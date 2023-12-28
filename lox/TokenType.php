@@ -18,37 +18,37 @@ enum TokenType
     case STAR;
 
     // One or two character tokens.
-case BANG;
-case BANG_EQUAL;
-case EQUAL;
-case EQUAL_EQUAL;
-case GREATER;
-case GREATER_EQUAL;
-case LESS;
-case LESS_EQUAL;
+    case BANG;
+    case BANG_EQUAL;
+    case EQUAL;
+    case EQUAL_EQUAL;
+    case GREATER;
+    case GREATER_EQUAL;
+    case LESS;
+    case LESS_EQUAL;
 
     // Literals.
-case IDENTIFIER;
-case STRING;
-case NUMBER;
+    case IDENTIFIER;
+    case STRING;
+    case NUMBER;
 
     // Keywords.
-case AND;
-case CLS;
-case ELSE;
-case FALSE;
-case FUN;
-case FOR;
-case IF;
-case NIL;
-case OR;
-case PRINT;
-case RETURN;
-case SUPER;
-case THIS;
-case TRUE;
-case VAR;
-case WHILE;
+    case AND;
+    case CLS;
+    case ELSE;
+    case FALSE;
+    case FUN;
+    case FOR;
+    case IF;
+    case NIL;
+    case OR;
+    case PRINT;
+    case RETURN;
+    case SUPER;
+    case THIS;
+    case TRUE;
+    case VAR;
+    case WHILE;
 
-case EOF;
+    case EOF;
 }

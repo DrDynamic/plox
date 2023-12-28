@@ -28,7 +28,7 @@ class Scanner
         $this->source  = $source;
         $this->start   = 0;
         $this->current = 0;
-        $this->line    = 0;
+        $this->line    = 1;
         $this->tokens  = [];
 
 
@@ -90,7 +90,7 @@ class Scanner
                 $this->addToken($this->match('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
                 break;
             case '>':
-                $this->addToken($this->match('=') ? TokenType::GREATER_EQUAL : TokenType::EQUAL);
+                $this->addToken($this->match('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
                 break;
             case '/':
                 if ($this->match('/')) {
