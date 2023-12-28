@@ -115,6 +115,16 @@ class Scanner
                 if ($this->match('/')) {
                     // TODO: put comments into tokens too
                     while ($this->peek() != "\n" && !$this->isAtEnd()) $this->advance();
+                } else if ($this->match("*")) {
+                    $before = $this->current;
+                    while ($this->peek() != '*' || $this->peekNext() != '/') {
+                        if($this->advance() == "\n"){
+                            $this->line++;
+                        }
+                    }
+                    $this->advance();
+                    $this->advance();
+
                 } else {
                     $this->addToken(TokenType::SLASH);
                 }
@@ -134,7 +144,6 @@ class Scanner
                 if ($this->isDigit($char)) {
                     $this->number();
                 } else if ($this->isAlpha($char)) {
-                    dump($char);
                     $this->identifier();
                 } else {
                     $this->errorReporter->error($this->line, "Unexpected Character ($char).");

@@ -23,7 +23,7 @@ expect()->extend('toHaveLine', function (int $line) {
 it('parses sourcecode to tokens', function () {
     $source = '
     // Single-character tokens.
-    (){},.-+;/*
+    (){},.-+;*/
     
     // One or two character tokens.
     ! != = == > >= < <=
@@ -31,6 +31,12 @@ it('parses sourcecode to tokens', function () {
     // Literals.
     //case IDENTIFIER;
     "Lorem Ipsum"13.37
+    
+        /********
+ *\/
+ /* 
+//
+ */
     
     // Keywords.
     _identifier_ and class else false fun for if nil or print return super this true var while
@@ -97,16 +103,17 @@ it('parses sourcecode to tokens', function () {
         ->toHaveLine(3);
 
     expect(array_shift($tokens))
+        ->toHaveType(TokenType::STAR)
+        ->toHaveLexeme("*")
+        ->toHaveLiteral(null)
+        ->toHaveLine(3);
+
+    expect(array_shift($tokens))
         ->toHaveType(TokenType::SLASH)
         ->toHaveLexeme("/")
         ->toHaveLiteral(null)
         ->toHaveLine(3);
 
-    expect(array_shift($tokens))
-        ->toHaveType(TokenType::STAR)
-        ->toHaveLexeme("*")
-        ->toHaveLiteral(null)
-        ->toHaveLine(3);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::BANG)
@@ -173,109 +180,109 @@ it('parses sourcecode to tokens', function () {
         ->toHaveType(TokenType::IDENTIFIER)
         ->toHaveLexeme('_identifier_')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::AND)
         ->toHaveLexeme('and')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::CLS)
         ->toHaveLexeme('class')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::ELSE)
         ->toHaveLexeme('else')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::FALSE)
         ->toHaveLexeme('false')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::FUN)
         ->toHaveLexeme('fun')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::FOR)
         ->toHaveLexeme('for')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::IF)
         ->toHaveLexeme('if')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::NIL)
         ->toHaveLexeme('nil')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::OR)
         ->toHaveLexeme('or')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::PRINT)
         ->toHaveLexeme('print')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::RETURN)
         ->toHaveLexeme('return')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::SUPER)
         ->toHaveLexeme('super')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::THIS)
         ->toHaveLexeme('this')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::TRUE)
         ->toHaveLexeme('true')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::VAR)
         ->toHaveLexeme('var')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::WHILE)
         ->toHaveLexeme('while')
         ->toHaveLiteral(null)
-        ->toHaveLine(13);
+        ->toHaveLine(19);
 
     expect(array_shift($tokens))
         ->toHaveType(TokenType::EOF)
         ->toHaveLexeme('')
         ->toHaveLiteral(null)
-        ->toHaveLine(14);
+        ->toHaveLine(20);
 
     expect($tokens)->toBeEmpty();
 });
