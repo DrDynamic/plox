@@ -4,7 +4,7 @@ namespace Lox;
 
 
 use App\Attributes\Instance;
-use App\Services\Reporter;
+use App\Services\ErrorReporter;
 
 #[Instance]
 class Lox
@@ -13,18 +13,25 @@ class Lox
 
 
     public function __construct(
-        private readonly Reporter $reporter
+        private readonly Scanner       $scanner,
+        private readonly ErrorReporter $errorReporter,
     )
     {
+    }
+
+    public function runString(string $source)
+    {
+        $this->run($source);
+        if ($this->errorReporter->hasError) exit(ExitCodes::EX_DATAERR);
     }
 
     public function runFile(string $file)
     {
         // TODO: replace with something to lazy load file line by line
-        $code = file_get_contents($file);
-        $this->run($code);
+        $source = file_get_contents($file);
+        $this->run($source);
 
-        if ($this->hadError) exit(ExitCodes::EX_DATAERR);
+        if ($this->errorReporter->hasError) exit(ExitCodes::EX_DATAERR);
     }
 
     public function runCli()
@@ -37,12 +44,16 @@ class Lox
                 break;
             }
             $this->run($line);
+            $this->errorReporter->reset();
         }
     }
 
-    private function run(string $code)
+    private function run(string $source)
     {
-        echo "[$code]\n";
+        $tokens = $this->scanner->scanTokens($source);
+        foreach ($tokens as $token) {
+            echo "$token \n";
+        }
     }
 
     private function error(int $line, string $message)
@@ -52,6 +63,6 @@ class Lox
 
     private static function report(int $line, string $where, string $message)
     {
-        fwrite(STDERR, "[$line] Error$where: $message");
+        fwrite(STDERR, "[$line] Error$where: $message\n");
     }
 }
