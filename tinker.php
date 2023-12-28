@@ -1,11 +1,9 @@
 <?php
-require __DIR__.'/vendor/autoload.php';
-require_once __DIR__.'/app/Services/helpers.php';
 
 use Lox\Lox;
 
-$lox = dependency(Lox::class);
+require __DIR__.'/vendor/autoload.php';
+require_once __DIR__.'/app/Services/helpers.php';
 
-$s = dependency(\App\Services\ServiceA::class);
 
-$lox->runCli();
+dependency(Lox::class)->runCli();

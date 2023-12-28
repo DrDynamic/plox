@@ -1,8 +1,32 @@
 {
+  "name": "drdynamic/plox",
+  "type": "project",
+  "description": "PHP implementation of a lox interpreter",
+  "keywords": [
+    "lox",
+    "interpreter"
+  ],
+
   "autoload": {
     "psr-4": {
       "App\\": "app/",
       "Lox\\": "lox/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+
+  "require": {
+  },
+  "require-dev": {
+    "pestphp/pest": "^2.30"
+  },
+  "config": {
+    "allow-plugins": {
+      "pestphp/pest-plugin": true
     }
   }
 }
