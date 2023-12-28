@@ -112,7 +112,11 @@ class Scanner
                 $this->line++;
                 break;
             default:
-                $this->errorReporter->error($this->line, "Unexpected Character.");
+                if ($this->isDigit($char)) {
+                    $this->number();
+                } else {
+                    $this->errorReporter->error($this->line, "Unexpected Character.");
+                }
                 break;
         }
     }
@@ -150,6 +154,17 @@ class Scanner
         return $this->charAt($this->current);
     }
 
+    protected function peekNext(): string
+    {
+        if ($this->current + 1 >= mb_strlen($this->source)) return "\0";
+        return $this->charAt($this->current + 1);
+    }
+
+    protected function isDigit(string $char): bool
+    {
+        return is_numeric($char);
+    }
+
     protected function string()
     {
         while ($this->peek() != '"' && !$this->isAtEnd()) {
@@ -170,5 +185,17 @@ class Scanner
         // TODO: unescape escape sequences
         $this->addToken(TokenType::STRING, $value);
     }
+
+    protected function number()
+    {
+        while ($this->isDigit($this->peek())) $this->advance();
+
+        if ($this->peek() == '.' && $this->isDigit($this->peekNext())) {
+            $this->advance();
+            while ($this->isDigit($this->peek())) $this->advance();
+        }
+        $this->addToken(TokenType::NUMBER, doubleval(mb_substr($this->source, $this->start, $this->current - $this->start)));
+    }
+
 
 }

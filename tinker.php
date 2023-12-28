@@ -12,7 +12,8 @@ $lox = dependency(Lox::class);
 $code = '// this is a comment
 (( )){} // grouping stuff
 !*+-/=<> <= == // operators
-"Lorem ipsum dolor sit amet!"';
+"Lorem ipsum dolor sit amet!"
+21.42';
 $lox->runString($code);
 
 $lox->runCli();
