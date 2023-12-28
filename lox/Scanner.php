@@ -16,6 +16,25 @@ class Scanner
     private int $current = 0;
     private int $line = 1;
 
+    private const KEYWORDS = [
+        'and'    => TokenType::AND,
+        'class'  => TokenType::CLS,
+        'else'   => TokenType::ELSE,
+        'false'  => TokenType::FALSE,
+        'for'    => TokenType::FOR,
+        'fun'    => TokenType::FUN,
+        'if'     => TokenType::IF,
+        'nil'    => TokenType::NIL,
+        'or'     => TokenType::OR,
+        'print'  => TokenType::PRINT,
+        'return' => TokenType::RETURN,
+        'super'  => TokenType::SUPER,
+        'this'   => TokenType::THIS,
+        'true'   => TokenType::TRUE,
+        'var'    => TokenType::VAR,
+        'while'  => TokenType::WHILE,
+    ];
+
     public function __construct(
         private readonly ErrorReporter $errorReporter
 
@@ -114,8 +133,11 @@ class Scanner
             default:
                 if ($this->isDigit($char)) {
                     $this->number();
+                } else if ($this->isAlpha($char)) {
+                    dump($char);
+                    $this->identifier();
                 } else {
-                    $this->errorReporter->error($this->line, "Unexpected Character.");
+                    $this->errorReporter->error($this->line, "Unexpected Character ($char).");
                 }
                 break;
         }
@@ -165,6 +187,16 @@ class Scanner
         return is_numeric($char);
     }
 
+    protected function isAlpha(string $char)
+    {
+        return preg_match('/[a-zA-Z_]/', $char) === 1;
+    }
+
+    protected function isAlphaNumeric(string $char)
+    {
+        return $this->isAlpha($char) || $this->isDigit($char);
+    }
+
     protected function string()
     {
         while ($this->peek() != '"' && !$this->isAtEnd()) {
@@ -197,5 +229,16 @@ class Scanner
         $this->addToken(TokenType::NUMBER, doubleval(mb_substr($this->source, $this->start, $this->current - $this->start)));
     }
 
+    protected function identifier()
+    {
+        while ($this->isAlphaNumeric($this->peek())) $this->advance();
+        $value = mb_substr($this->source, $this->start, $this->current - $this->start);
+
+        $type = TokenType::IDENTIFIER;
+        if (isset(self::KEYWORDS[$value])) {
+            $type = self::KEYWORDS[$value];
+        }
+        $this->addToken($type);
+    }
 
 }

@@ -9,11 +9,20 @@ require_once __DIR__.'/app/Services/helpers.php';
 /** @var Lox $lox */
 $lox = dependency(Lox::class);
 
-$code = '// this is a comment
-(( )){} // grouping stuff
-!*+-/=<> <= == // operators
-"Lorem ipsum dolor sit amet!"
-21.42';
-$lox->runString($code);
+$source = '
+    // Single-character tokens.
+    (){},.-+;/*
+    
+    // One or two character tokens.
+    ! != = == > >= < <=
+    
+    // Literals.
+    //case IDENTIFIER;
+    "Lorem Ipsum"13.37
+    
+    // Keywords.
+    _identifier_ and class else false fun for if nil or print return super this true var while
+';
+$lox->runString($source);
 
 $lox->runCli();
