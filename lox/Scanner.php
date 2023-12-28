@@ -99,6 +99,10 @@ class Scanner
                 } else {
                     $this->addToken(TokenType::SLASH);
                 }
+                break;
+            case '"':
+                $this->string();
+                break;
             case ' ':
             case "\r":
             case "\t":
@@ -144,6 +148,27 @@ class Scanner
     {
         if ($this->isAtEnd()) return "\0";
         return $this->charAt($this->current);
+    }
+
+    protected function string()
+    {
+        while ($this->peek() != '"' && !$this->isAtEnd()) {
+            if ($this->peek() == "\n") $this->line++;
+            $this->advance();
+        }
+
+        if ($this->isAtEnd()) {
+            $this->errorReporter->error($this->line, "Expected '\"' but got EOF");
+            return;
+        }
+
+        // include the closing "
+        $this->advance();
+
+        // get the string without the starting and ending "
+        $value = mb_substr($this->source, $this->start + 1, $this->current - $this->start - 2);
+        // TODO: unescape escape sequences
+        $this->addToken(TokenType::STRING, $value);
     }
 
 }

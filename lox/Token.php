@@ -15,7 +15,7 @@ class Token
 
     public function __toString(): string
     {
-        return "[{$this->tokenType->name}: $this->lexeme $this->literal]";
+        return "[{$this->tokenType->name}: $this->lexeme | $this->literal]";
     }
 
 
