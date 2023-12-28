@@ -2,9 +2,21 @@
 
 namespace Lox;
 
+
+use App\Attributes\Instance;
+use App\Services\Reporter;
+
+#[Instance]
 class Lox
 {
     private bool $hadError = false;
+
+
+    public function __construct(
+        private readonly Reporter $reporter
+    )
+    {
+    }
 
     public function runFile(string $file)
     {
@@ -12,7 +24,7 @@ class Lox
         $code = file_get_contents($file);
         $this->run($code);
 
-        if($this->hadError) exit(65);
+        if ($this->hadError) exit(ExitCodes::EX_DATAERR);
     }
 
     public function runCli()
