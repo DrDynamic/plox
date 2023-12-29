@@ -31,7 +31,7 @@ it('parses sourcecode to tokens', function () {
     // Literals.
     //case IDENTIFIER;
     "Lorem Ipsum"13.37
-    
+///*    
         /********
  *\/
  /* 
