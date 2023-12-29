@@ -1,6 +1,6 @@
 <?php
 
-namespace Lox;
+namespace Lox\Scan;
 
 enum TokenType
 {

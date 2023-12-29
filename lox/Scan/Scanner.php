@@ -1,6 +1,6 @@
 <?php
 
-namespace Lox;
+namespace Lox\Scan;
 
 use App\Attributes\Instance;
 use App\Services\ErrorReporter;

@@ -5,6 +5,7 @@ namespace Lox;
 
 use App\Attributes\Instance;
 use App\Services\ErrorReporter;
+use Lox\Scan\Scanner;
 
 #[Instance]
 class Lox

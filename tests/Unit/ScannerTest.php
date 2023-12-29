@@ -1,7 +1,7 @@
 <?php
 
-use Lox\Scanner;
-use Lox\TokenType;
+use Lox\Scan\Scanner;
+use Lox\Scan\TokenType;
 
 require_once __DIR__.'/../../app/Services/helpers.php';
 
@@ -44,7 +44,7 @@ it('parses sourcecode to tokens', function () {
 
 
     /** @var Scanner $scanner */
-    $scanner = dependency(\Lox\Scanner::class);
+    $scanner = dependency(\Lox\Scan\Scanner::class);
 
     $tokens = $scanner->scanTokens($source);
 
