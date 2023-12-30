@@ -5,6 +5,8 @@ namespace Lox;
 
 use App\Attributes\Instance;
 use App\Services\ErrorReporter;
+use Lox\AST\AstPrinter;
+use Lox\Parse\Parser;
 use Lox\Scan\Scanner;
 
 #[Instance]
@@ -15,6 +17,7 @@ class Lox
 
     public function __construct(
         private readonly Scanner       $scanner,
+        private readonly Parser        $parser,
         private readonly ErrorReporter $errorReporter,
     )
     {
@@ -51,10 +54,12 @@ class Lox
 
     private function run(string $source)
     {
-        $tokens = $this->scanner->scanTokens($source);
-        foreach ($tokens as $token) {
-            echo "$token \n";
-        }
+        $tokens     = $this->scanner->scanTokens($source);
+        $expression = $this->parser->parse($tokens);
+
+        if ($this->errorReporter->hasError) return;
+
+        echo (new AstPrinter(true))->print($expression)."\n";
     }
 
     private function error(int $line, string $message)

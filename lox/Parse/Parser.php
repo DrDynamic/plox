@@ -2,6 +2,7 @@
 
 namespace Lox\Parse;
 
+use App\Attributes\Instance;
 use App\Services\ErrorReporter;
 use Lox\AST\Expressions\Binary;
 use Lox\AST\Expressions\Expression;
@@ -11,6 +12,7 @@ use Lox\AST\Expressions\Unary;
 use Lox\Scan\Token;
 use Lox\Scan\TokenType;
 
+#[Instance]
 class Parser
 {
 
@@ -27,7 +29,14 @@ class Parser
 
     public function parse(array $tokens)
     {
-        $this->tokens = $tokens;
+        $this->tokens  = $tokens;
+        $this->current = 0;
+
+        try {
+            return $this->expression();
+        } catch (ParseException $exception) {
+            return null;
+        }
     }
 
     private function expression(): Expression
@@ -107,7 +116,7 @@ class Parser
                 $this->consume(TokenType::RIGHT_PAREN, "Expected ')' after expression.");
                 return new Grouping($expression);
             default:
-                return $this->expression();
+                throw $this->error($this->peek(), "Expect expression.");
         }
     }
 
@@ -160,5 +169,27 @@ class Parser
     {
         $this->errorReporter->errorAt($token, $message);
         return new ParseException();
+    }
+
+    private function synchonize()
+    {
+        $this->advance();
+
+        while (!$this->isAtEnd()) {
+            if ($this->previous()->tokenType == TokenType::EOF) return;
+
+            switch ($this->peek()->tokenType) {
+                case TokenType::CLS:
+                case TokenType::FUN:
+                case TokenType::VAR:
+                case TokenType::FOR:
+                case TokenType::IF:
+                case TokenType::WHILE:
+                case TokenType::PRINT:
+                case TokenType::RETURN:
+                    return;
+            }
+        }
+        $this->advance();
     }
 }

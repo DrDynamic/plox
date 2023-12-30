@@ -29,14 +29,14 @@ function runTokens($lox)
  *\/
  /* 
  */
-   @ 
+   
     // Keywords.
     _identifier_ and class else false fun for if nil or print return super this true var while
 ';
     $lox->runString($source);
 }
 
-runTokens($lox);
+//runTokens($lox);
 
 $root = new \Lox\AST\Expressions\Binary(
     new \Lox\AST\Expressions\Literal(2),
@@ -50,6 +50,6 @@ $root = new \Lox\AST\Expressions\Binary(
     )
 );
 
-dump(dependency(\Lox\AST\AstPrinter::class)->print($root));
+dump(dependency(\Lox\AST\AstPrinter::class)->print($root, true));
 
 $lox->runCli();
