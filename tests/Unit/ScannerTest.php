@@ -2,9 +2,7 @@
 
 use Lox\Scan\Scanner;
 use Lox\Scan\TokenType;
-
-require_once __DIR__.'/../../app/Services/helpers.php';
-
+// TODO: test error reporting
 expect()->extend('toHaveType', function (TokenType $type) {
     \PHPUnit\Framework\assertEquals($type, $this->value->tokenType);
 });

@@ -1,5 +1,4 @@
 <?php
-require_once __DIR__.'/../../app/Services/helpers.php';
 
 #[\App\Attributes\Singleton]
 class SingletonClass
