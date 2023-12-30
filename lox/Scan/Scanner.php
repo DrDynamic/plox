@@ -118,7 +118,7 @@ class Scanner
                 } else if ($this->match("*")) {
                     $before = $this->current;
                     while ($this->peek() != '*' || $this->peekNext() != '/') {
-                        if($this->advance() == "\n"){
+                        if ($this->advance() == "\n") {
                             $this->line++;
                         }
                     }
@@ -146,7 +146,11 @@ class Scanner
                 } else if ($this->isAlpha($char)) {
                     $this->identifier();
                 } else {
-                    $this->errorReporter->error($this->line, "Unexpected Character ($char).");
+                    if (empty($this->tokens)) {
+                        $this->errorReporter->error($this->line, "Unexpected Character ($char).");
+                    } else {
+                        $this->errorReporter->errorAt(new Token(TokenType::ERROR, $char, null, $this->line), "Unexpected Character ($char).");
+                    }
                 }
                 break;
         }

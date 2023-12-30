@@ -4,6 +4,7 @@ namespace Lox\Scan;
 
 class Token
 {
+    // TODO: rename tokenType property into type
     public function __construct(
         public readonly TokenType $tokenType,
         public readonly string    $lexeme,

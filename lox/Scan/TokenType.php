@@ -51,4 +51,5 @@ enum TokenType
     case WHILE;
 
     case EOF;
+    case ERROR;
 }
