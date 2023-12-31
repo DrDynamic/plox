@@ -34,7 +34,8 @@ class Parser
 
         try {
             return $this->expression();
-        } catch (ParseError $exception) {
+        } catch (ParseError $error) {
+            throw $error;
             return null;
         }
     }
@@ -140,7 +141,7 @@ class Parser
     private function check(TokenType $type)
     {
         if ($this->isAtEnd()) return false;
-        return $this->peek() == $type;
+        return $this->peek()->tokenType == $type;
     }
 
     private function advance(): Token
