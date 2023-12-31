@@ -18,4 +18,9 @@ class Unary extends Expression
     {
         return $visitor->visitorUnary($this);
     }
+
+    #[\Override] public function jsonSerialize(): mixed
+    {
+        return [$this->operator->lexeme, $this->right];
+    }
 }

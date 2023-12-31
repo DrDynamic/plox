@@ -20,4 +20,13 @@ class Binary extends Expression
     {
         return $visitor->visitBinary($this);
     }
+
+    #[\Override] public function jsonSerialize(): mixed
+    {
+        return [
+            'left' => $this->left,
+            'operator' => $this->operator->lexeme,
+            'right' => $this->right
+        ];
+    }
 }

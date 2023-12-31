@@ -5,7 +5,7 @@ namespace Lox;
 
 use App\Attributes\Instance;
 use App\Services\ErrorReporter;
-use Lox\AST\AstPrinter;
+use Lox\Interpret\Interpreter;
 use Lox\Parse\Parser;
 use Lox\Scan\Scanner;
 
@@ -18,6 +18,7 @@ class Lox
     public function __construct(
         private readonly Scanner       $scanner,
         private readonly Parser        $parser,
+        private readonly Interpreter   $interpreter,
         private readonly ErrorReporter $errorReporter,
     )
     {
@@ -26,7 +27,7 @@ class Lox
     public function runString(string $source)
     {
         $this->run($source);
-        if ($this->errorReporter->hasError) exit(ExitCodes::EX_DATAERR);
+        if ($this->errorReporter->hadError) exit(ExitCodes::EX_DATAERR);
     }
 
     public function runFile(string $file)
@@ -35,7 +36,8 @@ class Lox
         $source = file_get_contents($file);
         $this->run($source);
 
-        if ($this->errorReporter->hasError) exit(ExitCodes::EX_DATAERR);
+        if ($this->errorReporter->hadError) exit(ExitCodes::EX_DATAERR);
+        if ($this->errorReporter->hadRuntimeError) exit(ExitCodes::EX_SOFTWARE);
     }
 
     public function runCli()
@@ -57,9 +59,12 @@ class Lox
         $tokens     = $this->scanner->scanTokens($source);
         $expression = $this->parser->parse($tokens);
 
-        if ($this->errorReporter->hasError) return;
+        if ($this->errorReporter->hadError) return;
+//        echo (new AstPrinter(true))->print($expression)."\n";
 
-        echo (new AstPrinter(true))->print($expression)."\n";
+        $result = $this->interpreter->interpret($expression);
+        echo $this->interpreter->stringify($result)."\n";
+
     }
 
     private function error(int $line, string $message)

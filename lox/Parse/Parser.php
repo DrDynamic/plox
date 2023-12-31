@@ -34,7 +34,7 @@ class Parser
 
         try {
             return $this->expression();
-        } catch (ParseException $exception) {
+        } catch (ParseError $exception) {
             return null;
         }
     }
@@ -168,7 +168,7 @@ class Parser
     private function error(Token $token, string $message): \Throwable
     {
         $this->errorReporter->errorAt($token, $message);
-        return new ParseException();
+        return new ParseError();
     }
 
     private function synchonize()

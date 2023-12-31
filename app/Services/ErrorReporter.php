@@ -9,11 +9,12 @@ use Lox\Scan\TokenType;
 #[Singleton]
 class ErrorReporter
 {
-    public bool $hasError = false;
+    public bool $hadError = false;
+    public bool $hadRuntimeError = false;
 
     public function reset()
     {
-        $this->hasError = false;
+        $this->hadError = false;
     }
 
     public function errorAfter(Token $token, string $message)
@@ -39,10 +40,19 @@ class ErrorReporter
         $this->report($line, "", $message);
     }
 
+    public function runtimeError(\Lox\Interpret\RuntimeError $runtimeError)
+    {
+        $line = $runtimeError->token->line;
+        fwrite(STDERR,
+            $runtimeError->getMessage()."\n[line $line] near {$runtimeError->token->lexeme}\n");
+        $this->hadRuntimeError = true;
+    }
+
     public function report(int $line, string $where, string $message)
     {
         fwrite(STDERR, "[$line] Error $where: $message\n");
-        $this->hasError = true;
+        $this->hadError = true;
     }
+
 
 }

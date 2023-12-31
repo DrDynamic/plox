@@ -16,4 +16,9 @@ class Literal extends Expression
     {
         return $visitor->visitLiteral($this);
     }
+
+    #[\Override] public function jsonSerialize(): mixed
+    {
+        return $this->value;
+    }
 }

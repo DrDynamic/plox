@@ -35,21 +35,7 @@ function runTokens($lox)
 ';
     $lox->runString($source);
 }
-
 //runTokens($lox);
-
-$root = new \Lox\AST\Expressions\Binary(
-    new \Lox\AST\Expressions\Literal(2),
-    new \Lox\Scan\Token(\Lox\Scan\TokenType::STAR, "*", null, 0),
-    new \Lox\AST\Expressions\Grouping(
-        new \Lox\AST\Expressions\Binary(
-            new \Lox\AST\Expressions\Literal(5),
-            new \Lox\Scan\Token(\Lox\Scan\TokenType::PLUS, "+", null, 0),
-            new \Lox\AST\Expressions\Literal(5)
-        )
-    )
-);
-
-dump(dependency(\Lox\AST\AstPrinter::class)->print($root, true));
+//dump(dependency(\Lox\AST\AstPrinter::class)->print($root, true));
 
 $lox->runCli();

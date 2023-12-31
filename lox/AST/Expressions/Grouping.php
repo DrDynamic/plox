@@ -16,4 +16,11 @@ class Grouping extends Expression
     {
         return $visitor->visitGrouping($this);
     }
+
+    #[\Override] public function jsonSerialize(): mixed
+    {
+        return [
+            'group' => $this->expression
+        ];
+    }
 }
