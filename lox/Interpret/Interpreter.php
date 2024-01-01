@@ -8,6 +8,7 @@ use Lox\AST\Expressions\Binary;
 use Lox\AST\Expressions\Expression;
 use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
+use Lox\AST\Expressions\Ternary;
 use Lox\AST\Expressions\Unary;
 use Lox\AST\ExpressionVisitor;
 use Lox\Scan\TokenType;
@@ -29,6 +30,14 @@ class Interpreter implements ExpressionVisitor
         } catch (RuntimeError $exception) {
             $this->errorReporter->runtimeError($exception);
         }
+    }
+
+
+    #[\Override] public function visitTernary(Ternary $ternary)
+    {
+        return $this->isTruthy($this->evaluate($ternary->condition))
+            ? $this->evaluate($ternary->then)
+            : $this->evaluate($ternary->else);
     }
 
     #[\Override] public function visitBinary(Binary $binary)
@@ -127,6 +136,7 @@ class Interpreter implements ExpressionVisitor
         if (is_int($value)) return $value !== 0;
         if (is_double($value)) return $value !== 0;
         if (is_string($value)) return $value !== "";
+        if (is_bool($value)) return $value;
 
         return false;
     }

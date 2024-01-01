@@ -1,4 +1,6 @@
-expression     ::= comma
+
+expression     ::= ternary
+ternary        ::= comma "?" comma ":" comma
 comma          ::= equality ( "," equality )*
 equality       ::= comparison ( ( "!=" | "==" ) comparison )*
 comparison     ::= term ( ( ">" | ">=" | "<" | "<=" ) term )*

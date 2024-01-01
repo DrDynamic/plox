@@ -8,6 +8,7 @@ use Lox\AST\Expressions\Binary;
 use Lox\AST\Expressions\Expression;
 use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
+use Lox\AST\Expressions\Ternary;
 use Lox\AST\Expressions\Unary;
 use Lox\Scan\Token;
 use Lox\Scan\TokenType;
@@ -42,7 +43,26 @@ class Parser
 
     private function expression(): Expression
     {
-        return $this->comma();
+        return $this->ternary();
+    }
+
+    private function ternary(): Expression
+    {
+        $expression = $this->comma();
+
+        $question = $this->peek();
+        if ($this->match(TokenType::QUESTION_MARK)) {
+            $then = $this->comma();
+
+            if ($this->match(TokenType::COLON)) {
+                $colon = $this->previous();
+                $else  = $this->comma();
+
+                return new Ternary($expression, $question, $then, $colon, $else);
+            }
+            throw $this->error($question, "Ternary operator needs colon ':'");
+        }
+        return $expression;
     }
 
     private function comma(): Expression

@@ -87,6 +87,12 @@ class Scanner
             case '.':
                 $this->addToken(TokenType::DOT);
                 break;
+            case ':':
+                $this->addToken(TokenType::COLON);
+                break;
+            case '?':
+                $this->addToken(TokenType::QUESTION_MARK);
+                break;
             case '-':
                 $this->addToken(TokenType::MINUS);
                 break;
@@ -155,7 +161,6 @@ class Scanner
                 break;
         }
     }
-
 
     private function addToken(TokenType $type, mixed $literal = null, bool $includeLexeme = true)
     {

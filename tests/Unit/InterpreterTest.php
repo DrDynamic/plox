@@ -31,3 +31,17 @@ it('supports the comma operator', function() {
     expect(evaluate('2,4'))
         ->toEqual(4);
 });
+
+it('supports ternary operator', function () {
+    expect(evaluate('true ? 4 : 2'))
+        ->toEqual(4);
+
+    expect(evaluate('false ? 4 : 2'))
+        ->toEqual(2);
+
+    expect(evaluate('(true) ? 4 : 2'))
+        ->toEqual(4);
+
+    expect(evaluate('(false) ? 4 : 2'))
+        ->toEqual(2);
+});

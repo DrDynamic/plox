@@ -11,6 +11,8 @@ enum TokenType
     case RIGHT_BRACE;
     case COMMA;
     case DOT;
+    case COLON;
+    case QUESTION_MARK;
     case MINUS;
     case PLUS;
     case SEMICOLON;
