@@ -42,7 +42,18 @@ class Parser
 
     private function expression(): Expression
     {
-        return $this->equality();
+        return $this->comma();
+    }
+
+    private function comma(): Expression
+    {
+        $expression = $this->equality();
+        while ($this->match(TokenType::COMMA)) {
+            $operator   = $this->previous();
+            $right      = $this->equality();
+            $expression = new Binary($expression, $operator, $right);
+        }
+        return $expression;
     }
 
     private function equality(): Expression

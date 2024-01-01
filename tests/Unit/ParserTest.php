@@ -66,3 +66,49 @@ it('parses tokens to an expression', function () {
     expect($ast->left->right->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
         ->toHaveProperty('value', 4);
 });
+
+it('parses tokens with groupings', function () {
+
+    $tokens = [
+        createToken(\Lox\Scan\TokenType::LEFT_PAREN, "(", null),
+        createToken(\Lox\Scan\TokenType::NUMBER, "2", 2),
+        createToken(\Lox\Scan\TokenType::PLUS, "+", null),
+        createToken(\Lox\Scan\TokenType::NUMBER, "4", 4),
+        createToken(\Lox\Scan\TokenType::RIGHT_PAREN, ")", null),
+        createToken(\Lox\Scan\TokenType::STAR, "*", null),
+        createToken(\Lox\Scan\TokenType::NUMBER, "4", 4),
+        createToken(\Lox\Scan\TokenType::EOF, "", null),
+    ];
+
+    /** @var \Lox\Parse\Parser $parser */
+    $parser = dependency(\Lox\Parse\Parser::class);
+    $ast    = $parser->parse($tokens);
+//    dd($ast);
+    /*
+     * ast:bin [
+     *  left: grp [
+     *    expression: bin [
+     *      left: 2
+     *      op: +
+     *      right: 4
+     *    ]
+     *    op: *
+     *    right: 4
+     *  ]
+     */
+    expect($ast)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
+        ->toHaveOperator(\Lox\Scan\TokenType::STAR);
+
+    expect($ast->left)->toBeInstanceOf(\Lox\AST\Expressions\Grouping::class);
+    expect($ast->left->expression)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
+        ->toHaveOperator(\Lox\Scan\TokenType::PLUS);
+
+    expect($ast->left->expression->left)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
+        ->toHaveProperty('value', 2);
+
+    expect($ast->left->expression->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
+        ->toHaveProperty('value', 4);
+
+    expect($ast->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
+        ->toHaveProperty('value', 4);
+});

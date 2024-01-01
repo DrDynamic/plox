@@ -66,6 +66,8 @@ class Interpreter implements ExpressionVisitor
                 return floatval($left) / floatval($right);
             case TokenType::STAR:
                 return floatval($left) * floatval($right);
+            case TokenType::COMMA:
+                return $right;
         }
 
         return null;
