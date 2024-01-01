@@ -134,7 +134,7 @@ class Parser
 
     private function isAtEnd()
     {
-        return $this->peek()->tokenType == TokenType::EOF;
+        return $this->peek()->type == TokenType::EOF;
     }
 
     private function match(TokenType ...$types): bool
@@ -142,7 +142,7 @@ class Parser
         if ($this->isAtEnd()) return false;
 
         $token = $this->peek();
-        if (in_array($token->tokenType, $types)) {
+        if (in_array($token->type, $types)) {
             $this->advance();
             return true;
         }
@@ -152,7 +152,7 @@ class Parser
     private function check(TokenType $type)
     {
         if ($this->isAtEnd()) return false;
-        return $this->peek()->tokenType == $type;
+        return $this->peek()->type == $type;
     }
 
     private function advance(): Token
@@ -188,9 +188,9 @@ class Parser
         $this->advance();
 
         while (!$this->isAtEnd()) {
-            if ($this->previous()->tokenType == TokenType::EOF) return;
+            if ($this->previous()->type == TokenType::EOF) return;
 
-            switch ($this->peek()->tokenType) {
+            switch ($this->peek()->type) {
                 case TokenType::CLS:
                 case TokenType::FUN:
                 case TokenType::VAR:

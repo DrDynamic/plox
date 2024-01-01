@@ -19,7 +19,7 @@ class ErrorReporter
 
     public function errorAfter(Token $token, string $message)
     {
-        if ($token->tokenType == TokenType::EOF) {
+        if ($token->type == TokenType::EOF) {
             $this->report($token->line, "at end", $message);
         } else {
             $this->report($token->line, "after '$token->lexeme'", $message);
@@ -28,7 +28,7 @@ class ErrorReporter
 
     public function errorAt(Token $token, string $message)
     {
-        if ($token->tokenType == TokenType::EOF) {
+        if ($token->type == TokenType::EOF) {
             $this->report($token->line, "at end", $message);
         } else {
             $this->report($token->line, "at '$token->lexeme'", $message);

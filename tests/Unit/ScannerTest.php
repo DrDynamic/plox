@@ -4,7 +4,7 @@ use Lox\Scan\Scanner;
 use Lox\Scan\TokenType;
 // TODO: test error reporting
 expect()->extend('toHaveType', function (TokenType $type) {
-    \PHPUnit\Framework\assertEquals($type, $this->value->tokenType);
+    \PHPUnit\Framework\assertEquals($type, $this->value->type);
 });
 
 expect()->extend('toHaveLexeme', function (string $lexeme) {

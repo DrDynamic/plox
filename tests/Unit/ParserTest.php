@@ -11,7 +11,7 @@ expect()->extend('toHaveProperty', function ($property, $value) {
 });
 
 expect()->extend('toHaveOperator', function (\Lox\Scan\TokenType $type) {
-    \PHPUnit\Framework\assertEquals($type, $this->value->operator->tokenType);
+    \PHPUnit\Framework\assertEquals($type, $this->value->operator->type);
 });
 
 it('parses tokens to an expression', function () {

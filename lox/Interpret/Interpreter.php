@@ -36,7 +36,7 @@ class Interpreter implements ExpressionVisitor
         $left  = $this->evaluate($binary->left);
         $right = $this->evaluate($binary->right);
 
-        switch ($binary->operator->tokenType) {
+        switch ($binary->operator->type) {
             case TokenType::BANG_EQUAL:
                 return !$this->isEqual($left, $right);
             case TokenType::EQUAL_EQUAL:
@@ -87,7 +87,7 @@ class Interpreter implements ExpressionVisitor
     {
         $right = $this->evaluate($unary->right);
 
-        switch ($unary->operator->tokenType) {
+        switch ($unary->operator->type) {
             case TokenType::BANG:
                 return !$this->isTruthy($right);
             case TokenType::PLUS:
