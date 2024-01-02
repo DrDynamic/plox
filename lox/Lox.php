@@ -7,6 +7,7 @@ use App\Attributes\Instance;
 use App\Services\ErrorReporter;
 use Lox\Interpret\Interpreter;
 use Lox\Parse\Parser;
+use Lox\Runtime\Types\LoxType;
 use Lox\Scan\Scanner;
 
 #[Instance]
@@ -26,8 +27,8 @@ class Lox
 
     public function runString(string $source)
     {
-        $this->run($source);
-        if ($this->errorReporter->hadError) exit(ExitCodes::EX_DATAERR);
+        $result = $this->run($source);
+        return $result;
     }
 
     public function runFile(string $file)
@@ -49,22 +50,25 @@ class Lox
             if (in_array($line, ['exit', 'exit;', 'q', 'quit', false])) {
                 break;
             }
-            $this->run($line);
+            $result = $this->run($line);
+            echo $result->cast(LoxType::String)->value."\n";
             $this->errorReporter->reset();
         }
     }
 
     private function run(string $source)
     {
-        $tokens     = $this->scanner->scanTokens($source);
+        $tokens = $this->scanner->scanTokens($source);
+//        if ($tokens == null) throw new \Exception("Scanner failed!");
         $expression = $this->parser->parse($tokens);
+//        if ($expression == null) throw new \Exception("Parser failed!");
 
         if ($this->errorReporter->hadError) return;
+
 //        echo (new AstPrinter(true))->print($expression)."\n";
 
         $result = $this->interpreter->interpret($expression);
-        echo $this->interpreter->stringify($result)."\n";
-
+        return $result;
     }
 
     private function error(int $line, string $message)

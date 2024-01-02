@@ -1,9 +1,10 @@
 <?php
 
-namespace Lox\Interpret;
+namespace Lox\Runtime\Errors;
 
 use JetBrains\PhpStorm\Pure;
 use Lox\Scan\Token;
+use Throwable;
 
 class RuntimeError extends \Exception
 {

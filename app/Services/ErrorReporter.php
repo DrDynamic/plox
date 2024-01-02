@@ -40,7 +40,7 @@ class ErrorReporter
         $this->report($line, "", $message);
     }
 
-    public function runtimeError(\Lox\Interpret\RuntimeError $runtimeError)
+    public function runtimeError(\Lox\Runtime\Errors\RuntimeError $runtimeError)
     {
         $line = $runtimeError->token->line;
         fwrite(STDERR,

@@ -4,6 +4,8 @@ namespace Lox\Scan;
 
 use App\Attributes\Instance;
 use App\Services\ErrorReporter;
+use Lox\Runtime\Types\NumberType;
+use Lox\Runtime\Types\StringType;
 
 #[Instance]
 class Scanner
@@ -233,7 +235,7 @@ class Scanner
         // get the string without the starting and ending "
         $value = mb_substr($this->source, $this->start + 1, $this->current - $this->start - 2);
         // TODO: unescape escape sequences
-        $this->addToken(TokenType::STRING, $value);
+        $this->addToken(TokenType::STRING,$value);
     }
 
     protected function number()
@@ -244,7 +246,8 @@ class Scanner
             $this->advance();
             while ($this->isDigit($this->peek())) $this->advance();
         }
-        $this->addToken(TokenType::NUMBER, doubleval(mb_substr($this->source, $this->start, $this->current - $this->start)));
+        $value = floatval(mb_substr($this->source, $this->start, $this->current - $this->start));
+        $this->addToken(TokenType::NUMBER, $value);
     }
 
     protected function identifier()

@@ -6,8 +6,8 @@ function createToken(\Lox\Scan\TokenType $type, $lexeme, $literal)
     return new \Lox\Scan\Token($type, $lexeme, $literal, 0);
 }
 
-expect()->extend('toHaveProperty', function ($property, $value) {
-    \PHPUnit\Framework\assertEquals($value, $this->value->{$property});
+expect()->extend('toHaveValue', function ($value) {
+    \PHPUnit\Framework\assertEquals($value, $this->value->value->value);
 });
 
 expect()->extend('toHaveOperator', function (\Lox\Scan\TokenType $type) {
@@ -52,19 +52,19 @@ it('parses tokens to an expression', function () {
     expect($ast->left)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
         ->toHaveOperator(\Lox\Scan\TokenType::PLUS);
     expect($ast->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
-        ->toHaveProperty('value', 2);
+        ->toHaveValue(2.0);
 
     expect($ast->left->left)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
-        ->toHaveProperty('value', 2);
+        ->toHaveValue(2.0);
 
     expect($ast->left->right)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
         ->toHaveOperator(\Lox\Scan\TokenType::STAR);
 
     expect($ast->left->right->left)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
-        ->toHaveProperty('value', 4);
+        ->toHaveValue(4.0);
 
     expect($ast->left->right->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
-        ->toHaveProperty('value', 4);
+        ->toHaveValue(4.0);
 });
 
 it('parses tokens with groupings', function () {
@@ -104,11 +104,11 @@ it('parses tokens with groupings', function () {
         ->toHaveOperator(\Lox\Scan\TokenType::PLUS);
 
     expect($ast->left->expression->left)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
-        ->toHaveProperty('value', 2);
+        ->toHaveValue(2.0);
 
     expect($ast->left->expression->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
-        ->toHaveProperty('value', 4);
+        ->toHaveValue(4.0);
 
     expect($ast->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
-        ->toHaveProperty('value', 4);
+        ->toHaveValue(4.0);
 });

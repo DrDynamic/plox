@@ -1,11 +1,15 @@
-
 ## Features
+
 - Arithmetic
 - C-Style Single- and multiline comments ( ```// comment ``` / ```/* comment */```)
 - C-Style Comma operator ```var i = (a, b, c) // i == c```
 - Ternary (X ? Y : Z)
+- Comparison (wich '<'|'<='|'>'|'>=' operators) of mixed types (number, string, boolean)
+    - if a string is compared to a number, the string is converted to its length
+    - If a number is compared to a boolean, the boolean is converted into a number (true == 1.0 / false == 0.0)
 
 ## TBD
+
 - import native modules
 - Classes
 - Array data structure with dynamic types

@@ -10,6 +10,10 @@ use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
 use Lox\AST\Expressions\Ternary;
 use Lox\AST\Expressions\Unary;
+use Lox\Runtime\Types\BooleanType;
+use Lox\Runtime\Types\NilType;
+use Lox\Runtime\Types\NumberType;
+use Lox\Runtime\Types\StringType;
 use Lox\Scan\Token;
 use Lox\Scan\TokenType;
 
@@ -135,13 +139,15 @@ class Parser
     {
         switch (true) {
             case $this->match(TokenType::TRUE):
-                return new Literal(true);
+                return new Literal(new BooleanType(true));
             case $this->match(TokenType::FALSE):
-                return new Literal(false);
+                return new Literal(new BooleanType(false));
             case $this->match(TokenType::NIL):
-                return new Literal(null);
-            case $this->match(TokenType::NUMBER, TokenType::STRING):
-                return new Literal($this->previous()->literal);
+                return new Literal(new NilType());
+            case $this->match(TokenType::NUMBER):
+                return new Literal(new NumberType($this->previous()->literal));
+            case $this->match(TokenType::STRING):
+                return new Literal(new StringType($this->previous()->literal));
             case $this->match(TokenType::LEFT_PAREN):
                 $expression = $this->expression();
                 $this->consume(TokenType::RIGHT_PAREN, "Expected ')' after expression.");

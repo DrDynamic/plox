@@ -3,16 +3,8 @@
 
 function evaluate(string $source)
 {
-    /** @var \Lox\Scan\Scanner $scanner */
-    $scanner = dependency(\Lox\Scan\Scanner::class);
-    /** @var \Lox\Parse\Parser $parser */
-    $parser = dependency(\Lox\Parse\Parser::class);
-    /** @var \Lox\Interpret\Interpreter $interpreter */
-    $interpreter = dependency(\Lox\Interpret\Interpreter::class);
-
-    $tokens = $scanner->scanTokens($source);
-    $ast    = $parser->parse($tokens);
-    return $interpreter->interpret($ast);
+    $lox = dependency(\Lox\Lox::class);
+    return $lox->runString($source)->value;
 }
 
 it('can calculate', function () {
@@ -51,6 +43,11 @@ it('compares numbers with strings', function () {
     expect(evaluate('"Lorem" < 6'))
         ->toBeTrue();
     expect(evaluate('"Lorem" < 5'))
+        ->toBeFalse();
+
+    expect(evaluate('6 > "Lorem"'))
+        ->toBeTrue();
+    expect(evaluate('5 > "Lorem"'))
         ->toBeFalse();
 
     expect(evaluate('"Lorem" <= 5'))
@@ -99,4 +96,12 @@ it('compares numbers', function () {
         ->toBeTrue();
     expect(evaluate('5 >= 6'))
         ->toBeFalse();
+});
+
+it('can concatenate string', function () {
+    expect(evaluate('"Hello" + ", World"'))
+        ->toEqual('Hello, World');
+
+    expect(evaluate('"Fifty" + 5'))
+        ->toEqual('Fifty5');
 });

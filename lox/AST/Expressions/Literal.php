@@ -3,11 +3,12 @@
 namespace Lox\AST\Expressions;
 
 use Lox\AST\ExpressionVisitor;
+use Lox\Runtime\Types\Type;
 
 class Literal extends Expression
 {
     public function __construct(
-        public readonly mixed $value
+        public readonly Type $value
     )
     {
     }
