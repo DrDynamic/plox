@@ -46,24 +46,24 @@ it('parses tokens to an expression', function () {
      *  right: 2
      * ]
      */
-    expect($ast)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
+    expect($ast[0]->expression)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
         ->toHaveOperator(\Lox\Scan\TokenType::PLUS);
 
-    expect($ast->left)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
+    expect($ast[0]->expression->left)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
         ->toHaveOperator(\Lox\Scan\TokenType::PLUS);
-    expect($ast->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
+    expect($ast[0]->expression->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
         ->toHaveValue(2.0);
 
-    expect($ast->left->left)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
+    expect($ast[0]->expression->left->left)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
         ->toHaveValue(2.0);
 
-    expect($ast->left->right)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
+    expect($ast[0]->expression->left->right)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
         ->toHaveOperator(\Lox\Scan\TokenType::STAR);
 
-    expect($ast->left->right->left)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
+    expect($ast[0]->expression->left->right->left)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
         ->toHaveValue(4.0);
 
-    expect($ast->left->right->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
+    expect($ast[0]->expression->left->right->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
         ->toHaveValue(4.0);
 });
 
@@ -96,19 +96,19 @@ it('parses tokens with groupings', function () {
      *    right: 4
      *  ]
      */
-    expect($ast)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
+    expect($ast[0]->expression)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
         ->toHaveOperator(\Lox\Scan\TokenType::STAR);
 
-    expect($ast->left)->toBeInstanceOf(\Lox\AST\Expressions\Grouping::class);
-    expect($ast->left->expression)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
+    expect($ast[0]->expression->left)->toBeInstanceOf(\Lox\AST\Expressions\Grouping::class);
+    expect($ast[0]->expression->left->expression)->toBeInstanceOf(\Lox\AST\Expressions\Binary::class)
         ->toHaveOperator(\Lox\Scan\TokenType::PLUS);
 
-    expect($ast->left->expression->left)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
+    expect($ast[0]->expression->left->expression->left)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
         ->toHaveValue(2.0);
 
-    expect($ast->left->expression->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
+    expect($ast[0]->expression->left->expression->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
         ->toHaveValue(4.0);
 
-    expect($ast->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
+    expect($ast[0]->expression->right)->toBeInstanceOf(\Lox\AST\Expressions\Literal::class)
         ->toHaveValue(4.0);
 });

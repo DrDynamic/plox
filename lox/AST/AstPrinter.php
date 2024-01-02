@@ -33,7 +33,7 @@ class AstPrinter implements ExpressionVisitor
         return strval($literal->value);
     }
 
-    #[\Override] public function visitorUnary(Unary $unary)
+    #[\Override] public function visitUnary(Unary $unary)
     {
         return $this->parenthesize($unary->operator->lexeme, $unary->right);
     }

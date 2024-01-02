@@ -7,6 +7,7 @@ use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
 use Lox\AST\Expressions\Ternary;
 use Lox\AST\Expressions\Unary;
+use Lox\AST\Expressions\Variable;
 
 interface ExpressionVisitor
 {
@@ -18,6 +19,8 @@ interface ExpressionVisitor
 
     public function visitLiteral(Literal $literal);
 
-    public function visitorUnary(Unary $unary);
+    public function visitUnary(Unary $unary);
+
+    public function visitVariable(Variable $variable);
 
 }

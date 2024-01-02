@@ -10,6 +10,9 @@ use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
 use Lox\AST\Expressions\Ternary;
 use Lox\AST\Expressions\Unary;
+use Lox\AST\Statements\ExpressionStmt;
+use Lox\AST\Statements\PrintStmt;
+use Lox\AST\Statements\Statement;
 use Lox\Runtime\Types\BooleanType;
 use Lox\Runtime\Types\NilType;
 use Lox\Runtime\Types\NumberType;
@@ -32,16 +35,44 @@ class Parser
 
     }
 
-    public function parse(array $tokens)
+    /**
+     * @param array $tokens
+     * @return array<Statement>
+     */
+    public function parse(array $tokens): array
     {
         $this->tokens  = $tokens;
         $this->current = 0;
 
-        try {
-            return $this->expression();
-        } catch (ParseError $error) {
-            return null;
+        $statements = [];
+
+        while (!$this->isAtEnd()) {
+            $statements[] = $this->statement();
         }
+
+        return $statements;
+    }
+
+    private function statement(): Statement
+    {
+        if ($this->match(TokenType::PRINT)) {
+            return $this->printStmt();
+        }
+        return $this->expressionStmt();
+    }
+
+    private function printStmt(): Statement
+    {
+        $value = $this->expression();
+//        $this->consume(TokenType::SEMICOLON, "Expected ; after value.");
+        return new PrintStmt($value);
+    }
+
+    private function expressionStmt(): Statement
+    {
+        $value = $this->expression();
+//        $this->consume(TokenType::SEMICOLON, "Expected ; after value.");
+        return new ExpressionStmt($value);
     }
 
     private function expression(): Expression

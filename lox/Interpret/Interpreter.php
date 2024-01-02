@@ -11,13 +11,17 @@ use Lox\AST\Expressions\Literal;
 use Lox\AST\Expressions\Ternary;
 use Lox\AST\Expressions\Unary;
 use Lox\AST\ExpressionVisitor;
+use Lox\AST\Statements\ExpressionStmt;
+use Lox\AST\Statements\PrintStmt;
+use Lox\AST\Statements\Statement;
+use Lox\AST\StatementVisitor;
 use Lox\Runtime\Errors\RuntimeError;
 use Lox\Runtime\Types\LoxType;
 use Lox\Runtime\Types\NumberType;
 use Lox\Scan\TokenType;
 
 #[Instance]
-class Interpreter implements ExpressionVisitor
+class Interpreter implements ExpressionVisitor, StatementVisitor
 {
     public function __construct(
         private readonly ErrorReporter $errorReporter,
@@ -26,13 +30,37 @@ class Interpreter implements ExpressionVisitor
     }
 
 
-    public function interpret(Expression $expression)
+    public function interpret(array $statements)
     {
         try {
-            return $expression->accept($this);
+            foreach ($statements as $statement) {
+                $this->execute($statement);
+            }
+//            return $expression->accept($this);
         } catch (RuntimeError $exception) {
             $this->errorReporter->runtimeError($exception);
         }
+    }
+
+    private function execute(Statement $statement)
+    {
+        $statement->accept($this);
+    }
+
+    private function evaluate(Expression $expression)
+    {
+        return $expression->accept($this);
+    }
+
+    #[\Override] public function visitExpressionStmt(ExpressionStmt $statement)
+    {
+        $this->evaluate($statement->expression);
+    }
+
+    #[\Override] public function visitPrintStmt(PrintStmt $statement)
+    {
+        $result = $this->evaluate($statement->expression);
+        echo $result->cast(LoxType::String)->value."\n";
     }
 
 
@@ -78,7 +106,7 @@ class Interpreter implements ExpressionVisitor
         return $literal->value;
     }
 
-    #[\Override] public function visitorUnary(Unary $unary)
+    #[\Override] public function visitUnary(Unary $unary)
     {
         $right = $this->evaluate($unary->right);
 
@@ -93,10 +121,7 @@ class Interpreter implements ExpressionVisitor
         return null;
     }
 
-    private function evaluate(Expression $expression)
-    {
-        return $expression->accept($this);
-    }
+
 
     private function assertNumber(Expression $expression, ...$values)
     {

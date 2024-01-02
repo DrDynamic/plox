@@ -16,7 +16,7 @@ class Unary extends Expression
 
     #[\Override] function accept(ExpressionVisitor $visitor)
     {
-        return $visitor->visitorUnary($this);
+        return $visitor->visitUnary($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed
