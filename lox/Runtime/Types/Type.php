@@ -2,6 +2,7 @@
 
 namespace Lox\Runtime\Types;
 
+use Lox\Runtime\Errors\DivisionByZeroError;
 use Lox\Runtime\Errors\InvalidCastError;
 use Lox\Runtime\Errors\RuntimeError;
 use Lox\Scan\Token;
@@ -45,6 +46,10 @@ abstract class Type
     {
         $ownValue   = $this->cast(LoxType::Number);
         $otherValue = $value->cast(LoxType::Number);
+
+        if ($this->value == 0 || $ownValue->value == 0) {
+            throw new DivisionByZeroError($operatorToken, "Division by zero.");
+        }
 
         switch ($operatorToken->type) {
             case TokenType::PLUS:

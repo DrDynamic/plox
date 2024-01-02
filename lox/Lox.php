@@ -51,7 +51,9 @@ class Lox
                 break;
             }
             $result = $this->run($line);
-            echo $result->cast(LoxType::String)->value."\n";
+            if ($result) {
+                echo $result->cast(LoxType::String)->value."\n";
+            }
             $this->errorReporter->reset();
         }
     }
