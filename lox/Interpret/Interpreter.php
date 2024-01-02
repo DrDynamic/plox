@@ -11,6 +11,7 @@ use Lox\AST\Expressions\Literal;
 use Lox\AST\Expressions\Ternary;
 use Lox\AST\Expressions\Unary;
 use Lox\AST\ExpressionVisitor;
+use Lox\Scan\Token;
 use Lox\Scan\TokenType;
 
 #[Instance]
@@ -51,16 +52,20 @@ class Interpreter implements ExpressionVisitor
             case TokenType::EQUAL_EQUAL:
                 return $this->isEqual($left, $right);
             case TokenType::GREATER:
-                $this->assertNumber($binary, $left);
+                $this->castForCompare($left,$right, $binary->operator);
+                $this->assertNumber($binary, $left, $right);
                 return floatval($left) > floatval($right);
             case TokenType::GREATER_EQUAL:
-                $this->assertNumber($binary, $left);
+                $this->castForCompare($left,$right, $binary->operator);
+                $this->assertNumber($binary, $left, $right);
                 return floatval($left) >= floatval($right);
             case TokenType::LESS:
-                $this->assertNumber($binary, $left);
+                $this->castForCompare($left,$right, $binary->operator);
+                $this->assertNumber($binary, $left, $right);
                 return floatval($left) < floatval($right);
             case TokenType::LESS_EQUAL:
-                $this->assertNumber($binary, $left);
+                $this->castForCompare($left,$right, $binary->operator);
+                $this->assertNumber($binary, $left, $right);
                 return floatval($left) <= floatval($right);
             case TokenType::PLUS:
                 if ($this->isNumber($left, $right)) {
@@ -159,6 +164,24 @@ class Interpreter implements ExpressionVisitor
         }
         return true;
     }
+
+    private function castForCompare(&$left, &$right, Token $operatorToken)
+    {
+        if (in_array($operatorToken->type, [
+            TokenType::GREATER,
+            TokenType::GREATER_EQUAL,
+            TokenType::LESS,
+            TokenType::LESS_EQUAL])) {
+            if (!$this->isNumber($left) || !$this->isNumber($right)) {
+                if ($this->isNumber($left) && is_string($right)) {
+                    $right = mb_strlen($right);
+                } else {
+                    $left = mb_strlen($left);
+                }
+            }
+        }
+    }
+
 
     private function assertNumber(Expression $expression, ...$values)
     {

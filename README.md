@@ -3,6 +3,7 @@
 - Arithmetic
 - C-Style Single- and multiline comments ( ```// comment ``` / ```/* comment */```)
 - C-Style Comma operator ```var i = (a, b, c) // i == c```
+- Ternary (X ? Y : Z)
 
 ## TBD
 - import native modules
@@ -15,7 +16,7 @@
 - Function Extenson
 - Local functions
 - Native Functions
-- Ternary (X ? Y : Z) and Elvis (X ? Y) Operators
+- Elvis (X ?? Y) Operators
 - If condition
 - While loop
 - Do While Loop

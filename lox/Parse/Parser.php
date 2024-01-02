@@ -36,7 +36,6 @@ class Parser
         try {
             return $this->expression();
         } catch (ParseError $error) {
-            throw $error;
             return null;
         }
     }
