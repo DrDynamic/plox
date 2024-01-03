@@ -7,6 +7,11 @@ use Lox\Parse\Parser;
 use Lox\Runtime\Environment;
 use Lox\Runtime\Values\Value;
 use Lox\Scan\Scanner;
+use Lox\Scan\Token;
+use Lox\Scan\TokenType;
+use function PHPUnit\Framework\assertEquals;
+use function PHPUnit\Framework\assertFalse;
+use function PHPUnit\Framework\assertTrue;
 
 require_once __DIR__.'/../app/Services/helpers.php';
 
@@ -23,14 +28,7 @@ require_once __DIR__.'/../app/Services/helpers.php';
 
 // uses(Tests\TestCase::class)->in('Feature');
 uses(\Tests\TestCase::class)->beforeEach(function () {
-    $this->errorReporter = dependency(ErrorReporter::class);
-    $this->environment   = dependency(Environment::class);
-
-    $this->scanner     = dependency(Scanner::class);
-    $this->parser      = dependency(Parser::class);
-    $this->interpreter = new Interpreter($this->errorReporter, $this->environment);
-
-    $this->lox = new Lox($this->scanner, $this->parser, $this->interpreter, $this->errorReporter);
+    resetLox();
 })->in(__DIR__);
 
 /*
@@ -44,6 +42,19 @@ uses(\Tests\TestCase::class)->beforeEach(function () {
 |
 */
 
+expect()->extend('toHave', function ($name, $value = null) {
+    $variable = new Token(TokenType::IDENTIFIER, $name, null, 0);
+
+    assertTrue($this->value->has($variable));
+    if ($value !== null) {
+        assertEquals($this->value->get($variable), $value);
+    }
+});
+
+expect()->extend('toNotHave', function ($name) {
+    $variable = new Token(TokenType::IDENTIFIER, $name, null, 0);
+    assertFalse($this->value->has($variable));
+});
 
 /*
 |--------------------------------------------------------------------------
@@ -56,6 +67,17 @@ uses(\Tests\TestCase::class)->beforeEach(function () {
 |
 */
 
+function resetLox(): void
+{
+    test()->errorReporter = dependency(ErrorReporter::class);
+    test()->environment   = dependency(Environment::class);
+
+    test()->scanner     = dependency(Scanner::class);
+    test()->parser      = dependency(Parser::class);
+    test()->interpreter = new Interpreter(test()->errorReporter, test()->environment);
+
+    test()->lox = new Lox(test()->scanner, test()->parser, test()->interpreter, test()->errorReporter);
+}
 
 function execute(string $source): void
 {
@@ -64,6 +86,5 @@ function execute(string $source): void
 
 function evaluate(string $source): Value
 {
-    test()->interpreter->resetEnvironment();
-    return test()->lox->runString($source);
+        return test()->lox->runString($source);
 }

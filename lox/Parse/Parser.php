@@ -14,6 +14,7 @@ use Lox\AST\Expressions\Unary;
 use Lox\AST\Expressions\Variable;
 use Lox\AST\Statements\BlockStatement;
 use Lox\AST\Statements\ExpressionStmt;
+use Lox\AST\Statements\IfStatement;
 use Lox\AST\Statements\PrintStmt;
 use Lox\AST\Statements\Statement;
 use Lox\AST\Statements\VarStatement;
@@ -86,13 +87,31 @@ class Parser
 
     private function statement(): Statement
     {
-        if ($this->match(TokenType::PRINT)) {
+        if ($this->match(TokenType::IF)) {
+            return $this->ifStmt();
+        } else if ($this->match(TokenType::PRINT)) {
             return $this->printStmt();
         } else if ($this->match(TokenType::LEFT_BRACE)) {
             return new BlockStatement($this->blockStmt());
         }
 
         return $this->expressionStmt();
+    }
+
+    private function ifStmt(): Statement
+    {
+        $this->consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
+        $condition = $this->expression();
+        $this->consume(TokenType::RIGHT_PAREN, "Expect ')' after if condition.");
+
+        $thenBranch = $this->statement();
+        $elseBranch = null;
+
+        if($this->match(TokenType::ELSE)) {
+            $elseBranch = $this->statement();
+        }
+
+        return new IfStatement($condition, $thenBranch, $elseBranch);
     }
 
     private function printStmt(): Statement

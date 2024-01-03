@@ -4,7 +4,8 @@ program             ::= declaration* EOF ;
 // statements
 declaration         ::= varDeclaration | statement ;
 varDeclaration      ::= "var" IDENTIFIER ( "=" expression )? ;
-statement           ::= expressionStatement | printStatement | blockStatement;
+statement           ::= expressionStatement | ifStatement | printStatement | blockStatement;
+ifStatement         ::= "if" "(" expression ")" statement ( "else" statement )? ;
 expressionStatement ::= expression ;
 blockStatement      ::= "{" declaration* "}" ;
 printStatement      ::= "print" expression ;

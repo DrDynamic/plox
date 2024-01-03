@@ -15,6 +15,7 @@ use Lox\AST\Expressions\Variable;
 use Lox\AST\ExpressionVisitor;
 use Lox\AST\Statements\BlockStatement;
 use Lox\AST\Statements\ExpressionStmt;
+use Lox\AST\Statements\IfStatement;
 use Lox\AST\Statements\PrintStmt;
 use Lox\AST\Statements\Statement;
 use Lox\AST\Statements\VarStatement;
@@ -102,6 +103,15 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
     #[\Override] public function visitExpressionStmt(ExpressionStmt $statement)
     {
         $this->evaluate($statement->expression);
+    }
+
+    #[\Override] public function visitIfStmt(IfStatement $if)
+    {
+        if ($this->evaluate($if->condition)->cast(ValueType::Boolean)->value) {
+            $this->execute($if->thenBranch);
+        } else if ($if->elseBranch !== null) {
+            $this->execute($if->elseBranch);
+        }
     }
 
     #[\Override] public function visitPrintStmt(PrintStmt $statement)

@@ -4,25 +4,7 @@ use Lox\Runtime\Values\BooleanValue;
 use Lox\Runtime\Values\NilValue;
 use Lox\Runtime\Values\NumberValue;
 use Lox\Runtime\Values\StringValue;
-use Lox\Scan\Token;
-use Lox\Scan\TokenType;
-use function PHPUnit\Framework\assertEquals;
-use function PHPUnit\Framework\assertFalse;
-use function PHPUnit\Framework\assertTrue;
 
-expect()->extend('toHave', function ($name, $value = null) {
-    $variable = new Token(TokenType::IDENTIFIER, $name, null, 0);
-
-    assertTrue($this->value->has($variable));
-    if ($value !== null) {
-        assertEquals($this->value->get($variable), $value);
-    }
-});
-
-expect()->extend('toNotHave', function ($name) {
-    $variable = new Token(TokenType::IDENTIFIER, $name, null, 0);
-    assertFalse($this->value->has($variable));
-});
 
 it('can declare variables', function () {
     execute('var a');
