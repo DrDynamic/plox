@@ -20,7 +20,7 @@ class Ternary extends Expression
 
     #[\Override] function accept(ExpressionVisitor $visitor)
     {
-        return $visitor->visitTernary($this);
+        return $visitor->visitTernaryExpr($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed

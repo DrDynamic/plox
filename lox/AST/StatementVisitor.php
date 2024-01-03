@@ -2,11 +2,18 @@
 
 namespace Lox\AST;
 
+use Lox\AST\Statements\BlockStatement;
+use Lox\AST\Statements\ExpressionStmt;
+use Lox\AST\Statements\PrintStmt;
+use Lox\AST\Statements\VarStatement;
+
 interface StatementVisitor
 {
-    public function visitExpressionStmt(Statements\ExpressionStmt $statement);
+    public function visitExpressionStmt(ExpressionStmt $statement);
 
-    public function visitPrintStmt(Statements\PrintStmt $statement);
+    public function visitPrintStmt(PrintStmt $statement);
 
-    public function visitVarStmt(Statements\VarStatement $statement);
+    public function visitVarStmt(VarStatement $statement);
+
+    public function visitBlockStmt(BlockStatement $block);
 }

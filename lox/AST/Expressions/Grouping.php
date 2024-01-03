@@ -14,7 +14,7 @@ class Grouping extends Expression
 
     #[\Override] function accept(ExpressionVisitor $visitor)
     {
-        return $visitor->visitGrouping($this);
+        return $visitor->visitGroupingExpr($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed

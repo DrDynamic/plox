@@ -13,7 +13,7 @@ expect()->extend('variable', function ($name, $value) {
     \PHPUnit\Framework\assertEquals(test()->environment->get($variable), $value);
 });
 
-it('declare variables', function () {
+it('can declare variables', function () {
     expect(evaluate('var a'))
         ->variable('a', new NilValue());
     expect(evaluate('var b=nil'))
@@ -24,4 +24,17 @@ it('declare variables', function () {
         ->variable('d', new NumberValue(1));
     expect(evaluate('var e="Lorem"'))
         ->variable('e', new StringValue("Lorem"));
+
+});
+
+it('can mutate variables (even to different types)', function () {
+    expect(evaluate('var a'))
+        ->variable('a', new NilValue());
+    expect(evaluate('var b=nil'))
+        ->variable('b', new NilValue());
+
+    expect(evaluate('a="One"'))
+        ->variable('a', new StringValue("One"));
+    expect(evaluate('b=1'))
+        ->variable('b', new NumberValue(1));
 });

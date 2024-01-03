@@ -1,16 +1,19 @@
 
-program             ::= declaration* EOF
-declaration         ::= varDeclaration | statement
-varDeclaration      ::= "var" IDENTIFIER ( "=" expression )?
-statement           ::= expressionStatement | printStatement
-expressionStatement ::= expression
-printStatement      ::= "print" expression
-expression          ::= ternary | comma
-ternary             ::= comma "?" comma ":" comma
-comma               ::= equality ( "," equality )*
-equality            ::= comparison ( ( "!=" | "==" ) comparison )*
-comparison          ::= term ( ( ">" | ">=" | "<" | "<=" ) term )*
-term                ::= factor ( ( "-" | "+" ) factor )*
-factor              ::= unary ( ( "/" | "*" ) unary )*
-unary               ::= ( "!" | "-" ) unary | primary
-primary             ::= NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER
+program             ::= declaration* EOF ;
+declaration         ::= varDeclaration | statement ;
+varDeclaration      ::= "var" IDENTIFIER ( "=" expression )? ;
+statement           ::= expressionStatement | printStatement | blockStatement;
+expressionStatement ::= expression ;
+blockStatement      ::= "{" declaration* "}" ;
+printStatement      ::= "print" expression ;
+
+expression          ::= ternary;
+ternary             ::= assignment ("?" assignment ":" assignment)*;
+assignment          ::= IDENTIFIER "=" assignment | comma;
+comma               ::= equality ( "," equality )* ;
+equality            ::= comparison ( ( "!=" | "==" ) comparison )* ;
+comparison          ::= term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
+term                ::= factor ( ( "-" | "+" ) factor )* ;
+factor              ::= unary ( ( "/" | "*" ) unary )* ;
+unary               ::= ( "!" | "-" ) unary | primary ;
+primary             ::= NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER ;

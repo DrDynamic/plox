@@ -17,23 +17,23 @@ class AstPrinter implements ExpressionVisitor
         return $expression->accept($this);
     }
 
-    #[\Override] public function visitBinary(Binary $binary)
+    #[\Override] public function visitBinaryExpr(Binary $binary)
     {
         return $this->parenthesize($binary->operator->lexeme, $binary->left, $binary->right);
     }
 
-    #[\Override] public function visitGrouping(Grouping $grouping)
+    #[\Override] public function visitGroupingExpr(Grouping $grouping)
     {
         return $this->parenthesize("group", $grouping->expression);
     }
 
-    #[\Override] public function visitLiteral(Literal $literal)
+    #[\Override] public function visitLiteralExpr(Literal $literal)
     {
         if ($literal->value == null) return "nil";
         return strval($literal->value);
     }
 
-    #[\Override] public function visitUnary(Unary $unary)
+    #[\Override] public function visitUnaryExpr(Unary $unary)
     {
         return $this->parenthesize($unary->operator->lexeme, $unary->right);
     }

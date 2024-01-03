@@ -4,6 +4,7 @@ namespace Lox\Parse;
 
 use App\Attributes\Instance;
 use App\Services\ErrorReporter;
+use Lox\AST\Expressions\Assign;
 use Lox\AST\Expressions\Binary;
 use Lox\AST\Expressions\Expression;
 use Lox\AST\Expressions\Grouping;
@@ -11,6 +12,7 @@ use Lox\AST\Expressions\Literal;
 use Lox\AST\Expressions\Ternary;
 use Lox\AST\Expressions\Unary;
 use Lox\AST\Expressions\Variable;
+use Lox\AST\Statements\BlockStatement;
 use Lox\AST\Statements\ExpressionStmt;
 use Lox\AST\Statements\PrintStmt;
 use Lox\AST\Statements\Statement;
@@ -76,6 +78,9 @@ class Parser
             $initializer = $this->expression();
         }
 
+        $this->match(TokenType::SEMICOLON);
+//        $this->consume(TokenType::SEMICOLON, "Expected ; after value.");
+
         return new VarStatement($name, $initializer);
     }
 
@@ -83,20 +88,35 @@ class Parser
     {
         if ($this->match(TokenType::PRINT)) {
             return $this->printStmt();
+        } else if ($this->match(TokenType::LEFT_BRACE)) {
+            return new BlockStatement($this->blockStmt());
         }
+
         return $this->expressionStmt();
     }
 
     private function printStmt(): Statement
     {
         $value = $this->expression();
+        $this->match(TokenType::SEMICOLON);
 //        $this->consume(TokenType::SEMICOLON, "Expected ; after value.");
         return new PrintStmt($value);
+    }
+
+    private function blockStmt()
+    {
+        $statements = [];
+        while (!$this->check(TokenType::RIGHT_BRACE) && !$this->isAtEnd()) {
+            $statements[] = $this->declaration();
+        }
+        $this->consume(TokenType::RIGHT_BRACE, "Expect '}' after block.");
+        return $statements;
     }
 
     private function expressionStmt(): Statement
     {
         $value = $this->expression();
+        $this->match(TokenType::SEMICOLON);
 //        $this->consume(TokenType::SEMICOLON, "Expected ; after value.");
         return new ExpressionStmt($value);
     }
@@ -108,20 +128,39 @@ class Parser
 
     private function ternary(): Expression
     {
-        $expression = $this->comma();
+        $expression = $this->assignment();
 
         $question = $this->peek();
         if ($this->match(TokenType::QUESTION_MARK)) {
-            $then = $this->comma();
+            $then = $this->assignment();
 
             if ($this->match(TokenType::COLON)) {
                 $colon = $this->previous();
-                $else  = $this->comma();
+                $else  = $this->assignment();
 
                 return new Ternary($expression, $question, $then, $colon, $else);
             }
             throw $this->error($question, "Ternary operator needs colon ':'");
         }
+        return $expression;
+    }
+
+    private function assignment(): Expression
+    {
+        $expression = $this->comma();
+
+        if ($this->match(TokenType::EQUAL)) {
+            $equals = $this->previous();
+            $value  = $this->assignment();
+
+            if ($expression instanceof Variable) {
+                $name = $expression->name;
+                return new Assign($name, $value);
+            }
+
+            $this->error($equals, "Invalid assignment target.");
+        }
+
         return $expression;
     }
 

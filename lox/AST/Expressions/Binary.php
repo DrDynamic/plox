@@ -18,7 +18,7 @@ class Binary extends Expression
 
     #[\Override] function accept(ExpressionVisitor $visitor)
     {
-        return $visitor->visitBinary($this);
+        return $visitor->visitBinaryExpr($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed

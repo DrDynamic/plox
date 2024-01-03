@@ -16,7 +16,7 @@ class Variable extends Expression
 
     #[\Override] function accept(ExpressionVisitor $visitor)
     {
-        return $visitor->visitVariable($this);
+        return $visitor->visitVariableExpr($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed
