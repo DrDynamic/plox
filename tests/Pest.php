@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__.'/../app/Services/helpers.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -12,8 +13,16 @@
 */
 
 // uses(Tests\TestCase::class)->in('Feature');
+uses(\Tests\TestCase::class)->beforeEach(function () {
+    $this->errorReporter = dependency(\App\Services\ErrorReporter::class);
+    $this->environment   = dependency(\Lox\Runtime\Environment::class);
 
-require_once __DIR__.'/../app/Services/helpers.php';
+    $this->scanner     = dependency(\Lox\Scan\Scanner::class);
+    $this->parser      = dependency(Lox\Parse\Parser::class);
+    $this->interpreter = new \Lox\Interpret\Interpreter($this->errorReporter, $this->environment);
+
+    $this->lox = new \Lox\Lox($this->scanner, $this->parser, $this->interpreter, $this->errorReporter);
+})->in(__DIR__);
 
 /*
 |--------------------------------------------------------------------------
@@ -26,9 +35,6 @@ require_once __DIR__.'/../app/Services/helpers.php';
 |
 */
 
-expect()->extend('toBeOne', function () {
-    return $this->toBe(1);
-});
 
 /*
 |--------------------------------------------------------------------------
@@ -41,7 +47,8 @@ expect()->extend('toBeOne', function () {
 |
 */
 
-function something()
+
+function evaluate(string $source)
 {
-    // ..
+    return test()->lox->runString($source)->value;
 }

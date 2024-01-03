@@ -7,7 +7,7 @@ use App\Attributes\Instance;
 use App\Services\ErrorReporter;
 use Lox\Interpret\Interpreter;
 use Lox\Parse\Parser;
-use Lox\Runtime\Types\LoxType;
+use Lox\Runtime\Values\ValueType;
 use Lox\Scan\Scanner;
 
 #[Instance]
@@ -52,7 +52,7 @@ class Lox
             }
             $result = $this->run($line);
             if ($result) {
-                echo $result->cast(LoxType::String)->value."\n";
+                echo $result->cast(ValueType::String)->value."\n";
             }
             $this->errorReporter->reset();
         }

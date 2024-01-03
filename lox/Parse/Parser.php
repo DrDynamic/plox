@@ -10,13 +10,15 @@ use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
 use Lox\AST\Expressions\Ternary;
 use Lox\AST\Expressions\Unary;
+use Lox\AST\Expressions\Variable;
 use Lox\AST\Statements\ExpressionStmt;
 use Lox\AST\Statements\PrintStmt;
 use Lox\AST\Statements\Statement;
-use Lox\Runtime\Types\BooleanType;
-use Lox\Runtime\Types\NilType;
-use Lox\Runtime\Types\NumberType;
-use Lox\Runtime\Types\StringType;
+use Lox\AST\Statements\VarStatement;
+use Lox\Runtime\Values\BooleanValue;
+use Lox\Runtime\Values\NilValue;
+use Lox\Runtime\Values\NumberValue;
+use Lox\Runtime\Values\StringValue;
 use Lox\Scan\Token;
 use Lox\Scan\TokenType;
 
@@ -47,10 +49,34 @@ class Parser
         $statements = [];
 
         while (!$this->isAtEnd()) {
-            $statements[] = $this->statement();
+            $statements[] = $this->declaration();
         }
 
         return $statements;
+    }
+
+    private function declaration(): Statement|null
+    {
+        try {
+            if ($this->match(TokenType::VAR)) {
+                return $this->varDeclaration();
+            }
+            return $this->statement();
+        } catch (ParseError $error) {
+            $this->synchonize();
+            return null;
+        }
+    }
+
+    private function varDeclaration(): Statement
+    {
+        $name        = $this->consume(TokenType::IDENTIFIER, "Expect variable name.");
+        $initializer = null;
+        if ($this->match(TokenType::EQUAL)) {
+            $initializer = $this->expression();
+        }
+
+        return new VarStatement($name, $initializer);
     }
 
     private function statement(): Statement
@@ -170,19 +196,21 @@ class Parser
     {
         switch (true) {
             case $this->match(TokenType::TRUE):
-                return new Literal(new BooleanType(true));
+                return new Literal(new BooleanValue(true));
             case $this->match(TokenType::FALSE):
-                return new Literal(new BooleanType(false));
+                return new Literal(new BooleanValue(false));
             case $this->match(TokenType::NIL):
-                return new Literal(new NilType());
+                return new Literal(new NilValue());
             case $this->match(TokenType::NUMBER):
-                return new Literal(new NumberType($this->previous()->literal));
+                return new Literal(new NumberValue($this->previous()->literal));
             case $this->match(TokenType::STRING):
-                return new Literal(new StringType($this->previous()->literal));
+                return new Literal(new StringValue($this->previous()->literal));
             case $this->match(TokenType::LEFT_PAREN):
                 $expression = $this->expression();
                 $this->consume(TokenType::RIGHT_PAREN, "Expected ')' after expression.");
                 return new Grouping($expression);
+            case $this->match(TokenType::IDENTIFIER):
+                return new Variable($this->previous());
             default:
                 throw $this->error($this->peek(), "Expect expression.");
         }

@@ -1,8 +1,8 @@
 <?php
 
-namespace Lox\Runtime\Types;
+namespace Lox\Runtime\Values;
 
-enum LoxType: string
+enum ValueType: string
 {
     case NIL = "nil";
     case Boolean = "boolean";

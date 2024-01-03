@@ -17,7 +17,7 @@
 - this keyword
 - Methods
 - Functions
-- Function Extenson
+- Function Extension
 - Local functions
 - Native Functions
 - Elvis (X ?? Y) Operators
@@ -36,3 +36,4 @@
 - Arity Similar to Python that throw error if developer pass less or more than function arguments
 - Create custom prefix operators
 - Create custom infix Operators
+- undeclare (delete) variables

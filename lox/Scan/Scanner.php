@@ -4,8 +4,8 @@ namespace Lox\Scan;
 
 use App\Attributes\Instance;
 use App\Services\ErrorReporter;
-use Lox\Runtime\Types\NumberType;
-use Lox\Runtime\Types\StringType;
+use Lox\Runtime\Values\NumberValue;
+use Lox\Runtime\Values\StringValue;
 
 #[Instance]
 class Scanner

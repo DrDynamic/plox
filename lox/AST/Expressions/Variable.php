@@ -3,23 +3,26 @@
 namespace Lox\AST\Expressions;
 
 use Lox\AST\ExpressionVisitor;
-use Lox\Runtime\Values\Value;
+use Lox\Scan\Token;
 
-class Literal extends Expression
+class Variable extends Expression
 {
+
     public function __construct(
-        public readonly Value $value
+        public readonly Token $name
     )
     {
     }
 
     #[\Override] function accept(ExpressionVisitor $visitor)
     {
-        return $visitor->visitLiteral($this);
+        return $visitor->visitVariable($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed
     {
-        return $this->value;
+        return [
+            'name' => $this->name
+        ];
     }
 }

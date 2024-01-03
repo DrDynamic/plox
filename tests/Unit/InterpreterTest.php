@@ -1,12 +1,6 @@
 <?php
 // TODO: error reporting
 
-function evaluate(string $source)
-{
-    $lox = dependency(\Lox\Lox::class);
-    return $lox->runString($source)->value;
-}
-
 it('can calculate', function () {
     expect(evaluate("(2+4)*(4+2)"))
         ->toEqual(36);
