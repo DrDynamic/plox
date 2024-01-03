@@ -6,6 +6,7 @@ use Lox\AST\Expressions\Assign;
 use Lox\AST\Expressions\Binary;
 use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
+use Lox\AST\Expressions\Logical;
 use Lox\AST\Expressions\Ternary;
 use Lox\AST\Expressions\Unary;
 use Lox\AST\Expressions\Variable;
@@ -25,5 +26,7 @@ interface ExpressionVisitor
     public function visitVariableExpr(Variable $variable);
 
     public function visitAssignExpr(Assign $assign);
+
+    public function visitLogical(Logical $logical);
 
 }

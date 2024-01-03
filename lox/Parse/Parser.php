@@ -9,6 +9,7 @@ use Lox\AST\Expressions\Binary;
 use Lox\AST\Expressions\Expression;
 use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
+use Lox\AST\Expressions\Logical;
 use Lox\AST\Expressions\Ternary;
 use Lox\AST\Expressions\Unary;
 use Lox\AST\Expressions\Variable;
@@ -107,7 +108,7 @@ class Parser
         $thenBranch = $this->statement();
         $elseBranch = null;
 
-        if($this->match(TokenType::ELSE)) {
+        if ($this->match(TokenType::ELSE)) {
             $elseBranch = $this->statement();
         }
 
@@ -166,7 +167,7 @@ class Parser
 
     private function assignment(): Expression
     {
-        $expression = $this->comma();
+        $expression = $this->or();
 
         if ($this->match(TokenType::EQUAL)) {
             $equals = $this->previous();
@@ -178,6 +179,34 @@ class Parser
             }
 
             $this->error($equals, "Invalid assignment target.");
+        }
+
+        return $expression;
+    }
+
+    private function or(): Expression
+    {
+        $expression = $this->and();
+
+        while ($this->match(TokenType::OR)) {
+            $operator = $this->previous();
+            $right    = $this->and();
+
+            $expression = new Logical($expression, $operator, $right);
+        }
+
+        return $expression;
+    }
+
+    private function and(): Expression
+    {
+        $expression = $this->comma();
+
+        while ($this->match(TokenType::AND)) {
+            $operator = $this->previous();
+            $right    = $this->comma();
+
+            $expression = new Logical($expression, $operator, $right);
         }
 
         return $expression;
@@ -233,8 +262,8 @@ class Parser
         $expression = $this->unary();
         while ($this->match(TokenType::SLASH, TokenType::STAR)) {
             $operator   = $this->previous();
-            $rigth      = $this->unary();
-            $expression = new Binary($expression, $operator, $rigth);
+            $right      = $this->unary();
+            $expression = new Binary($expression, $operator, $right);
         }
         return $expression;
     }

@@ -9,6 +9,7 @@ use Lox\AST\Expressions\Binary;
 use Lox\AST\Expressions\Expression;
 use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
+use Lox\AST\Expressions\Logical;
 use Lox\AST\Expressions\Ternary;
 use Lox\AST\Expressions\Unary;
 use Lox\AST\Expressions\Variable;
@@ -183,6 +184,21 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
     #[\Override] public function visitLiteralExpr(Literal $literal)
     {
         return $literal->value;
+    }
+
+    #[\Override] public function visitLogical(Logical $logical)
+    {
+        $left = $this->evaluate($logical->left);
+
+        $leftIsTruthy = $left->cast(ValueType::Boolean)->value;
+
+        if ($logical->operator->type == TokenType::OR) {
+            if ($leftIsTruthy) return $left;
+        } else {
+            if (!$leftIsTruthy) return $left;
+        }
+
+        return $this->evaluate($logical->right);
     }
 
     #[\Override] public function visitUnaryExpr(Unary $unary)

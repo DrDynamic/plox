@@ -12,8 +12,10 @@ printStatement      ::= "print" expression ;
 
 // expressions
 expression          ::= ternary;
-ternary             ::= assignment ("?" assignment ":" assignment)*;
-assignment          ::= IDENTIFIER "=" assignment | comma;
+ternary             ::= assignment ( "?" assignment ":" assignment )* ;
+assignment          ::= IDENTIFIER "=" assignment | logic_or ;
+logic_or            ::= logic_and ( "or" logic_and )* ;
+logic_and           ::= comma ( "and" comma )* ;
 comma               ::= equality ( "," equality )* ;
 equality            ::= comparison ( ( "!=" | "==" ) comparison )* ;
 comparison          ::= term ( ( ">" | ">=" | "<" | "<=" ) term )* ;

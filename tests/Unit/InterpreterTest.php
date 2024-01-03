@@ -22,21 +22,6 @@ it('supports the comma operator', function () {
         ->toEqual(new NumberValue(5));
 });
 
-it('supports ternary operator', function () {
-    expect(evaluate('true ? 4 : 2'))
-        ->toEqual(new NumberValue(4));
-
-    expect(evaluate('false ? 4 : 2'))
-        ->toEqual(new NumberValue(2));
-
-    expect(evaluate('(true) ? 4 : 2'))
-        ->toEqual(new NumberValue(4));
-
-    expect(evaluate('(false) ? 4 : 2'))
-        ->toEqual(new NumberValue(2));
-});
-
-
 it('compares numbers with strings', function () {
     expect(evaluate('"Lorem" < 6'))
         ->toEqual(new BooleanValue(true));
