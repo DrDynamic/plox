@@ -37,17 +37,38 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
     {
     }
 
-
-    public function interpret(array $statements)
+    public function resetEnvironment()
     {
+        $this->environment = new Environment();
+    }
+
+
+    /**
+     * @param array<Statement> $statements
+     * @return void
+     */
+    public function interpret(array $statements): Value|null
+    {
+        if (empty($statements)) return null;
+
         try {
+            $last = array_pop($statements);
+
             foreach ($statements as $statement) {
                 $this->execute($statement);
             }
-//            return $expression->accept($this);
+
+            if ($last instanceof ExpressionStmt) {
+                return $this->evaluate($last->expression);
+            } else {
+                $this->execute($last);
+                return null;
+            }
+
         } catch (RuntimeError $exception) {
             $this->errorReporter->runtimeError($exception);
         }
+        return null;
     }
 
     private function execute(Statement $statement): void

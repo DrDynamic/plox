@@ -7,8 +7,6 @@ use Lox\Parse\Parser;
 use Lox\Runtime\Environment;
 use Lox\Runtime\Values\Value;
 use Lox\Scan\Scanner;
-use Lox\Scan\Token;
-use Lox\Scan\TokenType;
 
 require_once __DIR__.'/../app/Services/helpers.php';
 
@@ -66,10 +64,6 @@ function execute(string $source): void
 
 function evaluate(string $source): Value
 {
-    test()->environment = new Environment();
-    test()->interpreter = new Interpreter(test()->errorReporter, test()->environment);
-    test()->lox         = new Lox(test()->scanner, test()->parser, test()->interpreter, test()->errorReporter);
-
-    test()->lox->runString("var _result = ($source)");
-    return test()->environment->get(new Token(TokenType::IDENTIFIER, '_result', null, 0));
+    test()->interpreter->resetEnvironment();
+    return test()->lox->runString($source);
 }

@@ -7,6 +7,7 @@ use App\Attributes\Instance;
 use App\Services\ErrorReporter;
 use Lox\Interpret\Interpreter;
 use Lox\Parse\Parser;
+use Lox\Runtime\Values\Value;
 use Lox\Runtime\Values\ValueType;
 use Lox\Scan\Scanner;
 
@@ -58,19 +59,14 @@ class Lox
         }
     }
 
-    private function run(string $source)
+    private function run(string $source): Value|null
     {
-        $tokens = $this->scanner->scanTokens($source);
-//        if ($tokens == null) throw new \Exception("Scanner failed!");
+        $tokens     = $this->scanner->scanTokens($source);
         $expression = $this->parser->parse($tokens);
-//        if ($expression == null) throw new \Exception("Parser failed!");
 
-        if ($this->errorReporter->hadError) return;
+        if ($this->errorReporter->hadError) return null;
 
-//        echo (new AstPrinter(true))->print($expression)."\n";
-
-        $result = $this->interpreter->interpret($expression);
-        return $result;
+        return $this->interpreter->interpret($expression);
     }
 
     private function error(int $line, string $message)

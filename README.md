@@ -7,6 +7,8 @@
 - Comparison (wich '<'|'<='|'>'|'>=' operators) of mixed types (number, string, boolean)
     - if a string is compared to a number, the string is converted to its length
     - If a number is compared to a boolean, the boolean is converted into a number (true == 1.0 / false == 0.0)
+- optional semicolons
+- REPL
 
 ## TBD
 
@@ -37,3 +39,4 @@
 - Create custom prefix operators
 - Create custom infix Operators
 - undeclare (delete) variables
+- implicit variable declaration?
