@@ -6,35 +6,67 @@ use Lox\Runtime\Values\NumberValue;
 use Lox\Runtime\Values\StringValue;
 use Lox\Scan\Token;
 use Lox\Scan\TokenType;
+use function PHPUnit\Framework\assertEquals;
+use function PHPUnit\Framework\assertFalse;
+use function PHPUnit\Framework\assertTrue;
 
-expect()->extend('variable', function ($name, $value) {
+expect()->extend('toHave', function ($name, $value = null) {
     $variable = new Token(TokenType::IDENTIFIER, $name, null, 0);
-    \PHPUnit\Framework\assertTrue(test()->environment->has($variable));
-    \PHPUnit\Framework\assertEquals(test()->environment->get($variable), $value);
+
+    assertTrue($this->value->has($variable));
+    if ($value !== null) {
+        assertEquals($this->value->get($variable), $value);
+    }
+});
+
+expect()->extend('toNotHave', function ($name) {
+    $variable = new Token(TokenType::IDENTIFIER, $name, null, 0);
+    assertFalse($this->value->has($variable));
 });
 
 it('can declare variables', function () {
-    expect(evaluate('var a'))
-        ->variable('a', new NilValue());
-    expect(evaluate('var b=nil'))
-        ->variable('b', new NilValue());
-    expect(evaluate('var c=true'))
-        ->variable('c', new BooleanValue(true));
-    expect(evaluate('var d=1'))
-        ->variable('d', new NumberValue(1));
-    expect(evaluate('var e="Lorem"'))
-        ->variable('e', new StringValue("Lorem"));
+    execute('var a');
+    expect($this->environment)
+        ->toHave('a', new NilValue());
+
+    execute('var b=nil');
+    expect($this->environment)
+        ->toHave('b', new NilValue());
+
+    execute('var c=true');
+    expect($this->environment)
+        ->toHave('c', new BooleanValue(true));
+
+    execute('var d=1');
+    expect($this->environment)
+        ->toHave('d', new NumberValue(1));
+    execute('var e="Lorem"');
+    expect($this->environment)
+        ->toHave('e', new StringValue("Lorem"));
 
 });
 
 it('can mutate variables (even to different types)', function () {
-    expect(evaluate('var a'))
-        ->variable('a', new NilValue());
-    expect(evaluate('var b=nil'))
-        ->variable('b', new NilValue());
+    execute('var a');
+    expect($this->environment)
+        ->toHave('a', new NilValue());
 
-    expect(evaluate('a="One"'))
-        ->variable('a', new StringValue("One"));
-    expect(evaluate('b=1'))
-        ->variable('b', new NumberValue(1));
+    execute('var b=nil');
+    expect($this->environment)
+        ->toHave('b', new NilValue());
+
+    execute('a="One"');
+    expect($this->environment)
+        ->toHave('a', new StringValue("One"));
+
+    execute('b=1');
+    expect($this->environment)
+        ->toHave('b', new NumberValue(1));
+});
+
+it('supports scoped variables', function () {
+    execute('var a {var b}');
+    expect($this->environment)
+        ->toHave('a', new NilValue())
+        ->toNotHave('b');
 });

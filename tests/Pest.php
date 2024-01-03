@@ -1,4 +1,15 @@
 <?php
+
+use App\Services\ErrorReporter;
+use Lox\Interpret\Interpreter;
+use Lox\Lox;
+use Lox\Parse\Parser;
+use Lox\Runtime\Environment;
+use Lox\Runtime\Values\Value;
+use Lox\Scan\Scanner;
+use Lox\Scan\Token;
+use Lox\Scan\TokenType;
+
 require_once __DIR__.'/../app/Services/helpers.php';
 
 /*
@@ -14,14 +25,14 @@ require_once __DIR__.'/../app/Services/helpers.php';
 
 // uses(Tests\TestCase::class)->in('Feature');
 uses(\Tests\TestCase::class)->beforeEach(function () {
-    $this->errorReporter = dependency(\App\Services\ErrorReporter::class);
-    $this->environment   = dependency(\Lox\Runtime\Environment::class);
+    $this->errorReporter = dependency(ErrorReporter::class);
+    $this->environment   = dependency(Environment::class);
 
-    $this->scanner     = dependency(\Lox\Scan\Scanner::class);
-    $this->parser      = dependency(Lox\Parse\Parser::class);
-    $this->interpreter = new \Lox\Interpret\Interpreter($this->errorReporter, $this->environment);
+    $this->scanner     = dependency(Scanner::class);
+    $this->parser      = dependency(Parser::class);
+    $this->interpreter = new Interpreter($this->errorReporter, $this->environment);
 
-    $this->lox = new \Lox\Lox($this->scanner, $this->parser, $this->interpreter, $this->errorReporter);
+    $this->lox = new Lox($this->scanner, $this->parser, $this->interpreter, $this->errorReporter);
 })->in(__DIR__);
 
 /*
@@ -48,7 +59,17 @@ uses(\Tests\TestCase::class)->beforeEach(function () {
 */
 
 
-function evaluate(string $source)
+function execute(string $source): void
 {
-    return test()->lox->runString($source)->value;
+    test()->lox->runString($source);
+}
+
+function evaluate(string $source): Value
+{
+    test()->environment = new Environment();
+    test()->interpreter = new Interpreter(test()->errorReporter, test()->environment);
+    test()->lox         = new Lox(test()->scanner, test()->parser, test()->interpreter, test()->errorReporter);
+
+    test()->lox->runString("var _result = ($source)");
+    return test()->environment->get(new Token(TokenType::IDENTIFIER, '_result', null, 0));
 }

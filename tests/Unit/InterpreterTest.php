@@ -1,101 +1,107 @@
 <?php
 // TODO: error reporting
 
-it('can calculate', function () {
-    expect(evaluate("(2+4)*(4+2)"))
-        ->toEqual(36);
+use Lox\Runtime\Values\BooleanValue;
+use Lox\Runtime\Values\NumberValue;
+use Lox\Runtime\Values\StringValue;
 
-    expect(evaluate("2+4*4+2"))
-        ->toEqual(20);
+it('can calculate', function () {
+    expect(evaluate('(2+4)*(4+2)'))
+        ->toEqual(new NumberValue(36));
+
+    expect(evaluate('2+4*4+2'))
+        ->toEqual(new NumberValue(20));
 
 });
 
 it('supports the comma operator', function () {
-    expect(evaluate('(2,4)'))
-        ->toEqual(4);
+    expect(evaluate('(2,4,3)'))
+        ->toEqual(new NumberValue(3));
 
-    expect(evaluate('2,4'))
-        ->toEqual(4);
+    expect(evaluate('2,4,5'))
+        ->toEqual(new NumberValue(5));
 });
 
 it('supports ternary operator', function () {
     expect(evaluate('true ? 4 : 2'))
-        ->toEqual(4);
+        ->toEqual(new NumberValue(4));
 
     expect(evaluate('false ? 4 : 2'))
-        ->toEqual(2);
+        ->toEqual(new NumberValue(2));
 
     expect(evaluate('(true) ? 4 : 2'))
-        ->toEqual(4);
+        ->toEqual(new NumberValue(4));
 
     expect(evaluate('(false) ? 4 : 2'))
-        ->toEqual(2);
+        ->toEqual(new NumberValue(2));
 });
 
 
 it('compares numbers with strings', function () {
     expect(evaluate('"Lorem" < 6'))
-        ->toBeTrue();
+        ->toEqual(new BooleanValue(true));
     expect(evaluate('"Lorem" < 5'))
-        ->toBeFalse();
+        ->toEqual(new BooleanValue(false));
 
     expect(evaluate('6 > "Lorem"'))
-        ->toBeTrue();
+        ->toEqual(new BooleanValue(true));
     expect(evaluate('5 > "Lorem"'))
-        ->toBeFalse();
+        ->toEqual(new BooleanValue(false));
 
     expect(evaluate('"Lorem" <= 5'))
-        ->toBeTrue();
+        ->toEqual(new BooleanValue(true));
     expect(evaluate('"Lorem" <= 4'))
-        ->toBeFalse();
+        ->toEqual(new BooleanValue(false));
 
     expect(evaluate('"Lorem" > 4'))
-        ->toBeTrue();
+        ->toEqual(new BooleanValue(true));
     expect(evaluate('"Lorem" > 5'))
-        ->toBeFalse();
+        ->toEqual(new BooleanValue(false));
 
     expect(evaluate('"Lorem" >= 5'))
-        ->toBeTrue();
+        ->toEqual(new BooleanValue(true));
     expect(evaluate('"Lorem" >= 6'))
-        ->toBeFalse();
+        ->toEqual(new BooleanValue(false));
 });
 
 it('compares numbers', function () {
     expect(evaluate('5 == 5'))
-        ->toBeTrue();
+        ->toEqual(new BooleanValue(true));
     expect(evaluate('5 == 4'))
-        ->toBeFalse();
+        ->toEqual(new BooleanValue(false));
 
     expect(evaluate('5 != 4'))
-        ->toBeTrue();
+        ->toEqual(new BooleanValue(true));
     expect(evaluate('5 != 5'))
-        ->toBeFalse();
+        ->toEqual(new BooleanValue(false));
 
     expect(evaluate('5 < 6'))
-        ->toBeTrue();
+        ->toEqual(new BooleanValue(true));
     expect(evaluate('5 < 5'))
-        ->toBeFalse();
+        ->toEqual(new BooleanValue(false));
 
     expect(evaluate('5 <= 5'))
-        ->toBeTrue();
+        ->toEqual(new BooleanValue(true));
     expect(evaluate('5 <= 4'))
-        ->toBeFalse();
+        ->toEqual(new BooleanValue(false));
+
 
     expect(evaluate('5 > 4'))
-        ->toBeTrue();
+        ->toEqual(new BooleanValue(true));
     expect(evaluate('5 > 5'))
-        ->toBeFalse();
+        ->toEqual(new BooleanValue(false));
 
     expect(evaluate('5 >= 5'))
-        ->toBeTrue();
+        ->toEqual(new BooleanValue(true));
+
     expect(evaluate('5 >= 6'))
-        ->toBeFalse();
+        ->toEqual(new BooleanValue(false));
 });
 
 it('can concatenate string', function () {
     expect(evaluate('"Hello" + ", World"'))
-        ->toEqual('Hello, World');
+        ->toEqual(new StringValue('Hello, World'));
 
     expect(evaluate('"Fifty" + 5'))
-        ->toEqual('Fifty5');
+        ->toEqual(new StringValue('Fifty5'));
 });
