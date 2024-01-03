@@ -9,12 +9,16 @@
     - If a number is compared to a boolean, the boolean is converted into a number (true == 1.0 / false == 0.0)
 - optional semicolons
 - REPL
+- If condition
+- Scope and Block
+- Logical operators AND, OR
 
 ## TBD
-
+- Logical operator XOR
 - import native modules
 - Classes
 - Array data structure with dynamic types
+- Foreach loops
 - Single Inheritance like Java
 - this keyword
 - Methods
@@ -23,14 +27,11 @@
 - Local functions
 - Native Functions
 - Elvis (X ?? Y) Operators
-- If condition
 - While loop
 - Do While Loop
 - Repeat block like Kotlin
-- Scope and Block
 - super, this keywords for oop
 - Break and Continue keyword for loops
-- Logical operators AND, OR, XOR
 - Bitwise operators <<, >>, >>>
 - Function can take other Function as Parameter
 - Runtime error
@@ -40,3 +41,5 @@
 - Create custom infix Operators
 - undeclare (delete) variables
 - implicit variable declaration?
+- ++ operator to increment a variable
+-  +=, -=, *=, /= operators to run calculations on a variable 

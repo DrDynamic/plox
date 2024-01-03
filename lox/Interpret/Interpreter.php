@@ -20,6 +20,7 @@ use Lox\AST\Statements\IfStatement;
 use Lox\AST\Statements\PrintStmt;
 use Lox\AST\Statements\Statement;
 use Lox\AST\Statements\VarStatement;
+use Lox\AST\Statements\WhileStatement;
 use Lox\AST\StatementVisitor;
 use Lox\Runtime\Environment;
 use Lox\Runtime\Errors\RuntimeError;
@@ -108,7 +109,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
     #[\Override] public function visitIfStmt(IfStatement $if)
     {
-        if ($this->evaluate($if->condition)->cast(ValueType::Boolean)->value) {
+        if ($this->isTruthy($this->evaluate($if->condition))) {
             $this->execute($if->thenBranch);
         } else if ($if->elseBranch !== null) {
             $this->execute($if->elseBranch);
@@ -119,6 +120,13 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
     {
         $result = $this->evaluate($statement->expression);
         echo $result->cast(ValueType::String)->value."\n";
+    }
+
+    #[\Override] public function visitWhileStmt(WhileStatement $while)
+    {
+        while ($this->isTruthy($this->evaluate($while->condition))) {
+            $this->execute($while->body);
+        }
     }
 
     #[\Override] public function visitVarStmt(VarStatement $statement)
@@ -145,7 +153,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
     #[\Override] public function visitTernaryExpr(Ternary $ternary)
     {
-        return $this->evaluate($ternary->condition)->cast(ValueType::Boolean)->value
+        return $this->isTruthy($this->evaluate($ternary->condition))
             ? $this->evaluate($ternary->then)
             : $this->evaluate($ternary->else);
     }
@@ -186,11 +194,10 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         return $literal->value;
     }
 
-    #[\Override] public function visitLogical(Logical $logical)
+    #[\Override] public function visitLogicalExpr(Logical $logical)
     {
-        $left = $this->evaluate($logical->left);
-
-        $leftIsTruthy = $left->cast(ValueType::Boolean)->value;
+        $left         = $this->evaluate($logical->left);
+        $leftIsTruthy = $this->isTruthy($left);
 
         if ($logical->operator->type == TokenType::OR) {
             if ($leftIsTruthy) return $left;
@@ -207,7 +214,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
         switch ($unary->operator->type) {
             case TokenType::BANG:
-                return !$right->cast(ValueType::Boolean)->value;
+                return !$this->isTruthy($right);
             case TokenType::MINUS:
                 $this->assertNumber($unary, $right);
                 return new NumberValue($right->value * -1);
@@ -230,5 +237,10 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             $operator = property_exists($expression, 'operator') ? $expression->operator : null;
             throw new RuntimeError($operator, "Operand must be number.");
         }
+    }
+
+    private function isTruthy(Value $value)
+    {
+        return $value->cast(ValueType::Boolean)->value;
     }
 }

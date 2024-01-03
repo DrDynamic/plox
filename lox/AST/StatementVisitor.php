@@ -7,16 +7,19 @@ use Lox\AST\Statements\ExpressionStmt;
 use Lox\AST\Statements\IfStatement;
 use Lox\AST\Statements\PrintStmt;
 use Lox\AST\Statements\VarStatement;
+use Lox\AST\Statements\WhileStatement;
 
 interface StatementVisitor
 {
     public function visitExpressionStmt(ExpressionStmt $statement);
 
-    public function visitPrintStmt(PrintStmt $statement);
+    public function visitPrintStmt(PrintStmt $print);
 
-    public function visitVarStmt(VarStatement $statement);
+    public function visitVarStmt(VarStatement $var);
 
     public function visitBlockStmt(BlockStatement $block);
 
     public function visitIfStmt(IfStatement $if);
+
+    public function visitWhileStmt(WhileStatement $while);
 }

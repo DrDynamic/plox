@@ -18,7 +18,7 @@ class Logical extends Expression
 
     #[\Override] function accept(ExpressionVisitor $visitor)
     {
-        return $visitor->visitLogical($this);
+        return $visitor->visitLogicalExpr($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed

@@ -19,6 +19,7 @@ use Lox\AST\Statements\IfStatement;
 use Lox\AST\Statements\PrintStmt;
 use Lox\AST\Statements\Statement;
 use Lox\AST\Statements\VarStatement;
+use Lox\AST\Statements\WhileStatement;
 use Lox\Runtime\Values\BooleanValue;
 use Lox\Runtime\Values\NilValue;
 use Lox\Runtime\Values\NumberValue;
@@ -88,15 +89,18 @@ class Parser
 
     private function statement(): Statement
     {
-        if ($this->match(TokenType::IF)) {
-            return $this->ifStmt();
-        } else if ($this->match(TokenType::PRINT)) {
-            return $this->printStmt();
-        } else if ($this->match(TokenType::LEFT_BRACE)) {
-            return new BlockStatement($this->blockStmt());
+        switch (true) {
+            case $this->match(TokenType::IF):
+                return $this->ifStmt();
+            case $this->match(TokenType::PRINT):
+                return $this->printStmt();
+            case $this->match(TokenType::WHILE):
+                return $this->whileStmt();
+            case $this->match(TokenType::LEFT_BRACE):
+                return new BlockStatement($this->blockStmt());
+            default:
+                return $this->expressionStmt();
         }
-
-        return $this->expressionStmt();
     }
 
     private function ifStmt(): Statement
@@ -121,6 +125,16 @@ class Parser
         $this->match(TokenType::SEMICOLON);
 //        $this->consume(TokenType::SEMICOLON, "Expected ; after value.");
         return new PrintStmt($value);
+    }
+
+    private function whileStmt(): Statement
+    {
+        $this->consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.");
+        $confition = $this->expression();
+        $this->consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
+        $body = $this->statement();
+
+        return new WhileStatement($confition, $body);
     }
 
     private function blockStmt()

@@ -47,10 +47,6 @@ abstract class Value
         $ownValue   = $this->cast(ValueType::Number);
         $otherValue = $value->cast(ValueType::Number);
 
-        if ($this->value == 0 || $ownValue->value == 0) {
-            throw new DivisionByZeroError($operatorToken, "Division by zero.");
-        }
-
         switch ($operatorToken->type) {
             case TokenType::PLUS:
                 return new NumberValue($ownValue->value + $otherValue->value);
@@ -59,6 +55,9 @@ abstract class Value
             case TokenType::STAR:
                 return new NumberValue($ownValue->value * $otherValue->value);
             case TokenType::SLASH:
+                if ($this->value == 0 || $ownValue->value == 0) {
+                    throw new DivisionByZeroError($operatorToken, "Division by zero.");
+                }
                 return new NumberValue($ownValue->value / $otherValue->value);
         }
 

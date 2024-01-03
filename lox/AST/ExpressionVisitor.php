@@ -27,6 +27,6 @@ interface ExpressionVisitor
 
     public function visitAssignExpr(Assign $assign);
 
-    public function visitLogical(Logical $logical);
+    public function visitLogicalExpr(Logical $logical);
 
 }
