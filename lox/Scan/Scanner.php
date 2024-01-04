@@ -4,8 +4,6 @@ namespace Lox\Scan;
 
 use App\Attributes\Instance;
 use App\Services\ErrorReporter;
-use Lox\Runtime\Values\NumberValue;
-use Lox\Runtime\Values\StringValue;
 
 #[Instance]
 class Scanner
@@ -19,22 +17,24 @@ class Scanner
     private int $line = 1;
 
     private const KEYWORDS = [
-        'and'    => TokenType::AND,
-        'class'  => TokenType::CLS,
-        'else'   => TokenType::ELSE,
-        'false'  => TokenType::FALSE,
-        'for'    => TokenType::FOR,
-        'fun'    => TokenType::FUN,
-        'if'     => TokenType::IF,
-        'nil'    => TokenType::NIL,
-        'or'     => TokenType::OR,
-        'print'  => TokenType::PRINT,
-        'return' => TokenType::RETURN,
-        'super'  => TokenType::SUPER,
-        'this'   => TokenType::THIS,
-        'true'   => TokenType::TRUE,
-        'var'    => TokenType::VAR,
-        'while'  => TokenType::WHILE,
+        'and'      => TokenType::AND,
+        'class'    => TokenType::CLS,
+        'else'     => TokenType::ELSE,
+        'false'    => TokenType::FALSE,
+        'for'      => TokenType::FOR,
+        'fun'      => TokenType::FUN,
+        'if'       => TokenType::IF,
+        'nil'      => TokenType::NIL,
+        'or'       => TokenType::OR,
+        'print'    => TokenType::PRINT,
+        'return'   => TokenType::RETURN,
+        'super'    => TokenType::SUPER,
+        'this'     => TokenType::THIS,
+        'true'     => TokenType::TRUE,
+        'var'      => TokenType::VAR,
+        'while'    => TokenType::WHILE,
+        'break'    => TokenType::BREAK,
+        'continue' => TokenType::CONTINUE,
     ];
 
     public function __construct(
@@ -235,7 +235,7 @@ class Scanner
         // get the string without the starting and ending "
         $value = mb_substr($this->source, $this->start + 1, $this->current - $this->start - 2);
         // TODO: unescape escape sequences
-        $this->addToken(TokenType::STRING,$value);
+        $this->addToken(TokenType::STRING, $value);
     }
 
     protected function number()

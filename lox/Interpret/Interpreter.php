@@ -15,9 +15,10 @@ use Lox\AST\Expressions\Unary;
 use Lox\AST\Expressions\Variable;
 use Lox\AST\ExpressionVisitor;
 use Lox\AST\Statements\BlockStatement;
+use Lox\AST\Statements\CompletionStatement;
 use Lox\AST\Statements\ExpressionStmt;
 use Lox\AST\Statements\IfStatement;
-use Lox\AST\Statements\PrintStmt;
+use Lox\AST\Statements\PrintStatement;
 use Lox\AST\Statements\Statement;
 use Lox\AST\Statements\VarStatement;
 use Lox\AST\Statements\WhileStatement;
@@ -116,27 +117,40 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         }
     }
 
-    #[\Override] public function visitPrintStmt(PrintStmt $statement)
+    #[\Override] public function visitPrintStmt(PrintStatement $print)
     {
-        $result = $this->evaluate($statement->expression);
+        $result = $this->evaluate($print->expression);
         echo $result->cast(ValueType::String)->value."\n";
     }
 
     #[\Override] public function visitWhileStmt(WhileStatement $while)
     {
         while ($this->isTruthy($this->evaluate($while->condition))) {
-            $this->execute($while->body);
+            try {
+                $this->execute($while->body);
+            } catch (CompletionSignal $signal) {
+                if ($signal->statement->operator->type == TokenType::BREAK) {
+                    break;
+                } else if ($signal->statement->operator->type == TokenType::CONTINUE) {
+                    continue;
+                }
+            }
         }
     }
 
-    #[\Override] public function visitVarStmt(VarStatement $statement)
+    #[\Override] public function visitCompletionStmt(CompletionStatement $completion)
     {
-        if ($statement->initializer != null) {
-            $value = $this->evaluate($statement->initializer);
+        throw new CompletionSignal($completion);
+    }
+
+    #[\Override] public function visitVarStmt(VarStatement $var)
+    {
+        if ($var->initializer != null) {
+            $value = $this->evaluate($var->initializer);
         } else {
             $value = new NilValue();
         }
-        $this->environment->define($statement->name, $value);
+        $this->environment->define($var->name, $value);
     }
 
     #[\Override] public function visitBlockStmt(BlockStatement $block)

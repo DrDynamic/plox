@@ -3,21 +3,23 @@ program             ::= declaration* EOF ;
 
 // statements
 declaration         ::= varDeclaration | statement ;
-varDeclaration      ::= "var" IDENTIFIER ( "=" expression )? ;
+varDeclaration      ::= "var" IDENTIFIER ( "=" expression )? ";"?;
 statement           ::= expressionStatement
                       | forStatement
                       | ifStatement
                       | printStatement
                       | whileStmt
+                      | completionStatement
                       | blockStatement;
 forStatement        ::= "for" "(" ( varDeclaration | expressionStatement | ";" )
                                 expression? ";"
                                 expression? ")" statement ;
 whileStmt           ::= "while" "(" expression ")" statement ;
 ifStatement         ::= "if" "(" expression ")" statement ( "else" statement )? ;
+completionStatement ::= ("continue" | "break") ";"? ;
 expressionStatement ::= expression ;
 blockStatement      ::= "{" declaration* "}" ;
-printStatement      ::= "print" expression ;
+printStatement      ::= "print" expression ";"? ;
 
 // expressions
 expression          ::= ternary;
