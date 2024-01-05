@@ -3,13 +3,17 @@
 namespace Lox\AST\Expressions;
 
 use Lox\AST\ExpressionVisitor;
+use Lox\Scan\Token;
 
 class Grouping extends Expression
 {
     public function __construct(
-        public readonly Expression $expression
+        public readonly Token      $leftParen,
+        public readonly Expression $expression,
+        public readonly Token      $rightParen
     )
     {
+        parent::__construct($this->leftParen, $this->rightParen);
     }
 
     #[\Override] function accept(ExpressionVisitor $visitor)

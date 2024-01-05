@@ -15,6 +15,7 @@ class Ternary extends Expression
         public readonly Expression $else
     )
     {
+        parent::__construct($this->condition->tokenStart, $this->else->tokenEnd);
     }
 
 

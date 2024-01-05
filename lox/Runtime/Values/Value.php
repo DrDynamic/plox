@@ -2,65 +2,24 @@
 
 namespace Lox\Runtime\Values;
 
-use Lox\Runtime\Errors\DivisionByZeroError;
+use Lox\AST\Expressions\Expression;
+use Lox\AST\Statements\Statement;
 use Lox\Runtime\Errors\InvalidCastError;
-use Lox\Runtime\Errors\RuntimeError;
 use Lox\Scan\Token;
-use Lox\Scan\TokenType;
 
-abstract class Value
+interface Value
 {
-    abstract public static function getType(): ValueType;
+    public static function getType(): ValueType;
 
-    public function cast(ValueType $toType): Value
-    {
-        $ownType  = static::getType()->value;
-        $destType = $toType->value;
-        throw new InvalidCastError(null, "Invalid cast.\n Can not cast {$ownType} to {$destType}");
-    }
+    /**
+     * @param ValueType $toType The type to cast to
+     * @param Expression $cause The Statement or Expression, that caused the cast
+     * @return Value
+     * @throws InvalidCastError
+     */
+    public function cast(ValueType $toType, Statement|Expression $cause): Value;
 
-    public function compare(Value $value, Token $operatorToken): Value
-    {
-        $ownValue   = $this->cast(ValueType::Number);
-        $otherValue = $value->cast(ValueType::Number);
+    public function compare(Value $value, Token $operatorToken, Statement|Expression $cause): Value;
 
-        switch ($operatorToken->type) {
-            case TokenType::EQUAL_EQUAL:
-                return new BooleanValue($ownValue->value === $otherValue->value);
-            case TokenType::BANG_EQUAL:
-                return new BooleanValue($ownValue->value !== $otherValue->value);
-            case TokenType::GREATER:
-                return new BooleanValue($ownValue->value > $otherValue->value);
-            case TokenType::GREATER_EQUAL:
-                return new BooleanValue($ownValue->value >= $otherValue->value);
-            case TokenType::LESS:
-                return new BooleanValue($ownValue->value < $otherValue->value);
-            case TokenType::LESS_EQUAL:
-                return new BooleanValue($ownValue->value <= $otherValue->value);
-        }
-
-        throw new RuntimeError($operatorToken, "Unknown compare operator '$operatorToken->lexeme'");
-    }
-
-    public function calc(Value $value, Token $operatorToken): Value
-    {
-        $ownValue   = $this->cast(ValueType::Number);
-        $otherValue = $value->cast(ValueType::Number);
-
-        switch ($operatorToken->type) {
-            case TokenType::PLUS:
-                return new NumberValue($ownValue->value + $otherValue->value);
-            case TokenType::MINUS:
-                return new NumberValue($ownValue->value - $otherValue->value);
-            case TokenType::STAR:
-                return new NumberValue($ownValue->value * $otherValue->value);
-            case TokenType::SLASH:
-                if ($this->value == 0 || $ownValue->value == 0) {
-                    throw new DivisionByZeroError($operatorToken, "Division by zero.");
-                }
-                return new NumberValue($ownValue->value / $otherValue->value);
-        }
-
-        throw new RuntimeError($operatorToken, "Unknown calculation operator '$operatorToken->lexeme'");
-    }
+    public function calc(Value $value, Token $operatorToken, Statement|Expression $cause): Value;
 }

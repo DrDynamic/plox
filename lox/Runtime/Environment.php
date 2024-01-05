@@ -5,7 +5,8 @@ namespace Lox\Runtime;
 use App\Attributes\Instance;
 use Lox\Runtime\Errors\InvalidDeclarationError;
 use Lox\Runtime\Errors\UndefinedVariableError;
-use Lox\Runtime\Values\Value;
+use Lox\Runtime\Native\Natives;
+use Lox\Runtime\Values\BaseValue;
 use Lox\Scan\Token;
 
 #[Instance]
@@ -14,12 +15,27 @@ class Environment
     private $values = [];
 
     public function __construct(
-        public readonly Environment|null $enclosing = null
+        public readonly Environment|null $enclosing = null,
+        private readonly Natives|null    $natives = null,
     )
     {
+        $this->initValues();
     }
 
-    public function define(Token $name, Value $value): void
+    private function initValues()
+    {
+        if ($this->natives != null) {
+            $this->values = $this->natives->nativeFunctions;
+        }
+    }
+
+    public function reset(bool $recursive = false)
+    {
+        $this->initValues();
+        return $this;
+    }
+
+    public function define(Token $name, BaseValue $value): void
     {
         if (!$this->has($name)) {
             $this->values[$name->lexeme] = $value;
@@ -28,7 +44,7 @@ class Environment
         }
     }
 
-    public function assign(Token $name, Value $value): void
+    public function assign(Token $name, BaseValue $value): void
     {
         if ($this->has($name)) {
             $this->values[$name->lexeme] = $value;
@@ -44,7 +60,7 @@ class Environment
         return !empty($this->values[$name->lexeme]);
     }
 
-    public function get(Token $name): Value
+    public function get(Token $name): BaseValue
     {
         if ($this->has($name)) {
             return $this->values[$name->lexeme];

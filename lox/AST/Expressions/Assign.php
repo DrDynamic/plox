@@ -13,6 +13,7 @@ class Assign extends Expression
         public readonly Expression $value
     )
     {
+        parent::__construct($name, $this->value->tokenEnd);
     }
 
     #[\Override] function accept(ExpressionVisitor $visitor)

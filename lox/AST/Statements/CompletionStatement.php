@@ -8,9 +8,10 @@ use Lox\Scan\Token;
 class CompletionStatement extends Statement
 {
     public function __construct(
-        public readonly Token $operator
+        public readonly Token $operator,
     )
     {
+        parent::__construct($this->operator, $this->operator);
     }
 
 

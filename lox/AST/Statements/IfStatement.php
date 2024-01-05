@@ -4,16 +4,20 @@ namespace Lox\AST\Statements;
 
 use Lox\AST\Expressions\Expression;
 use Lox\AST\StatementVisitor;
+use Lox\Scan\Token;
 
 class IfStatement extends Statement
 {
 
     public function __construct(
+        public readonly Token          $startToken,
         public readonly Expression     $condition,
         public readonly Statement      $thenBranch,
         public readonly Statement|null $elseBranch
     )
     {
+        $end = $this->elseBranch != null ? $this->elseBranch->tokenEnd : $this->thenBranch->tokenEnd;
+        parent::__construct($this->startToken, $end);
     }
 
     #[\Override] function accept(StatementVisitor $visitor)

@@ -6,6 +6,7 @@ use App\Attributes\Instance;
 use App\Services\ErrorReporter;
 use Lox\AST\Expressions\Assign;
 use Lox\AST\Expressions\Binary;
+use Lox\AST\Expressions\Call;
 use Lox\AST\Expressions\Expression;
 use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
@@ -17,7 +18,6 @@ use Lox\AST\Statements\BlockStatement;
 use Lox\AST\Statements\CompletionStatement;
 use Lox\AST\Statements\ExpressionStmt;
 use Lox\AST\Statements\IfStatement;
-use Lox\AST\Statements\PrintStatement;
 use Lox\AST\Statements\Statement;
 use Lox\AST\Statements\VarStatement;
 use Lox\AST\Statements\WhileStatement;
@@ -76,6 +76,7 @@ class Parser
 
     private function varDeclaration(ParserContext $context): Statement
     {
+        $startToken  = $this->previous();
         $name        = $this->consume(TokenType::IDENTIFIER, "Expect variable name.");
         $initializer = null;
         if ($this->match(TokenType::EQUAL)) {
@@ -85,7 +86,7 @@ class Parser
         $this->match(TokenType::SEMICOLON);
 //        $this->consume(TokenType::SEMICOLON, "Expected ; after value.");
 
-        return new VarStatement($name, $initializer);
+        return new VarStatement($startToken, $name, $initializer);
     }
 
     private function statement(ParserContext $context): Statement
@@ -95,15 +96,17 @@ class Parser
                 return $this->forStmt($context);
             case $this->match(TokenType::IF):
                 return $this->ifStmt($context);
-            case $this->match(TokenType::PRINT):
-                return $this->printStmt($context);
             case $this->match(TokenType::WHILE):
                 return $this->whileStmt($context);
             case $this->match(TokenType::BREAK):
             case $this->match(TokenType::CONTINUE):
                 return $this->completionStmt($context);
             case $this->match(TokenType::LEFT_BRACE):
-                return new BlockStatement($this->blockStmt($context));
+                $leftBrace  = $this->previous();
+                $statements = $this->blockStmt($context);
+                $rightBrace = $this->previous();
+
+                return new BlockStatement($leftBrace, $statements, $rightBrace);
             default:
                 return $this->expressionStmt($context);
         }
@@ -111,60 +114,76 @@ class Parser
 
     private function forStmt(ParserContext $context)
     {
+        $tokenFor = $this->previous();
 
         $this->consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
 
+        $tokenInitializer = null;
         if ($this->match(TokenType::SEMICOLON)) {
             $initializer = null;
         } else if ($this->match(TokenType::VAR)) {
-            $initializer = $this->varDeclaration($context);
+            $tokenInitializer = $this->previous();
+            $initializer      = $this->varDeclaration($context);
         } else {
-            $initializer = $this->expressionStmt($context);
+            $tokenInitializer = $this->peek();
+            $initializer      = $this->expressionStmt($context);
         }
 
-        $condition = null;
+        $condition      = null;
+        $tokenCondition = null;
         if (!$this->check(TokenType::SEMICOLON)) {
-            $condition = $this->expression($context);
+            $tokenCondition = $this->peek();
+            $condition      = $this->expression($context);
         }
 
-        $this->consume(TokenType::SEMICOLON, "Exprect ';' after loop condition.");
+        $tokenAfterCondition = $this->consume(TokenType::SEMICOLON, "Exprect ';' after loop condition.");
 
-        $increment = null;
+        $increment      = null;
+        $tokenIncrement = null;
         if (!$this->check(TokenType::RIGHT_PAREN)) {
-            $increment = $this->expression($context);
+            $tokenIncrement = $this->peek();
+            $increment      = $this->expression($context);
         }
 
         $this->consume(TokenType::RIGHT_PAREN, "Expect ')' after for clauses.");
 
         $context->enterLoop($increment);
 
-        $body = $this->statement($context);
+        $tokenBody = $this->peek();
+        $body      = $this->statement($context);
 
-
+        $tokenEnd = $this->previous();
         if ($increment != null) {
-            $body = new BlockStatement([
-                $body,
-                new ExpressionStmt($increment)
-            ]);
+            $body = new BlockStatement(
+                $tokenIncrement,
+                [
+                    $body,
+                    new ExpressionStmt($increment)
+                ],
+                $tokenEnd);
         }
 
         $context->exitLoop();
 
-        if ($condition == null) $condition = new Literal(new BooleanValue(true));
+        if ($condition == null) $condition = new Literal(new BooleanValue(true), $tokenAfterCondition);
 
-        $body = new WhileStatement($condition, $body);
+        $body = new WhileStatement($tokenFor, $condition, $body);
 
         if ($initializer != null) {
-            $body = new BlockStatement([
-                $initializer,
-                $body
-            ]);
+            $body = new BlockStatement(
+                $tokenInitializer,
+                [
+                    $initializer,
+                    $body
+                ],
+                $tokenEnd);
         }
         return $body;
     }
 
     private function ifStmt(ParserContext $context): Statement
     {
+        $start = $this->previous();
         $this->consume(TokenType::LEFT_PAREN, "Expect '(' after 'if'.");
         $condition = $this->expression($context);
         $this->consume(TokenType::RIGHT_PAREN, "Expect ')' after if condition.");
@@ -176,19 +195,12 @@ class Parser
             $elseBranch = $this->statement($context);
         }
 
-        return new IfStatement($condition, $thenBranch, $elseBranch);
-    }
-
-    private function printStmt(ParserContext $context): Statement
-    {
-        $value = $this->expression($context);
-        $this->match(TokenType::SEMICOLON);
-//        $this->consume(TokenType::SEMICOLON, "Expected ; after value.");
-        return new PrintStatement($value);
+        return new IfStatement($start, $condition, $thenBranch, $elseBranch);
     }
 
     private function whileStmt(ParserContext $context): Statement
     {
+        $startToken = $this->previous();
         $this->consume(TokenType::LEFT_PAREN, "Expect '(' after 'while'.");
         $condition = $this->expression($context);
         $this->consume(TokenType::RIGHT_PAREN, "Expect ')' after condition.");
@@ -199,21 +211,25 @@ class Parser
 
         $context->exitLoop();
 
-        return new WhileStatement($condition, $body);
+        return new WhileStatement($startToken, $condition, $body);
     }
 
     private function completionStmt(ParserContext $context): Statement
     {
         if ($context->loopCount > 0) {
-            $completion = new CompletionStatement($this->previous());
+            $completionToken = $this->previous();
+            $completion      = new CompletionStatement($completionToken);
             $this->match(TokenType::SEMICOLON);
 
             $increment = end($context->loopIncrements);
             if ($increment != null) {
-                return new BlockStatement([
-                    new ExpressionStmt($increment),
-                    $completion
-                ]);
+                return new BlockStatement(
+                    $completionToken,
+                    [
+                        new ExpressionStmt($increment),
+                        $completion
+                    ],
+                    $completionToken);
             }
 
             return $completion;
@@ -235,7 +251,7 @@ class Parser
     {
         $value = $this->expression($context);
         $this->match(TokenType::SEMICOLON);
-//        $this->consume(TokenType::SEMICOLON, "Expected ; after value.");
+
         return new ExpressionStmt($value);
     }
 
@@ -374,26 +390,59 @@ class Parser
             return new Unary($operator, $right);
         }
 
-        return $this->primary($context);
+        return $this->call($context);
+    }
+
+    private function call(ParserContext $context): Expression
+    {
+        $expression = $this->primary($context);
+
+        while (true) {
+            if ($this->match(TokenType::LEFT_PAREN)) {
+                $expression = $this->finishCall($context, $expression);
+            } else {
+                break;
+            }
+        }
+
+        return $expression;
+    }
+
+    private function finishCall(ParserContext $context, Expression $callee): Call
+    {
+        $arguments = [];
+        if (!$this->check(TokenType::RIGHT_PAREN)) {
+            do {
+                if (count($arguments) >= 255) {
+                    $this->error($this->peek(), "Can't have more than 255 arguments.");
+                }
+                $arguments[] = $this->expression($context);
+            } while ($this->match(TokenType::COMMA));
+        }
+
+        $paren = $this->consume(TokenType::RIGHT_PAREN, "Expect ')' after arguments.");
+
+        return new Call($callee, $arguments, $paren);
     }
 
     private function primary(ParserContext $context): Expression
     {
         switch (true) {
             case $this->match(TokenType::TRUE):
-                return new Literal(new BooleanValue(true));
+                return new Literal(new BooleanValue(true), $this->previous());
             case $this->match(TokenType::FALSE):
-                return new Literal(new BooleanValue(false));
+                return new Literal(new BooleanValue(false), $this->previous());
             case $this->match(TokenType::NIL):
-                return new Literal(new NilValue());
+                return new Literal(new NilValue(), $this->previous());
             case $this->match(TokenType::NUMBER):
-                return new Literal(new NumberValue($this->previous()->literal));
+                return new Literal(new NumberValue($this->previous()->literal), $this->previous());
             case $this->match(TokenType::STRING):
-                return new Literal(new StringValue($this->previous()->literal));
+                return new Literal(new StringValue($this->previous()->literal), $this->previous());
             case $this->match(TokenType::LEFT_PAREN):
+                $leftParen  = $this->previous();
                 $expression = $this->expression($context);
-                $this->consume(TokenType::RIGHT_PAREN, "Expected ')' after expression.");
-                return new Grouping($expression);
+                $rightParen = $this->consume(TokenType::RIGHT_PAREN, "Expected ')' after expression.");
+                return new Grouping($leftParen, $expression, $rightParen);
             case $this->match(TokenType::IDENTIFIER):
                 return new Variable($this->previous());
             default:
@@ -466,7 +515,6 @@ class Parser
                 case TokenType::FOR:
                 case TokenType::IF:
                 case TokenType::WHILE:
-                case TokenType::PRINT:
                 case TokenType::RETURN:
                     return;
             }

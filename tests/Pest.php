@@ -5,7 +5,7 @@ use Lox\Interpret\Interpreter;
 use Lox\Lox;
 use Lox\Parse\Parser;
 use Lox\Runtime\Environment;
-use Lox\Runtime\Values\Value;
+use Lox\Runtime\Values\BaseValue;
 use Lox\Scan\Scanner;
 use Lox\Scan\Token;
 use Lox\Scan\TokenType;
@@ -84,7 +84,7 @@ function execute(string $source): void
     test()->lox->runString($source);
 }
 
-function evaluate(string $source): Value
+function evaluate(string $source): BaseValue
 {
         return test()->lox->runString($source);
 }

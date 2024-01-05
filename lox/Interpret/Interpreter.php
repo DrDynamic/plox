@@ -2,10 +2,11 @@
 
 namespace Lox\Interpret;
 
-use App\Attributes\Instance;
+use App\Attributes\Singleton;
 use App\Services\ErrorReporter;
 use Lox\AST\Expressions\Assign;
 use Lox\AST\Expressions\Binary;
+use Lox\AST\Expressions\Call;
 use Lox\AST\Expressions\Expression;
 use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
@@ -18,32 +19,36 @@ use Lox\AST\Statements\BlockStatement;
 use Lox\AST\Statements\CompletionStatement;
 use Lox\AST\Statements\ExpressionStmt;
 use Lox\AST\Statements\IfStatement;
-use Lox\AST\Statements\PrintStatement;
 use Lox\AST\Statements\Statement;
 use Lox\AST\Statements\VarStatement;
 use Lox\AST\Statements\WhileStatement;
 use Lox\AST\StatementVisitor;
 use Lox\Runtime\Environment;
+use Lox\Runtime\Errors\ArgumentCountError;
 use Lox\Runtime\Errors\RuntimeError;
+use Lox\Runtime\Values\CallableValue;
 use Lox\Runtime\Values\NilValue;
 use Lox\Runtime\Values\NumberValue;
-use Lox\Runtime\Values\Value;
+use Lox\Runtime\Values\BaseValue;
 use Lox\Runtime\Values\ValueType;
 use Lox\Scan\TokenType;
 
-#[Instance]
+#[Singleton]
 class Interpreter implements ExpressionVisitor, StatementVisitor
 {
+    private Environment $environment;
+
     public function __construct(
         private readonly ErrorReporter $errorReporter,
-        private Environment            $environment
+        private readonly Environment   $global
     )
     {
+        $this->environment = $this->global;
     }
 
     public function resetEnvironment()
     {
-        $this->environment = new Environment();
+        $this->environment = $this->global->reset();
     }
 
 
@@ -51,7 +56,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
      * @param array<Statement> $statements
      * @return void
      */
-    public function interpret(array $statements): Value|null
+    public function interpret(array $statements): BaseValue|null
     {
         if (empty($statements)) return null;
 
@@ -98,7 +103,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         }
     }
 
-    private function evaluate(Expression $expression): Value
+    private function evaluate(Expression $expression): BaseValue
     {
         return $expression->accept($this);
     }
@@ -110,22 +115,16 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
     #[\Override] public function visitIfStmt(IfStatement $if)
     {
-        if ($this->isTruthy($this->evaluate($if->condition))) {
+        if ($this->isTruthy($this->evaluate($if->condition), $if->condition)) {
             $this->execute($if->thenBranch);
         } else if ($if->elseBranch !== null) {
             $this->execute($if->elseBranch);
         }
     }
 
-    #[\Override] public function visitPrintStmt(PrintStatement $print)
-    {
-        $result = $this->evaluate($print->expression);
-        echo $result->cast(ValueType::String)->value."\n";
-    }
-
     #[\Override] public function visitWhileStmt(WhileStatement $while)
     {
-        while ($this->isTruthy($this->evaluate($while->condition))) {
+        while ($this->isTruthy($this->evaluate($while->condition), $while->condition)) {
             try {
                 $this->execute($while->body);
             } catch (CompletionSignal $signal) {
@@ -148,7 +147,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         if ($var->initializer != null) {
             $value = $this->evaluate($var->initializer);
         } else {
-            $value = new NilValue();
+            $value = dependency(NilValue::class);
         }
         $this->environment->define($var->name, $value);
     }
@@ -167,7 +166,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
     #[\Override] public function visitTernaryExpr(Ternary $ternary)
     {
-        return $this->isTruthy($this->evaluate($ternary->condition))
+        return $this->isTruthy($this->evaluate($ternary->condition), $ternary->condition)
             ? $this->evaluate($ternary->then)
             : $this->evaluate($ternary->else);
     }
@@ -185,17 +184,35 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             case TokenType::GREATER_EQUAL:
             case TokenType::LESS:
             case TokenType::LESS_EQUAL:
-                return $left->compare($right, $binary->operator);
+                return $left->compare($right, $binary->operator, $binary);
             case TokenType::PLUS:
             case TokenType::MINUS:
             case TokenType::SLASH:
             case TokenType::STAR:
-                return $left->calc($right, $binary->operator);
+                return $left->calc($right, $binary->operator, $binary);
             case TokenType::COMMA:
                 return $right;
         }
 
         throw new RuntimeError($binary->operator, "Undefined binary operator.");
+    }
+
+    #[\Override] public function visitCallExpr(Call $call)
+    {
+        $callee = $this->evaluate($call->callee);
+
+        $arguments = array_map(function (Expression $argument) {
+            return $this->evaluate($argument);
+        }, $call->arguments);
+
+        /** @var CallableValue $function */
+        $function = $callee->cast(ValueType::Callable, $call->callee);
+
+        if (count($arguments) < $function->arity()) {
+            throw new ArgumentCountError($call->rightParen, "Expect {$function->arity()} arguments but got ".count($arguments).".");
+        }
+
+        $function->call($arguments);
     }
 
     #[\Override] public function visitGroupingExpr(Grouping $grouping)
@@ -211,7 +228,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
     #[\Override] public function visitLogicalExpr(Logical $logical)
     {
         $left         = $this->evaluate($logical->left);
-        $leftIsTruthy = $this->isTruthy($left);
+        $leftIsTruthy = $this->isTruthy($left, $logical->left);
 
         if ($logical->operator->type == TokenType::OR) {
             if ($leftIsTruthy) return $left;
@@ -228,16 +245,16 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
         switch ($unary->operator->type) {
             case TokenType::BANG:
-                return !$this->isTruthy($right);
+                return !$this->isTruthy($right, $unary->right);
             case TokenType::MINUS:
                 $this->assertNumber($unary, $right);
                 return new NumberValue($right->value * -1);
         }
 
-        return new NilValue();
+        return dependency(NilValue::class);
     }
 
-    #[\Override] public function visitVariableExpr(Variable $variable): Value
+    #[\Override] public function visitVariableExpr(Variable $variable): BaseValue
     {
         $value = $this->environment->get($variable->name);
         return $value;
@@ -253,8 +270,8 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         }
     }
 
-    private function isTruthy(Value $value)
+    private function isTruthy(BaseValue $value, Expression $cause)
     {
-        return $value->cast(ValueType::Boolean)->value;
+        return $value->cast(ValueType::Boolean, $cause)->value;
     }
 }

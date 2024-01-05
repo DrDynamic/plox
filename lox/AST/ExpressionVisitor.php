@@ -4,6 +4,7 @@ namespace Lox\AST;
 
 use Lox\AST\Expressions\Assign;
 use Lox\AST\Expressions\Binary;
+use Lox\AST\Expressions\Call;
 use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
 use Lox\AST\Expressions\Logical;
@@ -28,5 +29,7 @@ interface ExpressionVisitor
     public function visitAssignExpr(Assign $assign);
 
     public function visitLogicalExpr(Logical $logical);
+
+    public function visitCallExpr(Call $call);
 
 }

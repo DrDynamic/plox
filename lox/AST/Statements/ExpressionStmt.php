@@ -8,9 +8,10 @@ use Lox\AST\StatementVisitor;
 class ExpressionStmt extends Statement
 {
     public function __construct(
-        public readonly Expression $expression
+        public readonly Expression $expression,
     )
     {
+        parent::__construct($this->expression->tokenStart, $this->expression->tokenEnd);
     }
 
 

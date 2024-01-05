@@ -10,10 +10,13 @@ class VarStatement extends Statement
 {
 
     public function __construct(
+        public readonly Token           $startToken,
         public readonly Token           $name,
         public readonly Expression|null $initializer
     )
     {
+        $end = $this->initializer != null ? $this->initializer->tokenEnd : $this->name;
+        parent::__construct($this->startToken, $end);
     }
 
     #[\Override] function accept(StatementVisitor $visitor)

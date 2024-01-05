@@ -2,11 +2,13 @@
 
 namespace Lox\Runtime\Values;
 
+use Lox\AST\Expressions\Expression;
+use Lox\AST\Statements\Statement;
 use Lox\Runtime\Errors\InvalidMathError;
 use Lox\Scan\Token;
 use Lox\Scan\TokenType;
 
-class StringValue extends Value
+class StringValue extends BaseValue
 {
     #[\Override] public static function getType(): ValueType
     {
@@ -19,7 +21,7 @@ class StringValue extends Value
     {
     }
 
-    #[\Override] public function cast(ValueType $toType): Value
+    #[\Override] public function cast(ValueType $toType, Statement|Expression $cause): BaseValue
     {
         switch ($toType) {
             case ValueType::Boolean:
@@ -29,14 +31,14 @@ class StringValue extends Value
             case ValueType::String:
                 return $this;
         }
-        return parent::cast($toType);
+        return parent::cast($toType, $cause);
     }
 
-    #[\Override] public function calc(Value $value, Token $operatorToken): Value
+    #[\Override] public function calc(Value $value, Token $operatorToken, Statement|Expression $cause): BaseValue
     {
         switch ($operatorToken->type) {
             case TokenType::PLUS:
-                $value = $value->cast(ValueType::String);
+                $value = $value->cast(ValueType::String, $cause);
                 return new StringValue($this->value.$value->value);
         }
         throw new InvalidMathError($operatorToken, "Arithmetic actions with string are not allowed (except concatenation '+' operator)");

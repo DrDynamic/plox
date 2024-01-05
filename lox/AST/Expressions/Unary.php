@@ -12,6 +12,7 @@ class Unary extends Expression
         public readonly Expression $right
     )
     {
+        parent::__construct($this->operator, $this->right->tokenEnd);
     }
 
     #[\Override] function accept(ExpressionVisitor $visitor)

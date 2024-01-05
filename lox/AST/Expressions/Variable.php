@@ -12,6 +12,7 @@ class Variable extends Expression
         public readonly Token $name
     )
     {
+        parent::__construct($this->name, $this->name);
     }
 
     #[\Override] function accept(ExpressionVisitor $visitor)

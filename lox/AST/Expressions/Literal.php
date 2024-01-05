@@ -3,14 +3,17 @@
 namespace Lox\AST\Expressions;
 
 use Lox\AST\ExpressionVisitor;
-use Lox\Runtime\Values\Value;
+use Lox\Runtime\Values\BaseValue;
+use Lox\Scan\Token;
 
 class Literal extends Expression
 {
     public function __construct(
-        public readonly Value $value
+        public readonly BaseValue $value,
+        public readonly Token     $token
     )
     {
+        parent::__construct($this->token, $this->token);
     }
 
     #[\Override] function accept(ExpressionVisitor $visitor)

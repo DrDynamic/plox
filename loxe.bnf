@@ -7,7 +7,6 @@ varDeclaration      ::= "var" IDENTIFIER ( "=" expression )? ";"?;
 statement           ::= expressionStatement
                       | forStatement
                       | ifStatement
-                      | printStatement
                       | whileStmt
                       | completionStatement
                       | blockStatement;
@@ -17,9 +16,8 @@ forStatement        ::= "for" "(" ( varDeclaration | expressionStatement | ";" )
 whileStmt           ::= "while" "(" expression ")" statement ;
 ifStatement         ::= "if" "(" expression ")" statement ( "else" statement )? ;
 completionStatement ::= ("continue" | "break") ";"? ;
-expressionStatement ::= expression ;
+expressionStatement ::= expression ";"?;
 blockStatement      ::= "{" declaration* "}" ;
-printStatement      ::= "print" expression ";"? ;
 
 // expressions
 expression          ::= ternary;
@@ -32,7 +30,9 @@ equality            ::= comparison ( ( "!=" | "==" ) comparison )* ;
 comparison          ::= term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term                ::= factor ( ( "-" | "+" ) factor )* ;
 factor              ::= unary ( ( "/" | "*" ) unary )* ;
-unary               ::= ( "!" | "-" ) unary | primary ;
+unary               ::= ( "!" | "-" ) unary | call ;
+call                ::= primary ( "(" arguments? ")" )* ;
+arguments           ::= expression ( "," expression )* ;
 primary             ::= NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER ;
 
 
@@ -42,7 +42,7 @@ NUMBER              ::= DIGIT+ ("." DIGIT+)?
 STRING              ::= "\"" <any char except "\"">* "\""
 IDENTIFIER          ::= ALPHA (ALPHA | DIGIT)*
 ALPHA               ::= "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p"
-                        | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
-                        | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P"
-                        | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "_"
+                      | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z"
+                      | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P"
+                      | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "_"
 DIGIT               ::= "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9"

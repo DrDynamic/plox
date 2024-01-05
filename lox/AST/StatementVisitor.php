@@ -14,8 +14,6 @@ interface StatementVisitor
 {
     public function visitExpressionStmt(ExpressionStmt $statement);
 
-    public function visitPrintStmt(PrintStatement $print);
-
     public function visitVarStmt(VarStatement $var);
 
     public function visitBlockStmt(BlockStatement $block);

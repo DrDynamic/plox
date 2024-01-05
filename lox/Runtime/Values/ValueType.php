@@ -8,4 +8,5 @@ enum ValueType: string
     case Boolean = "boolean";
     case Number = "number";
     case String = "string";
+    case Callable = "callable";
 }

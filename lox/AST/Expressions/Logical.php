@@ -14,6 +14,7 @@ class Logical extends Expression
         public readonly Expression $right
     )
     {
+        parent::__construct($this->left->tokenStart, $this->right->tokenEnd);
     }
 
     #[\Override] function accept(ExpressionVisitor $visitor)

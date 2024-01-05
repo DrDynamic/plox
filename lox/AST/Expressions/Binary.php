@@ -14,6 +14,7 @@ class Binary extends Expression
         public readonly Expression $right
     )
     {
+        parent::__construct($this->left->tokenStart, $this->right->tokenEnd);
     }
 
     #[\Override] function accept(ExpressionVisitor $visitor)
@@ -24,9 +25,9 @@ class Binary extends Expression
     #[\Override] public function jsonSerialize(): mixed
     {
         return [
-            'left' => $this->left,
+            'left'     => $this->left,
             'operator' => $this->operator->lexeme,
-            'right' => $this->right
+            'right'    => $this->right
         ];
     }
 }
