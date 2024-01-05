@@ -10,9 +10,9 @@ use Lox\Scan\TokenType;
 
 class StringValue extends BaseValue
 {
-    #[\Override] public static function getType(): ValueType
+    #[\Override] public static function getType(): LoxType
     {
-        return ValueType::String;
+        return LoxType::String;
     }
 
     public function __construct(
@@ -21,14 +21,14 @@ class StringValue extends BaseValue
     {
     }
 
-    #[\Override] public function cast(ValueType $toType, Statement|Expression $cause): BaseValue
+    #[\Override] public function cast(LoxType $toType, Statement|Expression $cause): BaseValue
     {
         switch ($toType) {
-            case ValueType::Boolean:
+            case LoxType::Boolean:
                 return new BooleanValue($this->value !== "");
-            case ValueType::Number:
+            case LoxType::Number:
                 return new NumberValue(mb_strlen($this->value));
-            case ValueType::String:
+            case LoxType::String:
                 return $this;
         }
         return parent::cast($toType, $cause);
@@ -38,7 +38,7 @@ class StringValue extends BaseValue
     {
         switch ($operatorToken->type) {
             case TokenType::PLUS:
-                $value = $value->cast(ValueType::String, $cause);
+                $value = $value->cast(LoxType::String, $cause);
                 return new StringValue($this->value.$value->value);
         }
         throw new InvalidMathError($operatorToken, "Arithmetic actions with string are not allowed (except concatenation '+' operator)");

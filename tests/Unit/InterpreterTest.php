@@ -89,4 +89,7 @@ it('can concatenate string', function () {
 
     expect(evaluate('"Fifty" + 5'))
         ->toEqual(new StringValue('Fifty5'));
+
+    expect(evaluate('5 + "Fifty"'))
+        ->toEqual(new StringValue('5Fifty'));
 });

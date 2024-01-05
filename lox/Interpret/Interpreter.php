@@ -26,11 +26,11 @@ use Lox\AST\StatementVisitor;
 use Lox\Runtime\Environment;
 use Lox\Runtime\Errors\ArgumentCountError;
 use Lox\Runtime\Errors\RuntimeError;
+use Lox\Runtime\Values\BaseValue;
 use Lox\Runtime\Values\CallableValue;
+use Lox\Runtime\Values\LoxType;
 use Lox\Runtime\Values\NilValue;
 use Lox\Runtime\Values\NumberValue;
-use Lox\Runtime\Values\BaseValue;
-use Lox\Runtime\Values\ValueType;
 use Lox\Scan\TokenType;
 
 #[Singleton]
@@ -189,6 +189,9 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             case TokenType::MINUS:
             case TokenType::SLASH:
             case TokenType::STAR:
+                if (in_array(LoxType::String, [$left::getType(), $right::getType()])) {
+                    $left = $left->cast(LoxType::String, $binary);
+                }
                 return $left->calc($right, $binary->operator, $binary);
             case TokenType::COMMA:
                 return $right;
@@ -206,7 +209,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         }, $call->arguments);
 
         /** @var CallableValue $function */
-        $function = $callee->cast(ValueType::Callable, $call->callee);
+        $function = $callee->cast(LoxType::Callable, $call->callee);
 
         if (count($arguments) < $function->arity()) {
             throw new ArgumentCountError($call->rightParen, "Expect {$function->arity()} arguments but got ".count($arguments).".");
@@ -272,6 +275,6 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
     private function isTruthy(BaseValue $value, Expression $cause)
     {
-        return $value->cast(ValueType::Boolean, $cause)->value;
+        return $value->cast(LoxType::Boolean, $cause)->value;
     }
 }

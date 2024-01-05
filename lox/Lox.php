@@ -8,7 +8,7 @@ use App\Services\Arr;
 use App\Services\ErrorReporter;
 use Lox\Interpret\Interpreter;
 use Lox\Parse\Parser;
-use Lox\Runtime\Values\ValueType;
+use Lox\Runtime\Values\LoxType;
 use Lox\Scan\Scanner;
 
 #[Instance]
@@ -53,7 +53,7 @@ class Lox
             }
             [$result, $statements] = $this->run($line);
             if ($result) {
-                echo $result->cast(ValueType::String, Arr::last($statements))->value."\n";
+                echo $result->cast(LoxType::String, Arr::last($statements))->value."\n";
             }
             $this->errorReporter->reset();
         }

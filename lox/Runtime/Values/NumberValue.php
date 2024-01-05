@@ -7,9 +7,9 @@ use Lox\AST\Statements\Statement;
 
 class NumberValue extends BaseValue
 {
-    #[\Override] public static function getType(): ValueType
+    #[\Override] public static function getType(): LoxType
     {
-        return ValueType::Number;
+        return LoxType::Number;
     }
 
     public function __construct(
@@ -18,14 +18,14 @@ class NumberValue extends BaseValue
     {
     }
 
-    #[\Override] public function cast(ValueType $toType, Statement|Expression $cause): BaseValue
+    #[\Override] public function cast(LoxType $toType, Statement|Expression $cause): BaseValue
     {
         switch ($toType) {
-            case ValueType::Boolean:
+            case LoxType::Boolean:
                 return new BooleanValue($this->value !== 0.0);
-            case ValueType::Number:
+            case LoxType::Number:
                 return $this;
-            case ValueType::String:
+            case LoxType::String:
                 return new StringValue("$this->value");
         }
         return parent::cast($toType, $cause);

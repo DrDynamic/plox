@@ -6,7 +6,7 @@ use Lox\AST\Expressions\Expression;
 use Lox\Runtime\Values\CallableValue;
 use Lox\Runtime\Values\NilValue;
 use Lox\Runtime\Values\BaseValue;
-use Lox\Runtime\Values\ValueType;
+use Lox\Runtime\Values\LoxType;
 
 class LoxPrint extends BaseValue implements CallableValue
 {
@@ -18,12 +18,12 @@ class LoxPrint extends BaseValue implements CallableValue
 
     #[\Override] public function call(array $arguments): BaseValue
     {
-        echo $arguments[0]->cast(ValueType::String)->value."\n";
+        echo $arguments[0]->cast(LoxType::String)->value."\n";
         return dependency(NilValue::class);
     }
 
-    #[\Override] public static function getType(): ValueType
+    #[\Override] public static function getType(): LoxType
     {
-        return ValueType::Callable;
+        return LoxType::Callable;
     }
 }

@@ -12,15 +12,15 @@ use Lox\Scan\TokenType;
 
 abstract class BaseValue implements Value
 {
-    abstract public static function getType(): ValueType;
+    abstract public static function getType(): LoxType;
 
     /**
-     * @param ValueType $toType The type to cast to
+     * @param LoxType $toType The type to cast to
      * @param Expression $cause The Statement or Expression, that caused the cast
      * @return BaseValue
      * @throws InvalidCastError
      */
-    public function cast(ValueType $toType, Statement|Expression $cause): BaseValue
+    public function cast(LoxType $toType, Statement|Expression $cause): BaseValue
     {
         $ownType  = static::getType()->value;
         $destType = $toType->value;
@@ -30,8 +30,8 @@ abstract class BaseValue implements Value
 
     public function compare(Value $value, Token $operatorToken, Statement|Expression $cause): BaseValue
     {
-        $ownValue   = $this->cast(ValueType::Number, $cause);
-        $otherValue = $value->cast(ValueType::Number, $cause);
+        $ownValue   = $this->cast(LoxType::Number, $cause);
+        $otherValue = $value->cast(LoxType::Number, $cause);
 
         switch ($operatorToken->type) {
             case TokenType::EQUAL_EQUAL:
@@ -53,8 +53,8 @@ abstract class BaseValue implements Value
 
     public function calc(Value $value, Token $operatorToken, Statement|Expression $cause): BaseValue
     {
-        $ownValue   = $this->cast(ValueType::Number, $cause);
-        $otherValue = $value->cast(ValueType::Number, $cause);
+        $ownValue   = $this->cast(LoxType::Number, $cause);
+        $otherValue = $value->cast(LoxType::Number, $cause);
 
         switch ($operatorToken->type) {
             case TokenType::PLUS:

@@ -2,7 +2,7 @@
 
 namespace Lox\Runtime\Values;
 
-enum ValueType: string
+enum LoxType: string
 {
     case NIL = "nil";
     case Boolean = "boolean";

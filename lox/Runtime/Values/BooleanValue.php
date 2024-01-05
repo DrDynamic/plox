@@ -9,9 +9,9 @@ use Lox\Scan\Token;
 
 class BooleanValue extends BaseValue
 {
-    #[\Override] public static function getType(): ValueType
+    #[\Override] public static function getType(): LoxType
     {
-        return ValueType::Boolean;
+        return LoxType::Boolean;
     }
 
     public function __construct(
@@ -20,14 +20,14 @@ class BooleanValue extends BaseValue
     {
     }
 
-    #[\Override] public function cast(ValueType $toType, Statement|Expression $cause): BaseValue
+    #[\Override] public function cast(LoxType $toType, Statement|Expression $cause): BaseValue
     {
         switch ($toType) {
-            case ValueType::Boolean:
+            case LoxType::Boolean:
                 return $this;
-            case ValueType::Number:
+            case LoxType::Number:
                 return new NumberValue($this->value ? 1.0 : 0.0);
-            case ValueType::String:
+            case LoxType::String:
                 return new StringValue($this->value ? "true" : "false");
         }
         return parent::cast($toType, $cause);
@@ -35,8 +35,8 @@ class BooleanValue extends BaseValue
 
     #[\Override] public function compare(Value $value, Token $operatorToken, Statement|Expression $cause): BaseValue
     {
-        $number = $this->cast(ValueType::Number, $cause);
-        $value  = $value->cast(ValueType::Number, $cause);
+        $number = $this->cast(LoxType::Number, $cause);
+        $value  = $value->cast(LoxType::Number, $cause);
 
         return $number->compare($value, $operatorToken, $cause);
     }
