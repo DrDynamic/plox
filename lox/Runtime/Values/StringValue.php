@@ -10,7 +10,7 @@ use Lox\Scan\TokenType;
 
 class StringValue extends BaseValue
 {
-    #[\Override] public static function getType(): LoxType
+    #[\Override] public function getType(): LoxType
     {
         return LoxType::String;
     }

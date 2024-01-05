@@ -26,11 +26,11 @@ use Lox\AST\StatementVisitor;
 use Lox\Runtime\Environment;
 use Lox\Runtime\Errors\ArgumentCountError;
 use Lox\Runtime\Errors\RuntimeError;
-use Lox\Runtime\Values\BaseValue;
 use Lox\Runtime\Values\CallableValue;
 use Lox\Runtime\Values\LoxType;
 use Lox\Runtime\Values\NilValue;
 use Lox\Runtime\Values\NumberValue;
+use Lox\Runtime\Values\Value;
 use Lox\Scan\TokenType;
 
 #[Singleton]
@@ -56,7 +56,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
      * @param array<Statement> $statements
      * @return void
      */
-    public function interpret(array $statements): BaseValue|null
+    public function interpret(array $statements): Value|null
     {
         if (empty($statements)) return null;
 
@@ -103,7 +103,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         }
     }
 
-    private function evaluate(Expression $expression): BaseValue
+    private function evaluate(Expression $expression): Value
     {
         return $expression->accept($this);
     }
@@ -189,7 +189,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             case TokenType::MINUS:
             case TokenType::SLASH:
             case TokenType::STAR:
-                if (in_array(LoxType::String, [$left::getType(), $right::getType()])) {
+                if (in_array(LoxType::String, [$left->getType(), $right->getType()])) {
                     $left = $left->cast(LoxType::String, $binary);
                 }
                 return $left->calc($right, $binary->operator, $binary);
@@ -215,7 +215,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             throw new ArgumentCountError($call->rightParen, "Expect {$function->arity()} arguments but got ".count($arguments).".");
         }
 
-        $function->call($arguments);
+        return $function->call($arguments, $call);
     }
 
     #[\Override] public function visitGroupingExpr(Grouping $grouping)
@@ -257,7 +257,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         return dependency(NilValue::class);
     }
 
-    #[\Override] public function visitVariableExpr(Variable $variable): BaseValue
+    #[\Override] public function visitVariableExpr(Variable $variable): Value
     {
         $value = $this->environment->get($variable->name);
         return $value;
@@ -273,7 +273,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         }
     }
 
-    private function isTruthy(BaseValue $value, Expression $cause)
+    private function isTruthy(Value $value, Expression $cause)
     {
         return $value->cast(LoxType::Boolean, $cause)->value;
     }

@@ -9,7 +9,7 @@ use Lox\Scan\Token;
 
 interface Value
 {
-    public static function getType(): LoxType;
+    public function getType(): LoxType;
 
     /**
      * @param LoxType $toType The type to cast to

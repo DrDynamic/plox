@@ -12,7 +12,7 @@ use Lox\Scan\TokenType;
 #[Singleton]
 class NilValue extends BaseValue
 {
-    #[\Override] public static function getType(): LoxType
+    #[\Override] public function getType(): LoxType
     {
         return LoxType::NIL;
     }
@@ -38,9 +38,9 @@ class NilValue extends BaseValue
     {
         switch ($operatorToken->type) {
             case TokenType::EQUAL_EQUAL:
-                if ($value::getType() == LoxType::NIL) return new BooleanValue(true);
+                if ($value->getType() == LoxType::NIL) return new BooleanValue(true);
             case TokenType::BANG_EQUAL:
-                if ($value::getType() == LoxType::NIL) return new BooleanValue(false);
+                if ($value->getType() == LoxType::NIL) return new BooleanValue(false);
             case TokenType::GREATER:
             case TokenType::GREATER_EQUAL:
                 return new BooleanValue(true);

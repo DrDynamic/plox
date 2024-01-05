@@ -6,7 +6,7 @@ use App\Attributes\Instance;
 use Lox\Runtime\Errors\InvalidDeclarationError;
 use Lox\Runtime\Errors\UndefinedVariableError;
 use Lox\Runtime\Native\Natives;
-use Lox\Runtime\Values\BaseValue;
+use Lox\Runtime\Values\Value;
 use Lox\Scan\Token;
 
 #[Instance]
@@ -35,7 +35,7 @@ class Environment
         return $this;
     }
 
-    public function define(Token $name, BaseValue $value): void
+    public function define(Token $name, Value $value): void
     {
         if (!$this->has($name)) {
             $this->values[$name->lexeme] = $value;
@@ -44,7 +44,16 @@ class Environment
         }
     }
 
-    public function assign(Token $name, BaseValue $value): void
+    public function delete(Token $name)
+    {
+        if ($this->has($name)) {
+            unset($this->values[$name->lexeme]);
+        } else {
+            throw new InvalidDeclarationError($name, "Cannot delete undefined variable '$name->lexeme'.");
+        }
+    }
+
+    public function assign(Token $name, Value $value): void
     {
         if ($this->has($name)) {
             $this->values[$name->lexeme] = $value;
@@ -60,7 +69,7 @@ class Environment
         return !empty($this->values[$name->lexeme]);
     }
 
-    public function get(Token $name): BaseValue
+    public function get(Token $name): Value
     {
         if ($this->has($name)) {
             return $this->values[$name->lexeme];

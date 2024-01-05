@@ -24,7 +24,7 @@ class Call extends Expression
 
     #[\Override] function accept(ExpressionVisitor $visitor)
     {
-        $visitor->visitCallExpr($this);
+        return $visitor->visitCallExpr($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed

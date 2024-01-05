@@ -9,7 +9,7 @@ use Lox\Scan\Token;
 
 class BooleanValue extends BaseValue
 {
-    #[\Override] public static function getType(): LoxType
+    #[\Override] public function getType(): LoxType
     {
         return LoxType::Boolean;
     }

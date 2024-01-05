@@ -12,7 +12,7 @@ use Lox\Scan\TokenType;
 
 abstract class BaseValue implements Value
 {
-    abstract public static function getType(): LoxType;
+    abstract public function getType(): LoxType;
 
     /**
      * @param LoxType $toType The type to cast to
@@ -22,7 +22,9 @@ abstract class BaseValue implements Value
      */
     public function cast(LoxType $toType, Statement|Expression $cause): BaseValue
     {
-        $ownType  = static::getType()->value;
+        if ($this->getType() == $toType) return $this;
+
+        $ownType  = $this->getType()->value;
         $destType = $toType->value;
 
         throw new InvalidCastError($cause->tokenStart, "Invalid cast.\n Can not cast {$ownType} to {$destType}");
