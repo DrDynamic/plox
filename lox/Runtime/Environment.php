@@ -22,14 +22,14 @@ class Environment
         $this->initValues();
     }
 
-    private function initValues()
+    private function initValues(): void
     {
         if ($this->natives != null) {
             $this->values = $this->natives->nativeFunctions;
         }
     }
 
-    public function reset(bool $recursive = false)
+    public function reset(bool $recursive = false): self
     {
         $this->initValues();
         return $this;

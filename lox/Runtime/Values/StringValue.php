@@ -23,6 +23,7 @@ class StringValue extends BaseValue
 
     #[\Override] public function cast(LoxType $toType, Statement|Expression $cause): BaseValue
     {
+
         switch ($toType) {
             case LoxType::Boolean:
                 return new BooleanValue($this->value !== "");

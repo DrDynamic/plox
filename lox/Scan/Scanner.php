@@ -22,7 +22,7 @@ class Scanner
         'else'     => TokenType::ELSE,
         'false'    => TokenType::FALSE,
         'for'      => TokenType::FOR,
-        'fun'      => TokenType::FUN,
+        'function' => TokenType::FUNCTION,
         'if'       => TokenType::IF,
         'nil'      => TokenType::NIL,
         'or'       => TokenType::OR,

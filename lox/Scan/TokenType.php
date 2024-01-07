@@ -39,7 +39,7 @@ enum TokenType
     case CLS;
     case ELSE;
     case FALSE;
-    case FUN;
+    case FUNCTION;
     case FOR;
     case IF;
     case NIL;

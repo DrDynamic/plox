@@ -3,6 +3,7 @@
 namespace Lox\Runtime\Native;
 
 use App\Attributes\Singleton;
+use Lox\Runtime\Native\Functions\LoxClock;
 use Lox\Runtime\Native\Functions\LoxPrint;
 
 // TODO: find better name / structure (maybe use this for Interpreter implemented functions, classes and FFI)
@@ -10,7 +11,8 @@ use Lox\Runtime\Native\Functions\LoxPrint;
 class Natives
 {
     const FUNCTIONS = [
-        'print' => LoxPrint::class
+        'print' => LoxPrint::class,
+        'clock' => LoxClock::class,
     ];
 
     public readonly array $nativeFunctions;

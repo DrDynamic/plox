@@ -17,7 +17,8 @@ use Lox\AST\Expressions\Variable;
 use Lox\AST\ExpressionVisitor;
 use Lox\AST\Statements\BlockStatement;
 use Lox\AST\Statements\CompletionStatement;
-use Lox\AST\Statements\ExpressionStmt;
+use Lox\AST\Statements\ExpressionStatement;
+use Lox\AST\Statements\FunctionStatement;
 use Lox\AST\Statements\IfStatement;
 use Lox\AST\Statements\Statement;
 use Lox\AST\Statements\VarStatement;
@@ -27,6 +28,7 @@ use Lox\Runtime\Environment;
 use Lox\Runtime\Errors\ArgumentCountError;
 use Lox\Runtime\Errors\RuntimeError;
 use Lox\Runtime\Values\CallableValue;
+use Lox\Runtime\Values\FunctionValue;
 use Lox\Runtime\Values\LoxType;
 use Lox\Runtime\Values\NilValue;
 use Lox\Runtime\Values\NumberValue;
@@ -36,11 +38,11 @@ use Lox\Scan\TokenType;
 #[Singleton]
 class Interpreter implements ExpressionVisitor, StatementVisitor
 {
-    private Environment $environment;
+    public Environment $environment;
 
     public function __construct(
         private readonly ErrorReporter $errorReporter,
-        private readonly Environment   $global
+        public readonly Environment    $global
     )
     {
         $this->environment = $this->global;
@@ -67,7 +69,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
                 $this->execute($statement);
             }
 
-            if ($last instanceof ExpressionStmt) {
+            if ($last instanceof ExpressionStatement) {
                 return $this->evaluate($last->expression);
             } else {
                 $this->execute($last);
@@ -90,7 +92,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
      * @param Environment $environment
      * @return void
      */
-    private function executeBlock(array $statements, Environment $environment): void
+    public function executeBlock(array $statements, Environment $environment): void
     {
         $previous = $this->environment;
         try {
@@ -108,9 +110,16 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         return $expression->accept($this);
     }
 
-    #[\Override] public function visitExpressionStmt(ExpressionStmt $statement)
+    #[\Override] public function visitExpressionStmt(ExpressionStatement $statement)
     {
         $this->evaluate($statement->expression);
+    }
+
+    #[\Override] public function visitFunctionStmt(FunctionStatement $statement)
+    {
+        $function = new FunctionValue($statement, $this->environment);
+        $this->environment->define($statement->name, $function);
+
     }
 
     #[\Override] public function visitIfStmt(IfStatement $if)

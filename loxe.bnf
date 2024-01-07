@@ -2,8 +2,12 @@
 program             ::= declaration* EOF ;
 
 // statements
-declaration         ::= varDeclaration | statement ;
-varDeclaration      ::= "var" IDENTIFIER ( "=" expression )? ";"?;
+declaration         ::= funcDeclaration | varDeclaration | statement ;
+funcDeclaration     ::= "function" function ;
+function            ::= IDENTIFIER "(" parameters? ")" blockStatement ;
+parameters          ::= IDENTIFIER ( "," IDENTIFIER )* ;
+varDeclaration      ::= "var" IDENTIFIER ( "=" expression )? ";"? ;
+
 statement           ::= expressionStatement
                       | forStatement
                       | ifStatement

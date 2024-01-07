@@ -16,7 +16,8 @@ use Lox\AST\Expressions\Unary;
 use Lox\AST\Expressions\Variable;
 use Lox\AST\Statements\BlockStatement;
 use Lox\AST\Statements\CompletionStatement;
-use Lox\AST\Statements\ExpressionStmt;
+use Lox\AST\Statements\ExpressionStatement;
+use Lox\AST\Statements\FunctionStatement;
 use Lox\AST\Statements\IfStatement;
 use Lox\AST\Statements\Statement;
 use Lox\AST\Statements\VarStatement;
@@ -64,14 +65,40 @@ class Parser
     private function declaration(ParserContext $context): Statement|null
     {
         try {
-            if ($this->match(TokenType::VAR)) {
-                return $this->varDeclaration($context);
+            switch (true) {
+                case $this->match(TokenType::FUNCTION):
+                    return $this->function("function", $context);
+                case $this->match(TokenType::VAR):
+                    return $this->varDeclaration($context);
             }
+
             return $this->statement($context);
         } catch (ParseError $error) {
             $this->synchonize();
             return null;
         }
+    }
+
+    private function function (string $kind, ParserContext $context)
+    {
+        $tokenStart = $this->previous();
+
+        $name = $this->consume(TokenType::IDENTIFIER, "Expect $kind name.");
+        $this->consume(TokenType::LEFT_PAREN, "Expect '(' after $kind name.");
+        $parameters = [];
+        if (!$this->check(TokenType::RIGHT_PAREN)) {
+            do {
+                if (count($parameters) >= 255) {
+                    $this->error($this->peek(), "Can't have more than 255 parameters");
+                }
+                $parameters[] = $this->consume(TokenType::IDENTIFIER, "Expect parameter name.");
+            } while ($this->match(TokenType::COMMA));
+        }
+        $this->consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.");
+        $this->consume(TokenType::LEFT_BRACE, "Expect '{' before $kind body.");
+        $body = $this->blockStmt($context);
+
+        return new FunctionStatement($tokenStart, $name, $parameters, $body);
     }
 
     private function varDeclaration(ParserContext $context): Statement
@@ -158,7 +185,7 @@ class Parser
                 $tokenIncrement,
                 [
                     $body,
-                    new ExpressionStmt($increment)
+                    new ExpressionStatement($increment)
                 ],
                 $tokenEnd);
         }
@@ -226,7 +253,7 @@ class Parser
                 return new BlockStatement(
                     $completionToken,
                     [
-                        new ExpressionStmt($increment),
+                        new ExpressionStatement($increment),
                         $completion
                     ],
                     $completionToken);
@@ -252,7 +279,7 @@ class Parser
         $value = $this->expression($context);
         $this->match(TokenType::SEMICOLON);
 
-        return new ExpressionStmt($value);
+        return new ExpressionStatement($value);
     }
 
     private function expression(ParserContext $context): Expression
@@ -510,7 +537,7 @@ class Parser
 
             switch ($this->peek()->type) {
                 case TokenType::CLS:
-                case TokenType::FUN:
+                case TokenType::FUNCTION:
                 case TokenType::VAR:
                 case TokenType::FOR:
                 case TokenType::IF:

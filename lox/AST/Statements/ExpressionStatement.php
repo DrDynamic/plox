@@ -5,7 +5,7 @@ namespace Lox\AST\Statements;
 use Lox\AST\Expressions\Expression;
 use Lox\AST\StatementVisitor;
 
-class ExpressionStmt extends Statement
+class ExpressionStatement extends Statement
 {
     public function __construct(
         public readonly Expression $expression,

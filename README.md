@@ -12,8 +12,14 @@
 - If condition
 - Scope and Block
 - Logical operators AND, OR
+- Native Functions
+- While loop
+- For Loop
+- Break and Continue keyword for loops
+- functions have access to parent scope
 
 ## TBD
+
 - Logical operator XOR
 - import native modules
 - Classes
@@ -25,13 +31,10 @@
 - Functions
 - Function Extension
 - Local functions
-- Native Functions
 - Elvis (X ?? Y) Operators
-- While loop
 - Do While Loop
 - Repeat block like Kotlin
 - super, this keywords for oop
-- Break and Continue keyword for loops
 - Bitwise operators <<, >>, >>>
 - Function can take other Function as Parameter
 - Runtime error
@@ -42,4 +45,6 @@
 - undeclare (delete) variables
 - implicit variable declaration?
 - ++ operator to increment a variable
--  +=, -=, *=, /= operators to run calculations on a variable 
+- +=, -=, *=, /= operators to run calculations on a variable
+- casting strings to callable
+- function declaration without block statement (instant return)

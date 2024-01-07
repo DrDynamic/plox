@@ -37,7 +37,7 @@ it('parses sourcecode to tokens', function () {
  */
     
     // Keywords.
-    _identifier_ and class else false fun for if nil or return super this true var while
+    _identifier_ and class else false function for if nil or return super this true var while
 ';
 
 
@@ -83,7 +83,7 @@ it('parses sourcecode to tokens', function () {
         ['type' => TokenType::CLS, 'lexeme' => 'class', 'literal' => null, 'line' => $line],
         ['type' => TokenType::ELSE, 'lexeme' => 'else', 'literal' => null, 'line' => $line],
         ['type' => TokenType::FALSE, 'lexeme' => 'false', 'literal' => null, 'line' => $line],
-        ['type' => TokenType::FUN, 'lexeme' => 'fun', 'literal' => null, 'line' => $line],
+        ['type' => TokenType::FUNCTION, 'lexeme' => 'function', 'literal' => null, 'line' => $line],
         ['type' => TokenType::FOR, 'lexeme' => 'for', 'literal' => null, 'line' => $line],
         ['type' => TokenType::IF, 'lexeme' => 'if', 'literal' => null, 'line' => $line],
         ['type' => TokenType::NIL, 'lexeme' => 'nil', 'literal' => null, 'line' => $line],

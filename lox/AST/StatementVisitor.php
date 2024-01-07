@@ -4,23 +4,25 @@ namespace Lox\AST;
 
 use Lox\AST\Statements\BlockStatement;
 use Lox\AST\Statements\CompletionStatement;
-use Lox\AST\Statements\ExpressionStmt;
+use Lox\AST\Statements\ExpressionStatement;
+use Lox\AST\Statements\FunctionStatement;
 use Lox\AST\Statements\IfStatement;
-use Lox\AST\Statements\PrintStatement;
 use Lox\AST\Statements\VarStatement;
 use Lox\AST\Statements\WhileStatement;
 
 interface StatementVisitor
 {
-    public function visitExpressionStmt(ExpressionStmt $statement);
+    public function visitExpressionStmt(ExpressionStatement $statement);
 
-    public function visitVarStmt(VarStatement $var);
+    public function visitVarStmt(VarStatement $statement);
 
-    public function visitBlockStmt(BlockStatement $block);
+    public function visitBlockStmt(BlockStatement $statement);
 
-    public function visitIfStmt(IfStatement $if);
+    public function visitIfStmt(IfStatement $statement);
 
-    public function visitWhileStmt(WhileStatement $while);
+    public function visitWhileStmt(WhileStatement $statement);
 
-    public function visitCompletionStmt(CompletionStatement $completion);
+    public function visitCompletionStmt(CompletionStatement $statement);
+
+    public function visitFunctionStmt(FunctionStatement $statement);
 }

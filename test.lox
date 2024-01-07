@@ -1,0 +1,46 @@
+/*
+var a = 1;
+{
+  var a = a + 2;
+  print a;
+}
+print a
+*/
+
+// a for loop like
+var y = 0
+var z = 0
+while(y<10) {
+  for(var i=0; i<=100; i=i+1) {
+    if(i > 10) {
+        y = y+1
+        break
+    }
+  }
+  z = y
+}
+print z
+//break
+
+
+
+
+/*
+a for loop like
+
+for(var i=0; i<10; i=i+1){
+    print i
+}
+
+is desugared to
+
+{
+    var i=0;
+    while(i<10) {
+        {
+            print i
+        }
+        i=i+1
+    }
+}
+*/

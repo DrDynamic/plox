@@ -20,6 +20,7 @@
   },
 
   "require": {
+    "laravel/framework": "^10.39"
   },
   "require-dev": {
     "pestphp/pest": "^2.30"
