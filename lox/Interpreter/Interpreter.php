@@ -1,6 +1,6 @@
 <?php
 
-namespace Lox\Interpret;
+namespace Lox\Interpreter;
 
 use App\Attributes\Singleton;
 use App\Services\ErrorReporter;
@@ -8,6 +8,7 @@ use Lox\AST\Expressions\Assign;
 use Lox\AST\Expressions\Binary;
 use Lox\AST\Expressions\Call;
 use Lox\AST\Expressions\Expression;
+use Lox\AST\Expressions\FunctionExpression;
 use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
 use Lox\AST\Expressions\Logical;
@@ -18,8 +19,8 @@ use Lox\AST\ExpressionVisitor;
 use Lox\AST\Statements\BlockStatement;
 use Lox\AST\Statements\CompletionStatement;
 use Lox\AST\Statements\ExpressionStatement;
-use Lox\AST\Statements\FunctionStatement;
 use Lox\AST\Statements\IfStatement;
+use Lox\AST\Statements\ReturnStatement;
 use Lox\AST\Statements\Statement;
 use Lox\AST\Statements\VarStatement;
 use Lox\AST\Statements\WhileStatement;
@@ -27,13 +28,15 @@ use Lox\AST\StatementVisitor;
 use Lox\Runtime\Environment;
 use Lox\Runtime\Errors\ArgumentCountError;
 use Lox\Runtime\Errors\RuntimeError;
+use Lox\Runtime\LoxType;
 use Lox\Runtime\Values\CallableValue;
 use Lox\Runtime\Values\FunctionValue;
-use Lox\Runtime\Values\LoxType;
 use Lox\Runtime\Values\NilValue;
 use Lox\Runtime\Values\NumberValue;
 use Lox\Runtime\Values\Value;
-use Lox\Scan\TokenType;
+use Lox\Scaner\Token;
+use Lox\Scaner\TokenType;
+use WeakMap;
 
 #[Singleton]
 class Interpreter implements ExpressionVisitor, StatementVisitor
@@ -42,17 +45,12 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
     public function __construct(
         private readonly ErrorReporter $errorReporter,
-        public readonly Environment    $global
+        public readonly Environment    $global,
+        private WeakMap                $locals
     )
     {
         $this->environment = $this->global;
     }
-
-    public function resetEnvironment()
-    {
-        $this->environment = $this->global->reset();
-    }
-
 
     /**
      * @param array<Statement> $statements
@@ -115,13 +113,6 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         $this->evaluate($statement->expression);
     }
 
-    #[\Override] public function visitFunctionStmt(FunctionStatement $statement)
-    {
-        $function = new FunctionValue($statement, $this->environment);
-        $this->environment->define($statement->name, $function);
-
-    }
-
     #[\Override] public function visitIfStmt(IfStatement $if)
     {
         if ($this->isTruthy($this->evaluate($if->condition), $if->condition)) {
@@ -131,11 +122,17 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         }
     }
 
-    #[\Override] public function visitWhileStmt(WhileStatement $while)
+    #[\Override] public function visitReturnStmt(ReturnStatement $statement)
     {
-        while ($this->isTruthy($this->evaluate($while->condition), $while->condition)) {
+        $value = $this->evaluate($statement->value);
+        throw new ReturnSignal($statement, $value);
+    }
+
+    #[\Override] public function visitWhileStmt(WhileStatement $statement)
+    {
+        while ($this->isTruthy($this->evaluate($statement->condition), $statement->condition)) {
             try {
-                $this->execute($while->body);
+                $this->execute($statement->body);
             } catch (CompletionSignal $signal) {
                 if ($signal->statement->operator->type == TokenType::BREAK) {
                     break;
@@ -166,47 +163,63 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         $this->executeBlock($block->statements, new Environment($this->environment));
     }
 
-    #[\Override] public function visitAssignExpr(Assign $assign)
+    #[\Override] public function visitFunctionExpr(FunctionExpression $expression)
     {
-        $value = $this->evaluate($assign->value);
-        $this->environment->assign($assign->name, $value);
+        $function = new FunctionValue($expression, $this->environment);
+        if ($expression->name != null) {
+            $this->environment->define($expression->name, $function);
+        }
+        return $function;
+    }
+
+    #[\Override] public function visitAssignExpr(Assign $expression)
+    {
+        $value = $this->evaluate($expression->value);
+
+        if ($this->hasLocale($expression)) {
+            $distance = $this->locals[$expression];
+            $this->environment->assignAt($distance, $expression->name, $value);
+        } else {
+            $this->global->assign($expression->name, $value);
+        }
+
         return $value;
     }
 
-    #[\Override] public function visitTernaryExpr(Ternary $ternary)
+    #[\Override] public function visitTernaryExpr(Ternary $expression)
     {
-        return $this->isTruthy($this->evaluate($ternary->condition), $ternary->condition)
-            ? $this->evaluate($ternary->then)
-            : $this->evaluate($ternary->else);
+        return $this->isTruthy($this->evaluate($expression->condition), $expression->condition)
+            ? $this->evaluate($expression->then)
+            : $this->evaluate($expression->else);
     }
 
-    #[\Override] public function visitBinaryExpr(Binary $binary)
+    #[\Override] public function visitBinaryExpr(Binary $expression)
     {
 
-        $left  = $this->evaluate($binary->left);
-        $right = $this->evaluate($binary->right);
+        $left  = $this->evaluate($expression->left);
+        $right = $this->evaluate($expression->right);
 
-        switch ($binary->operator->type) {
+        switch ($expression->operator->type) {
             case TokenType::BANG_EQUAL:
             case TokenType::EQUAL_EQUAL:
             case TokenType::GREATER:
             case TokenType::GREATER_EQUAL:
             case TokenType::LESS:
             case TokenType::LESS_EQUAL:
-                return $left->compare($right, $binary->operator, $binary);
+                return $left->compare($right, $expression->operator, $expression);
             case TokenType::PLUS:
             case TokenType::MINUS:
             case TokenType::SLASH:
             case TokenType::STAR:
                 if (in_array(LoxType::String, [$left->getType(), $right->getType()])) {
-                    $left = $left->cast(LoxType::String, $binary);
+                    $left = $left->cast(LoxType::String, $expression);
                 }
-                return $left->calc($right, $binary->operator, $binary);
+                return $left->calc($right, $expression->operator, $expression);
             case TokenType::COMMA:
                 return $right;
         }
 
-        throw new RuntimeError($binary->operator, "Undefined binary operator.");
+        throw new RuntimeError($expression->operator, "Undefined binary operator.");
     }
 
     #[\Override] public function visitCallExpr(Call $call)
@@ -227,49 +240,48 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         return $function->call($arguments, $call);
     }
 
-    #[\Override] public function visitGroupingExpr(Grouping $grouping)
+    #[\Override] public function visitGroupingExpr(Grouping $expression)
     {
-        return $this->evaluate($grouping->expression);
+        return $this->evaluate($expression->expression);
     }
 
-    #[\Override] public function visitLiteralExpr(Literal $literal)
+    #[\Override] public function visitLiteralExpr(Literal $expression)
     {
-        return $literal->value;
+        return $expression->value;
     }
 
-    #[\Override] public function visitLogicalExpr(Logical $logical)
+    #[\Override] public function visitLogicalExpr(Logical $expression)
     {
-        $left         = $this->evaluate($logical->left);
-        $leftIsTruthy = $this->isTruthy($left, $logical->left);
+        $left         = $this->evaluate($expression->left);
+        $leftIsTruthy = $this->isTruthy($left, $expression->left);
 
-        if ($logical->operator->type == TokenType::OR) {
+        if ($expression->operator->type == TokenType::OR) {
             if ($leftIsTruthy) return $left;
         } else {
             if (!$leftIsTruthy) return $left;
         }
 
-        return $this->evaluate($logical->right);
+        return $this->evaluate($expression->right);
     }
 
-    #[\Override] public function visitUnaryExpr(Unary $unary)
+    #[\Override] public function visitUnaryExpr(Unary $expression)
     {
-        $right = $this->evaluate($unary->right);
+        $right = $this->evaluate($expression->right);
 
-        switch ($unary->operator->type) {
+        switch ($expression->operator->type) {
             case TokenType::BANG:
-                return !$this->isTruthy($right, $unary->right);
+                return !$this->isTruthy($right, $expression->right);
             case TokenType::MINUS:
-                $this->assertNumber($unary, $right);
+                $this->assertNumber($expression, $right);
                 return new NumberValue($right->value * -1);
         }
 
         return dependency(NilValue::class);
     }
 
-    #[\Override] public function visitVariableExpr(Variable $variable): Value
+    #[\Override] public function visitVariableExpr(Variable $expression): Value
     {
-        $value = $this->environment->get($variable->name);
-        return $value;
+        return $this->lookUpVariable($expression->name, $expression);
     }
 
     private function assertNumber(Expression $expression, ...$values)
@@ -285,5 +297,29 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
     private function isTruthy(Value $value, Expression $cause)
     {
         return $value->cast(LoxType::Boolean, $cause)->value;
+    }
+
+    public function resolve(Expression|null $expression, int $depth)
+    {
+        $this->locals[$expression] = $depth;
+    }
+
+    public function lookUpVariable(Token $name, Expression $expression)
+    {
+        if ($this->hasLocale($expression)) {
+            $distance = $this->locals[$expression];
+            return $this->environment->getAt($distance, $name);
+        } else {
+            return $this->global->get($name);
+        }
+    }
+
+    public function hasLocale(Expression $expression)
+    {
+
+        if (!isset($this->locals[$expression])) {
+            return false;
+        }
+        return $this->locals[$expression] != null;
     }
 }

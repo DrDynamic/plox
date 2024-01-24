@@ -4,7 +4,7 @@ namespace Lox\Runtime\Native\Functions;
 
 use Lox\AST\Expressions\Expression;
 use Lox\AST\Statements\Statement;
-use Lox\Runtime\Values\LoxType;
+use Lox\Runtime\LoxType;
 use Lox\Runtime\Values\NilValue;
 use Lox\Runtime\Values\Value;
 

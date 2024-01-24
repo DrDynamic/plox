@@ -1,6 +1,6 @@
 <?php
 
-namespace Lox\Scan;
+namespace Lox\Scaner;
 
 class Token
 {

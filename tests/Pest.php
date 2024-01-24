@@ -1,14 +1,15 @@
 <?php
 
+use App\Services\Dependency;
 use App\Services\ErrorReporter;
-use Lox\Interpret\Interpreter;
+use Lox\Interpreter\Interpreter;
 use Lox\Lox;
-use Lox\Parse\Parser;
+use Lox\Parser\Parser;
 use Lox\Runtime\Environment;
 use Lox\Runtime\Values\BaseValue;
-use Lox\Scan\Scanner;
-use Lox\Scan\Token;
-use Lox\Scan\TokenType;
+use Lox\Scaner\Scanner;
+use Lox\Scaner\Token;
+use Lox\Scaner\TokenType;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertFalse;
 use function PHPUnit\Framework\assertTrue;
@@ -69,14 +70,16 @@ expect()->extend('toNotHave', function ($name) {
 
 function resetLox(): void
 {
-    test()->errorReporter = dependency(ErrorReporter::class);
-    test()->environment   = dependency(Environment::class);
+    $dependency = Dependency::getInstance();
+    $dependency->singleton(ErrorReporter::class, test()->errorReporter = dependency(ErrorReporter::class));
+    test()->environment = dependency(Environment::class);
 
-    test()->scanner     = dependency(Scanner::class);
-    test()->parser      = dependency(Parser::class);
-    test()->interpreter = new Interpreter(test()->errorReporter, test()->environment);
+    test()->scanner = dependency(Scanner::class);
+    test()->parser  = dependency(Parser::class);
+    $dependency->singleton(Interpreter::class, test()->interpreter = new Interpreter(test()->errorReporter, test()->environment));
 
     test()->lox = new Lox(test()->scanner, test()->parser, test()->interpreter, test()->errorReporter);
+
 }
 
 function execute(string $source): void
@@ -86,5 +89,5 @@ function execute(string $source): void
 
 function evaluate(string $source): BaseValue
 {
-        return test()->lox->runString($source);
+    return test()->lox->runString($source);
 }

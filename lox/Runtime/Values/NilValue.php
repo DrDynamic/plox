@@ -6,8 +6,9 @@ use App\Attributes\Singleton;
 use Lox\AST\Expressions\Expression;
 use Lox\AST\Statements\Statement;
 use Lox\Runtime\Errors\InvalidMathError;
-use Lox\Scan\Token;
-use Lox\Scan\TokenType;
+use Lox\Runtime\LoxType;
+use Lox\Scaner\Token;
+use Lox\Scaner\TokenType;
 
 #[Singleton]
 class NilValue extends BaseValue

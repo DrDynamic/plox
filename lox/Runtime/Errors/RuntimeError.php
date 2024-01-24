@@ -3,7 +3,7 @@
 namespace Lox\Runtime\Errors;
 
 use JetBrains\PhpStorm\Pure;
-use Lox\Scan\Token;
+use Lox\Scaner\Token;
 use Throwable;
 
 class RuntimeError extends \Exception

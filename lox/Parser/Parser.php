@@ -1,6 +1,6 @@
 <?php
 
-namespace Lox\Parse;
+namespace Lox\Parser;
 
 use App\Attributes\Instance;
 use App\Services\ErrorReporter;
@@ -8,6 +8,7 @@ use Lox\AST\Expressions\Assign;
 use Lox\AST\Expressions\Binary;
 use Lox\AST\Expressions\Call;
 use Lox\AST\Expressions\Expression;
+use Lox\AST\Expressions\FunctionExpression;
 use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
 use Lox\AST\Expressions\Logical;
@@ -17,8 +18,8 @@ use Lox\AST\Expressions\Variable;
 use Lox\AST\Statements\BlockStatement;
 use Lox\AST\Statements\CompletionStatement;
 use Lox\AST\Statements\ExpressionStatement;
-use Lox\AST\Statements\FunctionStatement;
 use Lox\AST\Statements\IfStatement;
+use Lox\AST\Statements\ReturnStatement;
 use Lox\AST\Statements\Statement;
 use Lox\AST\Statements\VarStatement;
 use Lox\AST\Statements\WhileStatement;
@@ -26,8 +27,8 @@ use Lox\Runtime\Values\BooleanValue;
 use Lox\Runtime\Values\NilValue;
 use Lox\Runtime\Values\NumberValue;
 use Lox\Runtime\Values\StringValue;
-use Lox\Scan\Token;
-use Lox\Scan\TokenType;
+use Lox\Scaner\Token;
+use Lox\Scaner\TokenType;
 
 #[Instance]
 class Parser
@@ -66,8 +67,8 @@ class Parser
     {
         try {
             switch (true) {
-                case $this->match(TokenType::FUNCTION):
-                    return $this->function("function", $context);
+//                case $this->match(TokenType::FUNCTION):
+//                    return $this->function("function", $context);
                 case $this->match(TokenType::VAR):
                     return $this->varDeclaration($context);
             }
@@ -79,27 +80,27 @@ class Parser
         }
     }
 
-    private function function (string $kind, ParserContext $context)
-    {
-        $tokenStart = $this->previous();
-
-        $name = $this->consume(TokenType::IDENTIFIER, "Expect $kind name.");
-        $this->consume(TokenType::LEFT_PAREN, "Expect '(' after $kind name.");
-        $parameters = [];
-        if (!$this->check(TokenType::RIGHT_PAREN)) {
-            do {
-                if (count($parameters) >= 255) {
-                    $this->error($this->peek(), "Can't have more than 255 parameters");
-                }
-                $parameters[] = $this->consume(TokenType::IDENTIFIER, "Expect parameter name.");
-            } while ($this->match(TokenType::COMMA));
-        }
-        $this->consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.");
-        $this->consume(TokenType::LEFT_BRACE, "Expect '{' before $kind body.");
-        $body = $this->blockStmt($context);
-
-        return new FunctionStatement($tokenStart, $name, $parameters, $body);
-    }
+//    private function function (string $kind, ParserContext $context)
+//    {
+//        $tokenStart = $this->previous();
+//
+//        $name = $this->consume(TokenType::IDENTIFIER, "Expect $kind name.");
+//        $this->consume(TokenType::LEFT_PAREN, "Expect '(' after $kind name.");
+//        $parameters = [];
+//        if (!$this->check(TokenType::RIGHT_PAREN)) {
+//            do {
+//                if (count($parameters) >= 255) {
+//                    $this->error($this->peek(), "Can't have more than 255 parameters");
+//                }
+//                $parameters[] = $this->consume(TokenType::IDENTIFIER, "Expect parameter name.");
+//            } while ($this->match(TokenType::COMMA));
+//        }
+//        $this->consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.");
+//        $this->consume(TokenType::LEFT_BRACE, "Expect '{' before $kind body.");
+//        $body = $this->blockStmt($context);
+//
+//        return new FunctionExpression($tokenStart, $name, $parameters, $body);
+//    }
 
     private function varDeclaration(ParserContext $context): Statement
     {
@@ -123,6 +124,8 @@ class Parser
                 return $this->forStmt($context);
             case $this->match(TokenType::IF):
                 return $this->ifStmt($context);
+            case $this->match(TokenType::RETURN):
+                return $this->returnStmt($context);
             case $this->match(TokenType::WHILE):
                 return $this->whileStmt($context);
             case $this->match(TokenType::BREAK):
@@ -239,6 +242,21 @@ class Parser
         $context->exitLoop();
 
         return new WhileStatement($startToken, $condition, $body);
+    }
+
+    private function returnStmt(ParserContext $context): Statement
+    {
+        $keyword = $this->previous();
+        $value   = new Literal(dependency(NilValue::class), $keyword);
+
+
+        if (!$this->checkStrict(TokenType::LINE_BREAK) && !$this->checkStrict(TokenType::SEMICOLON)) {
+            $value = $this->expression($context);
+        }
+
+        $this->match(TokenType::SEMICOLON);
+
+        return new ReturnStatement($keyword, $value);
     }
 
     private function completionStmt(ParserContext $context): Statement
@@ -472,17 +490,64 @@ class Parser
                 return new Grouping($leftParen, $expression, $rightParen);
             case $this->match(TokenType::IDENTIFIER):
                 return new Variable($this->previous());
+            case $this->match(TokenType::FUNCTION):
+                return $this->function('function', $context);
             default:
                 throw $this->error($this->peek(), "Expect expression.");
         }
     }
 
-    private function isAtEnd()
+    private function function (string $kind, ParserContext $context)
     {
+        $tokenStart = $this->previous();
+
+        $name = null;
+        if($this->match(TokenType::IDENTIFIER)) {
+            $name = $this->previous();
+        }
+
+
+        $this->consume(TokenType::LEFT_PAREN, "Expect '(' after $kind name.");
+        $parameters = [];
+        if (!$this->check(TokenType::RIGHT_PAREN)) {
+            do {
+                if (count($parameters) >= 255) {
+                    $this->error($this->peek(), "Can't have more than 255 parameters");
+                }
+                $parameters[] = $this->consume(TokenType::IDENTIFIER, "Expect parameter name.");
+            } while ($this->match(TokenType::COMMA));
+        }
+        $this->consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.");
+        $this->consume(TokenType::LEFT_BRACE, "Expect '{' before $kind body.");
+        $body = $this->blockStmt($context);
+
+        return new FunctionExpression($tokenStart, $name, $parameters, $body);
+    }
+
+    private function isAtEnd(): bool
+    {
+        while ($this->peek()->type == TokenType::LINE_BREAK) {
+            $this->current++;
+        }
+
         return $this->peek()->type == TokenType::EOF;
     }
 
     private function match(TokenType ...$types): bool
+    {
+        if ($this->isAtEnd()) return false;
+
+        while ($this->matchStrict(TokenType::LINE_BREAK)) continue;
+
+        $token = $this->peek();
+        if (in_array($token->type, $types)) {
+            $this->advance();
+            return true;
+        }
+        return false;
+    }
+
+    private function matchStrict(TokenType ...$types): bool
     {
         if ($this->isAtEnd()) return false;
 
@@ -495,6 +560,14 @@ class Parser
     }
 
     private function check(TokenType $type)
+    {
+        if ($this->isAtEnd()) return false;
+
+        while ($this->matchStrict(TokenType::LINE_BREAK)) continue;
+        return $this->peek()->type == $type;
+    }
+
+    private function checkStrict(TokenType $type)
     {
         if ($this->isAtEnd()) return false;
         return $this->peek()->type == $type;
@@ -517,6 +590,13 @@ class Parser
     }
 
     private function consume(TokenType $tokenType, string $message): Token
+    {
+        if ($this->check($tokenType)) return $this->advance();
+        while ($this->matchStrict(TokenType::LINE_BREAK)) continue;
+        throw $this->error($this->peek(), $message);
+    }
+
+    private function consumeStrict(TokenType $tokenType, string $message): Token
     {
         if ($this->check($tokenType)) return $this->advance();
         throw $this->error($this->peek(), $message);

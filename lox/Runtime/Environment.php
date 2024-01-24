@@ -7,12 +7,12 @@ use Lox\Runtime\Errors\InvalidDeclarationError;
 use Lox\Runtime\Errors\UndefinedVariableError;
 use Lox\Runtime\Native\Natives;
 use Lox\Runtime\Values\Value;
-use Lox\Scan\Token;
+use Lox\Scaner\Token;
 
 #[Instance]
 class Environment
 {
-    private $values = [];
+    protected $values = [];
 
     public function __construct(
         public readonly Environment|null $enclosing = null,
@@ -33,6 +33,15 @@ class Environment
     {
         $this->initValues();
         return $this;
+    }
+
+    public function ancestor(int $distance)
+    {
+        $env = $this;
+        for ($i = 0; $i < $distance; $i++) {
+            $env = $env->enclosing;
+        }
+        return $env;
     }
 
     public function define(Token $name, Value $value): void
@@ -64,6 +73,11 @@ class Environment
         }
     }
 
+    public function assignAt(int $distance, Token $name, Value $value)
+    {
+        $this->ancestor($distance)->values[$name->lexeme] = $value;
+    }
+
     public function has(Token $name): bool
     {
         return !empty($this->values[$name->lexeme]);
@@ -77,6 +91,11 @@ class Environment
             return $this->enclosing->get($name);
         }
         throw new UndefinedVariableError($name, "Undefined variable '$name->lexeme'.");
+    }
+
+    public function getAt(mixed $distance, Token $name)
+    {
+        return $this->ancestor($distance)->values[$name->lexeme];
     }
 
 

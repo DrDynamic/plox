@@ -7,8 +7,9 @@ use Lox\AST\Statements\Statement;
 use Lox\Runtime\Errors\DivisionByZeroError;
 use Lox\Runtime\Errors\InvalidCastError;
 use Lox\Runtime\Errors\RuntimeError;
-use Lox\Scan\Token;
-use Lox\Scan\TokenType;
+use Lox\Runtime\LoxType;
+use Lox\Scaner\Token;
+use Lox\Scaner\TokenType;
 
 abstract class BaseValue implements Value
 {

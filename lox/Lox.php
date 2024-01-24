@@ -6,10 +6,11 @@ namespace Lox;
 use App\Attributes\Instance;
 use App\Services\Arr;
 use App\Services\ErrorReporter;
-use Lox\Interpret\Interpreter;
-use Lox\Parse\Parser;
-use Lox\Runtime\Values\LoxType;
-use Lox\Scan\Scanner;
+use Lox\Interpreter\Interpreter;
+use Lox\Parser\Parser;
+use Lox\Resolver\Resolver;
+use Lox\Runtime\LoxType;
+use Lox\Scaner\Scanner;
 
 #[Instance]
 class Lox
@@ -20,6 +21,7 @@ class Lox
     public function __construct(
         private readonly Scanner       $scanner,
         private readonly Parser        $parser,
+        private readonly Resolver      $resolver,
         private readonly Interpreter   $interpreter,
         private readonly ErrorReporter $errorReporter,
     )
@@ -66,16 +68,11 @@ class Lox
 
         if ($this->errorReporter->hadError) return null;
 
+        $this->resolver->resolveAll($statements);
+
+        if ($this->errorReporter->hadError) return null;
+
+
         return [$this->interpreter->interpret($statements), $statements];
-    }
-
-    private function error(int $line, string $message)
-    {
-        $this->report($line, "", $message);
-    }
-
-    private static function report(int $line, string $where, string $message)
-    {
-        fwrite(STDERR, "[$line] Error$where: $message\n");
     }
 }

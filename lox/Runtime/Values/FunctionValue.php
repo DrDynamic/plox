@@ -3,17 +3,19 @@
 namespace Lox\Runtime\Values;
 
 use Lox\AST\Expressions\Expression;
-use Lox\AST\Statements\FunctionStatement;
+use Lox\AST\Expressions\FunctionExpression;
 use Lox\AST\Statements\Statement;
-use Lox\Interpret\Interpreter;
+use Lox\Interpreter\Interpreter;
+use Lox\Interpreter\ReturnSignal;
 use Lox\Runtime\Environment;
+use Lox\Runtime\LoxType;
 
 class FunctionValue extends BaseValue implements CallableValue
 {
 
     public function __construct(
-        private readonly FunctionStatement $declaration,
-        private readonly Environment       $parentEnvironment)
+        private readonly FunctionExpression $declaration,
+        private readonly Environment        $closure)
     {
     }
 
@@ -25,7 +27,12 @@ class FunctionValue extends BaseValue implements CallableValue
     #[\Override] public function cast(LoxType $toType, Statement|Expression $cause): BaseValue
     {
         if ($toType == LoxType::String) {
-            return new StringValue("<fn {$this->declaration->name->lexeme}>");
+// TODO: add reference to file / line?
+            $name = $this->declaration->name
+                ? $this->declaration->name->lexeme
+                : "anonymous";
+
+            return new StringValue("<fn {$name}>");
         }
         return parent::cast($toType, $cause);
     }
@@ -40,14 +47,17 @@ class FunctionValue extends BaseValue implements CallableValue
     {
         /** @var Interpreter $interpreter */
         $interpreter = dependency(Interpreter::class);
-        $environment = new Environment($this->parentEnvironment);
+        $environment = new Environment($this->closure);
 
         foreach ($this->declaration->parameters as $index => $parameter) {
             $environment->define($parameter, $arguments[$index]);
         }
 
-
-        $interpreter->executeBlock($this->declaration->body, $environment);
+        try {
+            $interpreter->executeBlock($this->declaration->body, $environment);
+        } catch (ReturnSignal $signal) {
+            return $signal->value;
+        }
         return dependency(NilValue::class);
     }
 }

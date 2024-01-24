@@ -1,6 +1,6 @@
 <?php
 
-namespace Lox\Scan;
+namespace Lox\Scaner;
 
 enum TokenType
 {
@@ -53,6 +53,7 @@ enum TokenType
     case BREAK;
     case CONTINUE;
 
+    case LINE_BREAK;
     case EOF;
     case ERROR;
 }

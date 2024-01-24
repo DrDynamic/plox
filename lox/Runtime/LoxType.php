@@ -1,6 +1,6 @@
 <?php
 
-namespace Lox\Runtime\Values;
+namespace Lox\Runtime;
 
 enum LoxType: string
 {

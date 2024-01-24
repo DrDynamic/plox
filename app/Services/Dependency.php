@@ -51,9 +51,28 @@ class Dependency
         }
     }
 
+    /**
+     * define a singleton (also overrides existing ones)
+     * @return void
+     */
+    public function singleton($abstract, $concrete)
+    {
+        // concrete could be callable (to crete the instance) or the direct instance
+        if (is_callable($concrete)) {
+            $this->dependencies[$abstract] = $concrete();
+        } else {
+            $this->dependencies[$abstract] = $concrete;
+        }
+
+    }
+
+    public function instance($abstract, callable $concrete){
+        $this->dependencies[$abstract] = $concrete;
+    }
+
     protected function createAndCacheDependency($abstract, $concrete): mixed
     {
-        if(in_array($concrete, $this->buildStack)) {
+        if (in_array($concrete, $this->buildStack)) {
             $previous = implode(', ', $this->buildStack);
 
             throw new DependencyResolutionException("Cyclic dependency detected while building $previous");

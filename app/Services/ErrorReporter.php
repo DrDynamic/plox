@@ -3,8 +3,8 @@
 namespace App\Services;
 
 use App\Attributes\Singleton;
-use Lox\Scan\Token;
-use Lox\Scan\TokenType;
+use Lox\Scaner\Token;
+use Lox\Scaner\TokenType;
 
 #[Singleton]
 class ErrorReporter

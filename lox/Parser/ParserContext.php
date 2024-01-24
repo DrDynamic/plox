@@ -1,6 +1,6 @@
 <?php
 
-namespace Lox\Parse;
+namespace Lox\Parser;
 
 use Lox\AST\Expressions\Expression;
 

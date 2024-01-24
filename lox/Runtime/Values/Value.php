@@ -5,7 +5,8 @@ namespace Lox\Runtime\Values;
 use Lox\AST\Expressions\Expression;
 use Lox\AST\Statements\Statement;
 use Lox\Runtime\Errors\InvalidCastError;
-use Lox\Scan\Token;
+use Lox\Runtime\LoxType;
+use Lox\Scaner\Token;
 
 interface Value
 {

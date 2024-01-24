@@ -4,6 +4,7 @@ namespace Lox\Runtime\Values;
 
 use Lox\AST\Expressions\Expression;
 use Lox\AST\Statements\Statement;
+use Lox\Runtime\LoxType;
 
 class NumberValue extends BaseValue
 {

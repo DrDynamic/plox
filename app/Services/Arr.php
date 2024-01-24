@@ -53,4 +53,9 @@ class Arr
 
         return static::first(array_reverse($array, true), $callback, $default);
     }
+
+    public static function pop(array $array)
+    {
+        return array_pop($array);
+    }
 }

@@ -3,7 +3,7 @@
 namespace Lox\AST\Expressions;
 
 use Lox\AST\ExpressionVisitor;
-use Lox\Scan\Token;
+use Lox\Scaner\Token;
 
 class Call extends Expression
 {
@@ -31,7 +31,6 @@ class Call extends Expression
     {
         return [
             'callee'    => $this->callee,
-            'paren'     => $this->paren,
             'arguments' => $this->arguments,
         ];
     }

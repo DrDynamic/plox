@@ -5,6 +5,7 @@ namespace Lox\AST;
 use Lox\AST\Expressions\Assign;
 use Lox\AST\Expressions\Binary;
 use Lox\AST\Expressions\Call;
+use Lox\AST\Expressions\FunctionExpression;
 use Lox\AST\Expressions\Grouping;
 use Lox\AST\Expressions\Literal;
 use Lox\AST\Expressions\Logical;
@@ -14,22 +15,24 @@ use Lox\AST\Expressions\Variable;
 
 interface ExpressionVisitor
 {
-    public function visitTernaryExpr(Ternary $ternary);
+    public function visitTernaryExpr(Ternary $expression);
 
-    public function visitBinaryExpr(Binary $binary);
+    public function visitBinaryExpr(Binary $expression);
 
-    public function visitGroupingExpr(Grouping $grouping);
+    public function visitGroupingExpr(Grouping $expression);
 
-    public function visitLiteralExpr(Literal $literal);
+    public function visitLiteralExpr(Literal $expression);
 
-    public function visitUnaryExpr(Unary $unary);
+    public function visitUnaryExpr(Unary $expression);
 
-    public function visitVariableExpr(Variable $variable);
+    public function visitVariableExpr(Variable $expression);
 
-    public function visitAssignExpr(Assign $assign);
+    public function visitAssignExpr(Assign $expression);
 
-    public function visitLogicalExpr(Logical $logical);
+    public function visitLogicalExpr(Logical $expression);
 
     public function visitCallExpr(Call $call);
+
+    public function visitFunctionExpr(FunctionExpression $expression);
 
 }

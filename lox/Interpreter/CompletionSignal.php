@@ -1,6 +1,6 @@
 <?php
 
-namespace Lox\Interpret;
+namespace Lox\Interpreter;
 
 use Lox\AST\Statements\CompletionStatement;
 use Lox\Runtime\Errors\RuntimeError;

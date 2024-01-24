@@ -2,22 +2,21 @@
 program             ::= declaration* EOF ;
 
 // statements
-declaration         ::= funcDeclaration | varDeclaration | statement ;
-funcDeclaration     ::= "function" function ;
-function            ::= IDENTIFIER "(" parameters? ")" blockStatement ;
-parameters          ::= IDENTIFIER ( "," IDENTIFIER )* ;
+declaration         ::= varDeclaration | statement ;
 varDeclaration      ::= "var" IDENTIFIER ( "=" expression )? ";"? ;
 
 statement           ::= expressionStatement
                       | forStatement
                       | ifStatement
-                      | whileStmt
+                      | returnStatement
+                      | whileStatement
                       | completionStatement
                       | blockStatement;
+returnStatement     ::= "return" expression? ("\n"|";") ;
 forStatement        ::= "for" "(" ( varDeclaration | expressionStatement | ";" )
                                 expression? ";"
                                 expression? ")" statement ;
-whileStmt           ::= "while" "(" expression ")" statement ;
+whileStatement      ::= "while" "(" expression ")" statement ;
 ifStatement         ::= "if" "(" expression ")" statement ( "else" statement )? ;
 completionStatement ::= ("continue" | "break") ";"? ;
 expressionStatement ::= expression ";"?;
@@ -37,9 +36,12 @@ factor              ::= unary ( ( "/" | "*" ) unary )* ;
 unary               ::= ( "!" | "-" ) unary | call ;
 call                ::= primary ( "(" arguments? ")" )* ;
 arguments           ::= expression ( "," expression )* ;
-primary             ::= NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER ;
+primary             ::= NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER | funcDeclaration ;
+funcDeclaration     ::= "function" IDENTIFIER? function ;
 
-
+// helpers
+function            ::= "(" parameters? ")" blockStatement ;
+parameters          ::= IDENTIFIER ( "," IDENTIFIER )* ;
 
 // Lexical grammar
 NUMBER              ::= DIGIT+ ("." DIGIT+)?

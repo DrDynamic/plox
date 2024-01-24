@@ -3,7 +3,7 @@
 namespace Lox\AST\Statements;
 
 use Lox\AST\StatementVisitor;
-use Lox\Scan\Token;
+use Lox\Scaner\Token;
 
 abstract class Statement implements \JsonSerializable
 {

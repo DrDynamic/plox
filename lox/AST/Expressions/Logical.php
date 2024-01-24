@@ -3,7 +3,7 @@
 namespace Lox\AST\Expressions;
 
 use Lox\AST\ExpressionVisitor;
-use Lox\Scan\Token;
+use Lox\Scaner\Token;
 
 class Logical extends Expression
 {

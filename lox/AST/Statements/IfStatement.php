@@ -4,7 +4,7 @@ namespace Lox\AST\Statements;
 
 use Lox\AST\Expressions\Expression;
 use Lox\AST\StatementVisitor;
-use Lox\Scan\Token;
+use Lox\Scaner\Token;
 
 class IfStatement extends Statement
 {

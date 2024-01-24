@@ -1,7 +1,8 @@
 <?php
 
-use Lox\Scan\Scanner;
-use Lox\Scan\TokenType;
+use Lox\Scaner\Scanner;
+use Lox\Scaner\TokenType;
+
 // TODO: test error reporting
 expect()->extend('toHaveType', function (TokenType $type) {
     \PHPUnit\Framework\assertEquals($type, $this->value->type);
@@ -42,12 +43,17 @@ it('parses sourcecode to tokens', function () {
 
 
     /** @var Scanner $scanner */
-    $scanner = dependency(\Lox\Scan\Scanner::class);
+    $scanner = dependency(\Lox\Scaner\Scanner::class);
 
     $tokens = $scanner->scanTokens($source);
 
-    $line           = 3;
     $expectedTokens = [
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 1],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 2],
+    ];
+
+    $line           = 3;
+    $expectedTokens = array_merge($expectedTokens, [
         ['type' => TokenType::LEFT_PAREN, 'lexeme' => "(", 'literal' => null, 'line' => $line],
         ['type' => TokenType::RIGHT_PAREN, 'lexeme' => ")", 'literal' => null, 'line' => $line],
         ['type' => TokenType::LEFT_BRACE, 'lexeme' => "{", 'literal' => null, 'line' => $line],
@@ -59,7 +65,14 @@ it('parses sourcecode to tokens', function () {
         ['type' => TokenType::SEMICOLON, 'lexeme' => ";", 'literal' => null, 'line' => $line],
         ['type' => TokenType::STAR, 'lexeme' => "*", 'literal' => null, 'line' => $line],
         ['type' => TokenType::SLASH, 'lexeme' => "/", 'literal' => null, 'line' => $line]
-    ];
+    ]);
+
+    $expectedTokens = array_merge($expectedTokens, [
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 3],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 4],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 5],
+    ]);
+
     $line           = 6;
     $expectedTokens = array_merge($expectedTokens, [
         ['type' => TokenType::BANG, 'lexeme' => "!", 'literal' => null, 'line' => $line],
@@ -71,11 +84,32 @@ it('parses sourcecode to tokens', function () {
         ['type' => TokenType::LESS, 'lexeme' => "<", 'literal' => null, 'line' => $line],
         ['type' => TokenType::LESS_EQUAL, 'lexeme' => "<=", 'literal' => null, 'line' => $line]
     ]);
+
+    $expectedTokens = array_merge($expectedTokens, [
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 6],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 7],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 8],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 9],
+    ]);
+
     $line           = 10;
     $expectedTokens = array_merge($expectedTokens, [
         ['type' => TokenType::STRING, 'lexeme' => '"Lorem Ipsum"', 'literal' => 'Lorem Ipsum', 'line' => $line],
         ['type' => TokenType::NUMBER, 'lexeme' => '13.37', 'literal' => 13.37, 'line' => $line]
     ]);
+
+    $expectedTokens = array_merge($expectedTokens, [
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 10],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 11],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 12],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 13],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 14],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 15],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 16],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 17],
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 18],
+    ]);
+
     $line           = 19;
     $expectedTokens = array_merge($expectedTokens, [
         ['type' => TokenType::IDENTIFIER, 'lexeme' => '_identifier_', 'literal' => null, 'line' => $line],
@@ -96,6 +130,7 @@ it('parses sourcecode to tokens', function () {
         ['type' => TokenType::WHILE, 'lexeme' => 'while', 'literal' => null, 'line' => $line]
     ]);
     $expectedTokens = array_merge($expectedTokens, [
+        ['type' => TokenType::LINE_BREAK, 'lexeme' => '', 'literal' => null, 'line' => 19],
         ['type' => TokenType::EOF, 'lexeme' => '', 'literal' => null, 'line' => 20],
     ]);
 

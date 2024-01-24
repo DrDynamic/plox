@@ -1,6 +1,6 @@
 <?php
 
-namespace Lox\Scan;
+namespace Lox\Scaner;
 
 use App\Attributes\Instance;
 use App\Services\ErrorReporter;
@@ -126,6 +126,7 @@ class Scanner
                     $before = $this->current;
                     while ($this->peek() != '*' || $this->peekNext() != '/') {
                         if ($this->advance() == "\n") {
+                            $this->addToken(TokenType::LINE_BREAK, null, false);
                             $this->line++;
                         }
                     }
@@ -145,6 +146,7 @@ class Scanner
                 // ignore whitespace
                 break;
             case "\n":
+                $this->addToken(TokenType::LINE_BREAK, null, false);
                 $this->line++;
                 break;
             default:
@@ -219,7 +221,10 @@ class Scanner
     protected function string()
     {
         while ($this->peek() != '"' && !$this->isAtEnd()) {
-            if ($this->peek() == "\n") $this->line++;
+            if ($this->peek() == "\n") {
+                $this->addToken(TokenType::LINE_BREAK, null, false);
+                $this->line++;
+            }
             $this->advance();
         }
 
