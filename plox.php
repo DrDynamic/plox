@@ -6,7 +6,7 @@ use Lox\Lox;
 require __DIR__.'/vendor/autoload.php';
 require_once __DIR__.'/app/Services/helpers.php';
 
-// TODO: not very clean... (needed for constructor of lox\Interpreter\Interpreter.php)
+// TODO: not very clean... (needed for constructor of lox\Interpreter\Interpreter.php) / Also in tests/Pest.php
 Dependency::getInstance()->instance(WeakMap::class, fn() => new WeakMap());
 
 /** @var Lox $lox */

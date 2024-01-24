@@ -5,6 +5,7 @@ use App\Services\ErrorReporter;
 use Lox\Interpreter\Interpreter;
 use Lox\Lox;
 use Lox\Parser\Parser;
+use Lox\Resolver\Resolver;
 use Lox\Runtime\Environment;
 use Lox\Runtime\Values\BaseValue;
 use Lox\Scaner\Scanner;
@@ -45,7 +46,6 @@ uses(\Tests\TestCase::class)->beforeEach(function () {
 
 expect()->extend('toHave', function ($name, $value = null) {
     $variable = new Token(TokenType::IDENTIFIER, $name, null, 0);
-
     assertTrue($this->value->has($variable));
     if ($value !== null) {
         assertEquals($this->value->get($variable), $value);
@@ -70,15 +70,19 @@ expect()->extend('toNotHave', function ($name) {
 
 function resetLox(): void
 {
+    // TODO: not very clean... (needed for constructor of lox\Interpreter\Interpreter.php) / Also in /plox.php
+    Dependency::getInstance()->instance(WeakMap::class, fn() => new WeakMap());
+
     $dependency = Dependency::getInstance();
     $dependency->singleton(ErrorReporter::class, test()->errorReporter = dependency(ErrorReporter::class));
     test()->environment = dependency(Environment::class);
 
-    test()->scanner = dependency(Scanner::class);
-    test()->parser  = dependency(Parser::class);
-    $dependency->singleton(Interpreter::class, test()->interpreter = new Interpreter(test()->errorReporter, test()->environment));
+    test()->scanner  = dependency(Scanner::class);
+    test()->parser   = dependency(Parser::class);
+    test()->resolver = dependency(Resolver::class);
+    $dependency->singleton(Interpreter::class, test()->interpreter = new Interpreter(test()->errorReporter, test()->environment, new WeakMap()));
 
-    test()->lox = new Lox(test()->scanner, test()->parser, test()->interpreter, test()->errorReporter);
+    test()->lox = new Lox(test()->scanner, test()->parser, test()->resolver, test()->interpreter, test()->errorReporter);
 
 }
 

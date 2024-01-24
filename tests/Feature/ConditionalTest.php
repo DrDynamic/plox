@@ -12,10 +12,6 @@ it('can execute code on conditions', function () {
         ->toHave('a', new NilValue())
         ->toHave('b', new NumberValue(1));
 
-    test()->interpreter->resetEnvironment();
-
-//    dd()
-
     resetLox();
 
     execute('var a var b if(true) if(true) a=1 else b=1');
