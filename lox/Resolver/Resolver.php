@@ -135,7 +135,10 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 
     #[\Override] public function visitVariableExpr(Variable $expression)
     {
-        if (!empty($this->scopes) && end($this->scopes)[$expression->name->lexeme] == false) {
+        if (!empty($this->scopes)
+            && isset(end($this->scopes)[$expression->name->lexeme])
+            && end($this->scopes)[$expression->name->lexeme] === false) {
+            dd("visitVar", $this->scopes, end($this->scopes)[$expression->name->lexeme]);
             $this->errorReporter->errorAt($expression->name, "Can't read local variable in its own initializer.");
         }
 
@@ -215,6 +218,9 @@ class Resolver implements ExpressionVisitor, StatementVisitor
     {
         $enclosingFunction     = $this->currentFunction;
         $this->currentFunction = $type;
+
+        $this->declare($expression->name);
+        $this->define($expression->name);
 
         $this->beginScope();
         foreach ($expression->parameters as $parameter) {
