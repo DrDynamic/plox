@@ -20,7 +20,7 @@ class BlockStatement extends Statement
 
     #[\Override] function accept(StatementVisitor $visitor)
     {
-        $visitor->visitBlockStmt($this);
+        return $visitor->visitBlockStmt($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed

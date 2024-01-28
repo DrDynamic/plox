@@ -148,9 +148,9 @@ class Parser
 
         $this->consume(TokenType::LEFT_PAREN, "Expect '(' after 'for'.");
 
-        $tokenInitializer = null;
         if ($this->match(TokenType::SEMICOLON)) {
-            $initializer = null;
+            $tokenInitializer = null;
+            $initializer      = null;
         } else if ($this->match(TokenType::VAR)) {
             $tokenInitializer = $this->previous();
             $initializer      = $this->varDeclaration($context);
@@ -249,11 +249,6 @@ class Parser
         $keyword = $this->previous();
         $value   = new Literal(dependency(NilValue::class), $keyword);
 
-
-        $strictLB = $this->peek()->type == TokenType::LINE_BREAK;
-        $strictSC = $this->peek()->type == TokenType::SEMICOLON;
-
-
         if (!$this->checkStrict(TokenType::LINE_BREAK) && !$this->checkStrict(TokenType::SEMICOLON)) {
             $value = $this->expression($context);
         }
@@ -275,7 +270,7 @@ class Parser
                 return new BlockStatement(
                     $completionToken,
                     [
-                        new ExpressionStatement($increment),
+                        new ExpressionStatement($increment->copy()),
                         $completion
                     ],
                     $completionToken);
@@ -506,7 +501,7 @@ class Parser
         $tokenStart = $this->previous();
 
         $name = null;
-        if($this->match(TokenType::IDENTIFIER)) {
+        if ($this->match(TokenType::IDENTIFIER)) {
             $name = $this->previous();
         }
 

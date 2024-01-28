@@ -2,10 +2,11 @@
 
 namespace src\AST\Statements;
 
+use src\AST\AstNode;
 use src\AST\StatementVisitor;
 use src\Scaner\Token;
 
-abstract class Statement implements \JsonSerializable
+abstract class Statement extends AstNode implements \JsonSerializable
 {
     public function __construct(
         public readonly Token $tokenStart,

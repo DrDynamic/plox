@@ -17,7 +17,7 @@ class ExpressionStatement extends Statement
 
     #[\Override] function accept(StatementVisitor $visitor)
     {
-        $visitor->visitExpressionStmt($this);
+        return $visitor->visitExpressionStmt($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed

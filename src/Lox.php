@@ -3,6 +3,7 @@
 namespace src;
 
 
+use src\AST\AstPrinter;
 use src\Interpreter\Interpreter;
 use src\Interpreter\Runtime\LoxType;
 use src\Parser\Parser;
@@ -26,6 +27,33 @@ class Lox
         private readonly ErrorReporter $errorReporter,
     )
     {
+    }
+
+    public function reverseAST(string $file) {
+        $source = file_get_contents($file);
+
+        $tokens     = $this->scanner->scanTokens($source);
+        $statements = $this->parser->parse($tokens);
+        $this->resolver->resolveAll($statements);
+
+        $astPrinter = new AstPrinter();
+        $serialized = "";
+
+        foreach ($statements as $statement) {
+            $serialized .= $statement->accept($astPrinter);
+        }
+
+        return $serialized;
+    }
+
+    public function jsonAST(string $file) {
+        $source = file_get_contents($file);
+
+        $tokens     = $this->scanner->scanTokens($source);
+        $statements = $this->parser->parse($tokens);
+        $this->resolver->resolveAll($statements);
+
+        return json_encode($statements, JSON_PRETTY_PRINT);
     }
 
     public function runString(string $source)

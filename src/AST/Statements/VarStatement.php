@@ -21,7 +21,7 @@ class VarStatement extends Statement
 
     #[\Override] function accept(StatementVisitor $visitor)
     {
-        $visitor->visitVarStmt($this);
+        return $visitor->visitVarStmt($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed

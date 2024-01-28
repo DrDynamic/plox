@@ -23,6 +23,9 @@ class Assign extends Expression
 
     #[\Override] public function jsonSerialize(): mixed
     {
-        // TODO: Implement jsonSerialize() method.
+        return [
+            "name"  => $this->name,
+            "value" => $this->value
+        ];
     }
 }

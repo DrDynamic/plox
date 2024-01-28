@@ -20,7 +20,7 @@ class WhileStatement extends Statement
 
     #[\Override] function accept(StatementVisitor $visitor)
     {
-        $visitor->visitWhileStmt($this);
+        return $visitor->visitWhileStmt($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed

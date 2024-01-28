@@ -17,7 +17,7 @@ class CompletionStatement extends Statement
 
     #[\Override] function accept(StatementVisitor $visitor)
     {
-        $visitor->visitCompletionStmt($this);
+        return $visitor->visitCompletionStmt($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed

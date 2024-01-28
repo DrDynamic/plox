@@ -17,7 +17,7 @@ class ReturnStatement extends Statement
 
     #[\Override] function accept(StatementVisitor $visitor)
     {
-        $visitor->visitReturnStmt($this);
+        return $visitor->visitReturnStmt($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed

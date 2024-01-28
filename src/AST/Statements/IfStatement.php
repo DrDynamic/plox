@@ -22,7 +22,7 @@ class IfStatement extends Statement
 
     #[\Override] function accept(StatementVisitor $visitor)
     {
-        $visitor->visitIfStmt($this);
+        return $visitor->visitIfStmt($this);
     }
 
     #[\Override] public function jsonSerialize(): mixed

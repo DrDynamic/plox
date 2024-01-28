@@ -2,10 +2,11 @@
 
 namespace src\AST\Expressions;
 
+use src\AST\AstNode;
 use src\AST\ExpressionVisitor;
 use src\Scaner\Token;
 
-abstract class Expression implements \JsonSerializable
+abstract class Expression extends AstNode implements \JsonSerializable
 {
 
     public function __construct(
