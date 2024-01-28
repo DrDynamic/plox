@@ -250,6 +250,10 @@ class Parser
         $value   = new Literal(dependency(NilValue::class), $keyword);
 
 
+        $strictLB = $this->peek()->type == TokenType::LINE_BREAK;
+        $strictSC = $this->peek()->type == TokenType::SEMICOLON;
+
+
         if (!$this->checkStrict(TokenType::LINE_BREAK) && !$this->checkStrict(TokenType::SEMICOLON)) {
             $value = $this->expression($context);
         }
@@ -549,7 +553,7 @@ class Parser
 
     private function matchStrict(TokenType ...$types): bool
     {
-        if ($this->isAtEnd()) return false;
+//        if ($this->isAtEnd()) return false;
 
         $token = $this->peek();
         if (in_array($token->type, $types)) {
@@ -569,7 +573,7 @@ class Parser
 
     private function checkStrict(TokenType $type)
     {
-        if ($this->isAtEnd()) return false;
+//        if ($this->isAtEnd()) return false;
         return $this->peek()->type == $type;
     }
 

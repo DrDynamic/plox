@@ -1,14 +1,9 @@
 var a = nil
-function parent() {
-    var b = nil
-    function child() {
-        b = "a value"
-    }
-    child()
-    a = b
-}
-parent()
-
-print(a)
-
-// 08:30 - 17:37 (48)
+        function test() {
+            return
+            
+            a = 42
+        }
+        
+        test()
+        print(a)
