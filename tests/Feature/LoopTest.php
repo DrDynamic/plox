@@ -1,6 +1,6 @@
 <?php
 
-use Lox\Runtime\Values\NumberValue;
+use src\Interpreter\Runtime\Values\NumberValue;
 
 it('supports while loops', function () {
     execute('

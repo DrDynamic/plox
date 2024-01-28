@@ -1,11 +1,11 @@
 <?php
 
-#[\App\Attributes\Singleton]
+#[\src\Services\Dependency\Attributes\Singleton]
 class SingletonClass
 {
 }
 
-#[\App\Attributes\Instance]
+#[\src\Services\Dependency\Attributes\Instance]
 class InstanceClass
 {
 }

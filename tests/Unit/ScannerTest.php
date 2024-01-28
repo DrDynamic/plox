@@ -1,7 +1,7 @@
 <?php
 
-use Lox\Scaner\Scanner;
-use Lox\Scaner\TokenType;
+use src\Scaner\Scanner;
+use src\Scaner\TokenType;
 
 // TODO: test error reporting
 expect()->extend('toHaveType', function (TokenType $type) {
@@ -43,7 +43,7 @@ it('parses sourcecode to tokens', function () {
 
 
     /** @var Scanner $scanner */
-    $scanner = dependency(\Lox\Scaner\Scanner::class);
+    $scanner = dependency(\src\Scaner\Scanner::class);
 
     $tokens = $scanner->scanTokens($source);
 

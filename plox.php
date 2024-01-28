@@ -1,7 +1,7 @@
 <?php
 
-use App\Services\Dependency;
-use Lox\Lox;
+use src\Lox;
+use src\Services\Dependency\Dependency;
 
 require __DIR__.'/vendor/autoload.php';
 require_once __DIR__.'/app/Services/helpers.php';

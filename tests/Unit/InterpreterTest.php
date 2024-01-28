@@ -1,9 +1,9 @@
 <?php
 // TODO: error reporting
 
-use Lox\Runtime\Values\BooleanValue;
-use Lox\Runtime\Values\NumberValue;
-use Lox\Runtime\Values\StringValue;
+use src\Interpreter\Runtime\Values\BooleanValue;
+use src\Interpreter\Runtime\Values\NumberValue;
+use src\Interpreter\Runtime\Values\StringValue;
 
 it('can calculate', function () {
     expect(evaluate('(2+4)*(4+2)'))

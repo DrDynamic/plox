@@ -1,21 +1,21 @@
 <?php
 
-use App\Services\Dependency;
-use App\Services\ErrorReporter;
-use Lox\Interpreter\Interpreter;
-use Lox\Lox;
-use Lox\Parser\Parser;
-use Lox\Resolver\Resolver;
-use Lox\Runtime\Environment;
-use Lox\Runtime\Values\BaseValue;
-use Lox\Scaner\Scanner;
-use Lox\Scaner\Token;
-use Lox\Scaner\TokenType;
+use src\Interpreter\Interpreter;
+use src\Interpreter\Runtime\Environment;
+use src\Interpreter\Runtime\Values\BaseValue;
+use src\Lox;
+use src\Parser\Parser;
+use src\Resolver\Resolver;
+use src\Scaner\Scanner;
+use src\Scaner\Token;
+use src\Scaner\TokenType;
+use src\Services\Dependency\Dependency;
+use src\Services\ErrorReporter;
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertFalse;
 use function PHPUnit\Framework\assertTrue;
 
-require_once __DIR__.'/../app/Services/helpers.php';
+require_once __DIR__.'/../src/helpers.php';
 
 /*
 |--------------------------------------------------------------------------

@@ -1,13 +1,13 @@
 <?php
 
-use Lox\Runtime\LoxType;
-use Lox\Runtime\Values\BaseValue;
-use Lox\Runtime\Values\CallableValue;
-use Lox\Runtime\Values\NilValue;
-use Lox\Runtime\Values\NumberValue;
-use Lox\Runtime\Values\StringValue;
-use Lox\Scaner\Token;
-use Lox\Scaner\TokenType;
+use src\Interpreter\Runtime\LoxType;
+use src\Interpreter\Runtime\Values\BaseValue;
+use src\Interpreter\Runtime\Values\CallableValue;
+use src\Interpreter\Runtime\Values\NilValue;
+use src\Interpreter\Runtime\Values\NumberValue;
+use src\Interpreter\Runtime\Values\StringValue;
+use src\Scaner\Token;
+use src\Scaner\TokenType;
 
 class MockFunction extends BaseValue implements CallableValue
 {
@@ -24,7 +24,7 @@ class MockFunction extends BaseValue implements CallableValue
         return 0;
     }
 
-    #[\Override] public function call(array $arguments, \Lox\AST\Statements\Statement|\Lox\AST\Expressions\Expression $cause): \Lox\Runtime\Values\Value
+    #[\Override] public function call(array $arguments, \src\AST\Statements\Statement|\src\AST\Expressions\Expression $cause): \src\Interpreter\Runtime\Values\Value
     {
         $this->wasCalled = true;
         return dependency(NilValue::class);

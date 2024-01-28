@@ -1,10 +1,10 @@
 <?php
 
 
-use Lox\Runtime\Values\BooleanValue;
-use Lox\Runtime\Values\NilValue;
-use Lox\Runtime\Values\NumberValue;
-use Lox\Runtime\Values\StringValue;
+use src\Interpreter\Runtime\Values\BooleanValue;
+use src\Interpreter\Runtime\Values\NilValue;
+use src\Interpreter\Runtime\Values\NumberValue;
+use src\Interpreter\Runtime\Values\StringValue;
 
 it('can execute code on conditions', function () {
     execute('var a var b if(true) if(false) a=1 else b=1');
