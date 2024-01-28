@@ -138,7 +138,6 @@ class Resolver implements ExpressionVisitor, StatementVisitor
         if (!empty($this->scopes)
             && isset(end($this->scopes)[$expression->name->lexeme])
             && end($this->scopes)[$expression->name->lexeme] === false) {
-            dd("visitVar", $this->scopes, end($this->scopes)[$expression->name->lexeme]);
             $this->errorReporter->errorAt($expression->name, "Can't read local variable in its own initializer.");
         }
 
@@ -197,30 +196,29 @@ class Resolver implements ExpressionVisitor, StatementVisitor
     {
         if (empty($this->scopes)) return;
 
-        $scope = end($this->scopes);
+        $scope = Arr::pop($this->scopes);
 
-        if (array_key_exists($name->lexeme, $this->scopes)) {
+        if (array_key_exists($name->lexeme, $scope)) {
             $this->errorReporter->errorAt($name, "Variable $name->lexeme is already declared in this scope!");
         }
 
         $scope[$name->lexeme] = false;
+        $this->scopes[]       = $scope;
     }
 
     private function define(Token $name)
     {
         if (empty($this->scopes)) return;
 
-        $scope                = end($this->scopes);
+        $scope                = Arr::pop($this->scopes);
         $scope[$name->lexeme] = true;
+        $this->scopes[] = $scope;
     }
 
     private function resolveFunction(FunctionExpression $expression, LoxFunctionType $type)
     {
         $enclosingFunction     = $this->currentFunction;
         $this->currentFunction = $type;
-
-        $this->declare($expression->name);
-        $this->define($expression->name);
 
         $this->beginScope();
         foreach ($expression->parameters as $parameter) {

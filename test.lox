@@ -1,15 +1,14 @@
-
-var a = "global";
-{
-  function showA() {
-    print(a);
-  }
-
-  showA();
-  var a = "block";
-  showA();
+var a = nil
+function parent() {
+    var b = nil
+    function child() {
+        b = "a value"
+    }
+    child()
+    a = b
 }
+parent()
 
-/*
+print(a)
 
-*/
+// 08:30 - 17:37 (48)

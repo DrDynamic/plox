@@ -90,6 +90,7 @@ class Environment
         } else if ($this->enclosing != null) {
             return $this->enclosing->get($name);
         }
+
         throw new UndefinedVariableError($name, "Undefined variable '$name->lexeme'.");
     }
 

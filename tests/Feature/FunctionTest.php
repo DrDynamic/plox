@@ -49,7 +49,6 @@ it('can call user defined functions', function () {
     }
     myAwesomeFunction()
     ');
-//    dd($this->environment);
     expect($this->environment)
         ->toHave('a', new StringValue('good call!'));
 });

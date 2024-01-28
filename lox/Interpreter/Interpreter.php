@@ -175,7 +175,6 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
     #[\Override] public function visitAssignExpr(Assign $expression)
     {
         $value = $this->evaluate($expression->value);
-
         if ($this->hasLocale($expression)) {
             $distance = $this->locals[$expression];
             $this->environment->assignAt($distance, $expression->name, $value);
@@ -320,6 +319,6 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         if (!isset($this->locals[$expression])) {
             return false;
         }
-        return $this->locals[$expression] != null;
+        return $this->locals[$expression] !== null;
     }
 }

@@ -70,19 +70,25 @@ expect()->extend('toNotHave', function ($name) {
 
 function resetLox(): void
 {
-    // TODO: not very clean... (needed for constructor of lox\Interpreter\Interpreter.php) / Also in /plox.php
-    Dependency::getInstance()->instance(WeakMap::class, fn() => new WeakMap());
-
+    Dependency::reset();
     $dependency = Dependency::getInstance();
-    $dependency->singleton(ErrorReporter::class, test()->errorReporter = dependency(ErrorReporter::class));
+    // TODO: not very clean... (needed for constructor of lox\Interpreter\Interpreter.php) / Also in /plox.php
+    $dependency->instance(WeakMap::class, fn() => new WeakMap());
+
+    test()->errorReporter = dependency(ErrorReporter::class);
+    $dependency->singleton(ErrorReporter::class, test()->errorReporter);
+
     test()->environment = dependency(Environment::class);
 
-    test()->scanner  = dependency(Scanner::class);
-    test()->parser   = dependency(Parser::class);
-    test()->resolver = dependency(Resolver::class);
-    $dependency->singleton(Interpreter::class, test()->interpreter = new Interpreter(test()->errorReporter, test()->environment, new WeakMap()));
+    test()->interpreter = new Interpreter(test()->errorReporter, test()->environment, new WeakMap());
+    $dependency->singleton(Interpreter::class, test()->interpreter);
 
-    test()->lox = new Lox(test()->scanner, test()->parser, test()->resolver, test()->interpreter, test()->errorReporter);
+    test()->scanner     = dependency(Scanner::class);
+    test()->parser      = dependency(Parser::class);
+    test()->resolver    = dependency(Resolver::class);
+
+
+    test()->lox = new Lox(test()->scanner, test()->parser, test()->resolver, dependency(Interpreter::class), test()->errorReporter);
 
 }
 

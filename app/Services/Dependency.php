@@ -20,10 +20,15 @@ class Dependency
     public static function getInstance()
     {
         if (is_null(static::$instance)) {
-            static::$instance = new static;
+            self::reset();
         }
 
         return static::$instance;
+    }
+
+    public static function reset()
+    {
+        static::$instance = new static;
     }
 
     /**
@@ -66,7 +71,8 @@ class Dependency
 
     }
 
-    public function instance($abstract, callable $concrete){
+    public function instance($abstract, callable $concrete)
+    {
         $this->dependencies[$abstract] = $concrete;
     }
 
