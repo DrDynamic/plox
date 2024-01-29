@@ -86,7 +86,6 @@ it('supports break and continue statements', function () {
       }
       z = y
     }
-    print(z)
     ');
     expect($this->environment)
         ->toHave('z', new NumberValue(10));

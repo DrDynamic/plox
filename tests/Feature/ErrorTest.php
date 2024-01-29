@@ -1,10 +1,11 @@
 <?php
 
-use src\Services\Dependency\Dependency;
 use src\Services\ErrorReporter;
 
 class ErrorReporterMock extends ErrorReporter
 {
+    public $mock = true;
+
     public function reset()
     {
         $this->hadError        = false;
@@ -22,19 +23,22 @@ class ErrorReporterMock extends ErrorReporter
     }
 }
 
-Dependency::getInstance()->singleton(ErrorReporter::class, new ErrorReporterMock());
+beforeEach(function () {
+    resetLox([
+        ErrorReporter::class => new ErrorReporterMock()
+    ]);
+});
 
 it('rises an error if completion statements are not in a loop', function () {
-    $reporter = dependency(ErrorReporter::class);
-    $reporter->reset();
-
     execute('
     break
     ');
 
-    expect($reporter->hadError)->toBeTrue();
+    expect(test()->errorReporter->hadError)->toBeTrue();
 
-    resetLox();
+    resetLox([
+        ErrorReporter::class => new ErrorReporterMock()
+    ]);
 
     execute('
     var a = 0;
@@ -43,5 +47,6 @@ it('rises an error if completion statements are not in a loop', function () {
         break
     }
     ');
+    expect(test()->errorReporter->hadError)->toBeFalse();
 
-});
+})->only();

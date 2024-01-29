@@ -68,24 +68,50 @@ expect()->extend('toNotHave', function ($name) {
 |
 */
 
-function resetLox(): void
+function resetLox(array $dependencies = []): void
 {
     Dependency::reset();
     $dependency = Dependency::getInstance();
     // TODO: not very clean... (needed for constructor of lox\Interpreter\Interpreter.php) / Also in /plox.php
-    $dependency->instance(WeakMap::class, fn() => new WeakMap());
 
+    if (isset($dependencies[WeakMap::class])) {
+        $dependency->instance(WeakMap::class, $dependencies[WeakMap::class]);
+    } else {
+        $dependency->instance(WeakMap::class, fn() => new WeakMap());
+    }
+
+    if (isset($dependencies[ErrorReporter::class])) {
+        $dependency->singleton(ErrorReporter::class, $dependencies[ErrorReporter::class]);
+    }
     test()->errorReporter = dependency(ErrorReporter::class);
-    $dependency->singleton(ErrorReporter::class, test()->errorReporter);
 
+    if (isset($dependencies[Environment::class])) {
+        $dependency->instance(Environment::class, $dependencies[Environment::class]);
+    }
     test()->environment = dependency(Environment::class);
 
-    test()->interpreter = new Interpreter(test()->errorReporter, test()->environment, new WeakMap());
-    $dependency->singleton(Interpreter::class, test()->interpreter);
+    if (isset($dependencies[Interpreter::class])) {
+        $dependency->singleton(Interpreter::class, $dependencies[Interpreter::class]);
+        test()->interpreter = dependency(Interpreter::class);
+    } else {
+        test()->interpreter = new Interpreter(test()->errorReporter, test()->environment, new WeakMap());
+        $dependency->singleton(Interpreter::class, test()->interpreter);
+    }
 
-    test()->scanner     = dependency(Scanner::class);
-    test()->parser      = dependency(Parser::class);
-    test()->resolver    = dependency(Resolver::class);
+    if (isset($dependencies[Scanner::class])) {
+        $dependency->instance(Scanner::class, $dependencies[Scanner::class]);
+    }
+    test()->scanner = dependency(Scanner::class);
+
+    if (isset($dependencies[Parser::class])) {
+        $dependency->instance(Parser::class, $dependencies[Parser::class]);
+    }
+    test()->parser = dependency(Parser::class);
+
+    if (isset($dependencies[Resolver::class])) {
+        $dependency->instance(Resolver::class, $dependencies[Resolver::class]);
+    }
+    test()->resolver = dependency(Resolver::class);
 
 
     test()->lox = new Lox(test()->scanner, test()->parser, test()->resolver, dependency(Interpreter::class), test()->errorReporter);
