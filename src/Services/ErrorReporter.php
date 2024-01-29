@@ -17,15 +17,6 @@ class ErrorReporter
         $this->hadError = false;
     }
 
-    public function errorAfter(Token $token, string $message)
-    {
-        if ($token->type == TokenType::EOF) {
-            $this->report($token->line, "at end", $message);
-        } else {
-            $this->report($token->line, "after '$token->lexeme'", $message);
-        }
-    }
-
     public function errorAt(Token $token, string $message)
     {
         if ($token->type == TokenType::EOF) {
