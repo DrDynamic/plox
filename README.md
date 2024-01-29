@@ -32,6 +32,7 @@
 - Function Extension
 - Local functions
 - Elvis (X ?? Y) Operators
+- spread operator (ellipsis)
 - Do While Loop
 - Repeat block like Kotlin
 - super, this keywords for oop
@@ -48,3 +49,4 @@
 - +=, -=, *=, /= operators to run calculations on a variable
 - casting strings to callable
 - function declaration without block statement (instant return)
+- Compiler instructions (inline / spread loop)

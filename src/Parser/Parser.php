@@ -266,7 +266,7 @@ class Parser
             $this->match(TokenType::SEMICOLON);
 
             $increment = end($context->loopIncrements);
-            if ($increment != null) {
+            if ($increment != null && $completionToken->type == TokenType::CONTINUE) {
                 return new BlockStatement(
                     $completionToken,
                     [

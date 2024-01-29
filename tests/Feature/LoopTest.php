@@ -91,4 +91,4 @@ it('supports break and continue statements', function () {
     expect($this->environment)
         ->toHave('z', new NumberValue(10));
 
-})->only();
+});
