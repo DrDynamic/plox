@@ -6,10 +6,10 @@
     "lox",
     "interpreter"
   ],
-
   "autoload": {
     "psr-4": {
-      "src\\": "src/"
+      "src\\": "src/",
+      "App\\": "app/"
     }
   },
   "autoload-dev": {
@@ -17,9 +17,9 @@
       "Tests\\": "tests/"
     }
   },
-
   "require": {
-    "laravel/framework": "^10.39"
+    "laravel/framework": "^11",
+    "laravel/tinker": "^2.10"
   },
   "require-dev": {
     "pestphp/pest": "^2.30"
@@ -28,5 +28,17 @@
     "allow-plugins": {
       "pestphp/pest-plugin": true
     }
+  },
+  "scripts": {
+    "post-autoload-dump": [
+      "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
+      "@php artisan package:discover --ansi"
+    ],
+    "post-update-cmd": [
+      "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
+    ],
+    "post-root-package-install": [
+      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+    ]
   }
 }
