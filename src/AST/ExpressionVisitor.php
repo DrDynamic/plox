@@ -5,6 +5,7 @@ namespace src\AST;
 use src\AST\Expressions\Assign;
 use src\AST\Expressions\Binary;
 use src\AST\Expressions\Call;
+use src\AST\Expressions\ClassExpression;
 use src\AST\Expressions\FunctionExpression;
 use src\AST\Expressions\Grouping;
 use src\AST\Expressions\Literal;
@@ -34,5 +35,7 @@ interface ExpressionVisitor
     public function visitCallExpr(Call $call);
 
     public function visitFunctionExpr(FunctionExpression $expression);
+
+    public function visitClassExpression(ClassExpression $expression);
 
 }

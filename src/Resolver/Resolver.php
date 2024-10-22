@@ -5,6 +5,7 @@ namespace src\Resolver;
 use src\AST\Expressions\Assign;
 use src\AST\Expressions\Binary;
 use src\AST\Expressions\Call;
+use src\AST\Expressions\ClassExpression;
 use src\AST\Expressions\Expression;
 use src\AST\Expressions\FunctionExpression;
 use src\AST\Expressions\Grouping;
@@ -172,6 +173,15 @@ class Resolver implements ExpressionVisitor, StatementVisitor
         $this->resolveFunction($expression, LoxFunctionType::FUNCTION);
     }
 
+    public function visitClassExpression(ClassExpression $expression)
+    {
+        if ($expression->name != null) {
+            $this->declare($expression->name);
+            $this->define($expression->name);
+        }
+    }
+
+
     private function beginScope()
     {
         $this->scopes[] = [];
@@ -230,6 +240,5 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 
         $this->currentFunction = $enclosingFunction;
     }
-
 
 }

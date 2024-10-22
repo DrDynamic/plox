@@ -5,6 +5,7 @@ namespace src\Parser;
 use src\AST\Expressions\Assign;
 use src\AST\Expressions\Binary;
 use src\AST\Expressions\Call;
+use src\AST\Expressions\ClassExpression;
 use src\AST\Expressions\Expression;
 use src\AST\Expressions\FunctionExpression;
 use src\AST\Expressions\Grouping;
@@ -489,11 +490,35 @@ class Parser
                 return new Grouping($leftParen, $expression, $rightParen);
             case $this->match(TokenType::IDENTIFIER):
                 return new Variable($this->previous());
+            case $this->match(TokenType::CLS):
+                return $this->classDeclaration($context);
             case $this->match(TokenType::FUNCTION):
                 return $this->function('function', $context);
             default:
                 throw $this->error($this->peek(), "Expect expression.");
         }
+    }
+
+    private function classDeclaration(ParserContext $context)
+    {
+        $tokenStart = $this->previous();
+
+        $name = null;
+        if ($this->match(TokenType::IDENTIFIER)) {
+            $name = $this->previous();
+        }
+
+        $this->consume(TokenType::LEFT_BRACE, "Expect '{' before Class body.");
+
+        $body = [];
+        while (!$this->check(TokenType::RIGHT_BRACE) && !$this->isAtEnd()) {
+            if ($this->match(TokenType::FUNCTION)) {
+                $body[] = $this->function("method", $context);
+            }
+        }
+        $this->consume(TokenType::RIGHT_BRACE, "Expect '}' after Class body.");
+
+        return new ClassExpression($tokenStart, $name, null, $body);
     }
 
     private function function (string $kind, ParserContext $context)

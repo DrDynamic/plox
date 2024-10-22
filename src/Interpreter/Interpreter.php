@@ -5,6 +5,7 @@ namespace src\Interpreter;
 use src\AST\Expressions\Assign;
 use src\AST\Expressions\Binary;
 use src\AST\Expressions\Call;
+use src\AST\Expressions\ClassExpression;
 use src\AST\Expressions\Expression;
 use src\AST\Expressions\FunctionExpression;
 use src\AST\Expressions\Grouping;
@@ -28,6 +29,7 @@ use src\Interpreter\Runtime\Errors\ArgumentCountError;
 use src\Interpreter\Runtime\Errors\RuntimeError;
 use src\Interpreter\Runtime\LoxType;
 use src\Interpreter\Runtime\Values\CallableValue;
+use src\Interpreter\Runtime\Values\ClassValue;
 use src\Interpreter\Runtime\Values\FunctionValue;
 use src\Interpreter\Runtime\Values\NilValue;
 use src\Interpreter\Runtime\Values\NumberValue;
@@ -170,6 +172,15 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             $this->environment->define($expression->name, $function);
         }
         return $function;
+    }
+
+    #[\Override] public function visitClassExpression(ClassExpression $expression)
+    {
+        $class = new ClassValue($expression);
+        if ($expression->name !== null) {
+            $this->environment->define($expression->name, $class);
+        }
+        return $class;
     }
 
     #[\Override] public function visitAssignExpr(Assign $expression)

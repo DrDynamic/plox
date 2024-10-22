@@ -9,4 +9,5 @@ enum LoxType: string
     case Number = "number";
     case String = "string";
     case Callable = "callable";
+    case Klass = "class";
 }

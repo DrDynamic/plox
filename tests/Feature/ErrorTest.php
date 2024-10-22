@@ -49,4 +49,4 @@ it('rises an error if completion statements are not in a loop', function () {
     ');
     expect(test()->errorReporter->hadError)->toBeFalse();
 
-})->only();
+});
