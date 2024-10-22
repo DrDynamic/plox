@@ -12,6 +12,14 @@ it('can declare classes', function () {
         ->toHave('Greeter');
 });
 
+it('can declare empty classes', function () {
+    execute('
+    class Greeter {}
+   ');
+    expect($this->environment)
+        ->toHave('Greeter');
+});
+
 it('can declare anonymous classes', function () {
     execute('
     var greeter = class {

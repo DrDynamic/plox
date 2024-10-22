@@ -115,12 +115,12 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         $this->evaluate($statement->expression);
     }
 
-    #[\Override] public function visitIfStmt(IfStatement $if)
+    #[\Override] public function visitIfStmt(IfStatement $statement)
     {
-        if ($this->isTruthy($this->evaluate($if->condition), $if->condition)) {
-            $this->execute($if->thenBranch);
-        } else if ($if->elseBranch !== null) {
-            $this->execute($if->elseBranch);
+        if ($this->isTruthy($this->evaluate($statement->condition), $statement->condition)) {
+            $this->execute($statement->thenBranch);
+        } else if ($statement->elseBranch !== null) {
+            $this->execute($statement->elseBranch);
         }
     }
 
@@ -176,9 +176,14 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
     #[\Override] public function visitClassExpression(ClassExpression $expression)
     {
-        $class = new ClassValue($expression);
         if ($expression->name !== null) {
-            $this->environment->define($expression->name, $class);
+            $this->environment->define($expression->name, null);
+        }
+
+        $class = new ClassValue($expression);
+
+        if ($expression->name !== null) {
+            $this->environment->assign($expression->name, $class);
         }
         return $class;
     }

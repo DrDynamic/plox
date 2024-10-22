@@ -44,7 +44,7 @@ class Environment
         return $env;
     }
 
-    public function define(Token $name, Value $value): void
+    public function define(Token $name, ?Value $value): void
     {
         if (!$this->has($name)) {
             $this->values[$name->lexeme] = $value;

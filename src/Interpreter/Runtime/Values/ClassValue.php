@@ -21,6 +21,19 @@ class ClassValue extends BaseValue implements CallableValue
         return LoxType::Klass;
     }
 
+    #[\Override] public function cast(LoxType $toType, Statement|Expression $cause): BaseValue
+    {
+        if ($toType == LoxType::String) {
+// TODO: add reference to file / line?
+            $name = $this->declaration->name
+                ? $this->declaration->name->lexeme
+                : "anonymous";
+
+            return new StringValue("<class {$name}>");
+        }
+        return parent::cast($toType, $cause);
+    }
+
     public function arity(): int
     {
         return 0;

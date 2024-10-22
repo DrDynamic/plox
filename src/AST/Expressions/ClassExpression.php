@@ -14,7 +14,15 @@ class ClassExpression extends Expression
                                 public readonly Variable|null $superClass,
                                 public readonly array         $body)
     {
-        parent::__construct($tokenStart, Arr::last($body)->tokenEnd);
+        $tokenEnd = $tokenStart;
+        if ($name != null) {
+            $tokenEnd = $name;
+        }
+        if (count($this->body) > 0) {
+            $tokenEnd = Arr::last($body)->tokenEnd;
+        }
+
+        parent::__construct($tokenStart, $tokenEnd);
     }
 
     function accept(ExpressionVisitor $visitor)
