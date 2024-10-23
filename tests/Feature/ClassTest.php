@@ -1,4 +1,4 @@
-<?php
+                        <?php
 
 it('can declare classes', function () {
     execute('
@@ -28,6 +28,15 @@ it('can declare anonymous classes', function () {
         }
     }
    ');
+    expect($this->environment)
+        ->toHave('greeter');
+});
+
+it('can instantiate classes', function () {
+    execute('
+    class Greeter {}
+    var greeter = Greeter();
+    ');
     expect($this->environment)
         ->toHave('greeter');
 });

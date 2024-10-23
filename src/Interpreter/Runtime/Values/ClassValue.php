@@ -16,6 +16,11 @@ class ClassValue extends BaseValue implements CallableValue
     {
     }
 
+    public function getName(): ?string
+    {
+        return $this->declaration->name?->lexeme;
+    }
+
     public function getType(): LoxType
     {
         return LoxType::Klass;
@@ -25,10 +30,7 @@ class ClassValue extends BaseValue implements CallableValue
     {
         if ($toType == LoxType::String) {
 // TODO: add reference to file / line?
-            $name = $this->declaration->name
-                ? $this->declaration->name->lexeme
-                : "anonymous";
-
+            $name = $this->getName() ?? "anonymous";
             return new StringValue("<class {$name}>");
         }
         return parent::cast($toType, $cause);
@@ -41,6 +43,8 @@ class ClassValue extends BaseValue implements CallableValue
 
     public function call(array $arguments, Expression|Statement $cause): Value
     {
-        return new NilValue();
+        return new InstanceValue($this);
     }
+
+
 }

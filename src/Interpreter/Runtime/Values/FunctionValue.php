@@ -21,7 +21,7 @@ class FunctionValue extends BaseValue implements CallableValue
 
     #[\Override] public function getType(): LoxType
     {
-        return LoxType::Callable;
+        return LoxType::Function;
     }
 
     #[\Override] public function cast(LoxType $toType, Statement|Expression $cause): BaseValue

@@ -245,14 +245,17 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             return $this->evaluate($argument);
         }, $call->arguments);
 
-        /** @var CallableValue $function */
-        $function = $callee->cast(LoxType::Callable, $call->callee);
-
-        if (count($arguments) < $function->arity()) {
-            throw new ArgumentCountError($call->rightParen, "Expect {$function->arity()} arguments but got ".count($arguments).".");
+        $callable = $callee;
+        if (!is_subclass_of($callee, CallableValue::class)) {
+            /** @var CallableValue $callable */
+            $callable = $callee->cast(LoxType::Callable, $call->callee);
         }
 
-        return $function->call($arguments, $call);
+        if (count($arguments) < $callable->arity()) {
+            throw new ArgumentCountError($call->rightParen, "Expect {$callable->arity()} arguments but got ".count($arguments).".");
+        }
+
+        return $callable->call($arguments, $call);
     }
 
     #[\Override] public function visitGroupingExpr(Grouping $expression)
