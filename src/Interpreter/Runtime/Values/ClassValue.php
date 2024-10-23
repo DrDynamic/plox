@@ -10,7 +10,6 @@ use src\Interpreter\Runtime\LoxType;
 class ClassValue extends BaseValue implements CallableValue
 {
 
-
     public function __construct(
         private readonly ClassExpression $declaration,
         private readonly array           $methods,
@@ -45,12 +44,21 @@ class ClassValue extends BaseValue implements CallableValue
 
     public function arity(): int
     {
+        $constructor = $this->getMethod('init');
+        if ($constructor !== null) {
+            return $constructor->arity();
+        }
         return 0;
     }
 
     public function call(array $arguments, Expression|Statement $cause): Value
     {
-        return new InstanceValue($this);
+        $instance    = new InstanceValue($this);
+        $constructor = $this->getMethod('init');
+        if ($constructor !== null) {
+            $constructor->bindInstance($instance)->call($arguments, $cause);
+        }
+        return $instance;
     }
 
 

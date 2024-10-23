@@ -2,7 +2,7 @@
 program             ::= declaration* EOF ;
 
 // statements
-declaration         ::= varDeclaration | statement ;
+declaration         ::= varDeclaration  | statement ;
 varDeclaration      ::= "var" IDENTIFIER ( "=" expression )? ";"? ;
 
 statement           ::= expressionStatement
@@ -23,12 +23,11 @@ expressionStatement ::= expression ";"?;
 blockStatement      ::= "{" declaration* "}" ;
 
 // expressions
-expression          ::= ternary;
-ternary             ::= assignment ( "?" assignment ":" assignment )* ;
-assignment          ::= (call ".")? IDENTIFIER "=" assignment | logic_or ;
+expression          ::= assignment ;
+assignment          ::= (call ".")? IDENTIFIER "=" assignment | ternary ;
+ternary             ::= logic_or ( "?" assignment ":" assignment )* ;
 logic_or            ::= logic_and ( "or" logic_and )* ;
-logic_and           ::= comma ( "and" comma )* ;
-comma               ::= equality ( "," equality )* ;
+logic_and           ::= equality ( "and" equality )* ;
 equality            ::= comparison ( ( "!=" | "==" ) comparison )* ;
 comparison          ::= term ( ( ">" | ">=" | "<" | "<=" ) term )* ;
 term                ::= factor ( ( "-" | "+" ) factor )* ;
@@ -36,7 +35,8 @@ factor              ::= unary ( ( "/" | "*" ) unary )* ;
 unary               ::= ( "!" | "-" ) unary | call ;
 call                ::= primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 arguments           ::= expression ( "," expression )* ;
-primary             ::= NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER | funcDeclaration | classDeclaration ;
+primary             ::= NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER | funcDeclaration | classDeclaration   ;
+
 funcDeclaration     ::= "function" IDENTIFIER? function ;
 classDeclaration    ::= "class" IDENTIFIER? "{" ("function" IDENTIFIER function)* "}" ;
 

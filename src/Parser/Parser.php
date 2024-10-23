@@ -84,28 +84,6 @@ class Parser
         }
     }
 
-//    private function function (string $kind, ParserContext $context)
-//    {
-//        $tokenStart = $this->previous();
-//
-//        $name = $this->consume(TokenType::IDENTIFIER, "Expect $kind name.");
-//        $this->consume(TokenType::LEFT_PAREN, "Expect '(' after $kind name.");
-//        $parameters = [];
-//        if (!$this->check(TokenType::RIGHT_PAREN)) {
-//            do {
-//                if (count($parameters) >= 255) {
-//                    $this->error($this->peek(), "Can't have more than 255 parameters");
-//                }
-//                $parameters[] = $this->consume(TokenType::IDENTIFIER, "Expect parameter name.");
-//            } while ($this->match(TokenType::COMMA));
-//        }
-//        $this->consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.");
-//        $this->consume(TokenType::LEFT_BRACE, "Expect '{' before $kind body.");
-//        $body = $this->blockStmt($context);
-//
-//        return new FunctionExpression($tokenStart, $name, $parameters, $body);
-//    }
-
     private function varDeclaration(ParserContext $context): Statement
     {
         $startToken  = $this->previous();
@@ -305,12 +283,12 @@ class Parser
 
     private function expression(ParserContext $context): Expression
     {
-        return $this->ternary($context);
+        return $this->assignment($context);
     }
 
     private function ternary(ParserContext $context): Expression
     {
-        $expression = $this->assignment($context);
+        $expression = $this->or($context);
 
         $question = $this->peek();
         if ($this->match(TokenType::QUESTION_MARK)) {
@@ -329,7 +307,7 @@ class Parser
 
     private function assignment(ParserContext $context): Expression
     {
-        $expression = $this->or($context);
+        $expression = $this->ternary($context);
 
         if ($this->match(TokenType::EQUAL)) {
             $equals = $this->previous();
@@ -364,26 +342,15 @@ class Parser
 
     private function and(ParserContext $context): Expression
     {
-        $expression = $this->comma($context);
+        $expression = $this->equality($context);
 
         while ($this->match(TokenType::AND)) {
             $operator = $this->previous();
-            $right    = $this->comma($context);
+            $right    = $this->equality($context);
 
             $expression = new Logical($expression, $operator, $right);
         }
 
-        return $expression;
-    }
-
-    private function comma(ParserContext $context): Expression
-    {
-        $expression = $this->equality($context);
-        while ($this->match(TokenType::COMMA)) {
-            $operator   = $this->previous();
-            $right      = $this->equality($context);
-            $expression = new Binary($expression, $operator, $right);
-        }
         return $expression;
     }
 
@@ -531,7 +498,7 @@ class Parser
         return new ClassExpression($tokenStart, $name, null, $body);
     }
 
-    private function function (string $kind, ParserContext $context)
+    private function function(string $kind, ParserContext $context)
     {
         $tokenStart = $this->previous();
 

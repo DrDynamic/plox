@@ -1,13 +1,12 @@
 <?php
 
+use phpDocumentor\Reflection\PseudoTypes\IntegerValue;
 use src\Interpreter\Runtime\LoxType;
 use src\Interpreter\Runtime\Values\BaseValue;
 use src\Interpreter\Runtime\Values\CallableValue;
 use src\Interpreter\Runtime\Values\NilValue;
 use src\Interpreter\Runtime\Values\NumberValue;
 use src\Interpreter\Runtime\Values\StringValue;
-use src\Scaner\Token;
-use src\Scaner\TokenType;
 
 class MockFunction extends BaseValue implements CallableValue
 {
@@ -108,6 +107,18 @@ it('can have a return value', function () {
     ');
     expect($this->environment)
         ->toHave('a', new NilValue());
+});
+
+it('can have arguments', function () {
+    execute('
+        function add(a, b) {
+            return a + b;
+        }
+        var result = add(1,2);
+    ');
+
+    expect($this->environment)
+        ->toHave('a', new IntegerValue(3));
 });
 
 // TODO: implement

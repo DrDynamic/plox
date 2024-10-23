@@ -1,5 +1,8 @@
 <?php
 
+use phpDocumentor\Reflection\PseudoTypes\IntegerValue;
+use src\Interpreter\Runtime\Values\BooleanValue;
+use src\Interpreter\Runtime\Values\NumberValue;
 use src\Interpreter\Runtime\Values\StringValue;
 use src\Scaner\Token;
 use src\Scaner\TokenType;
@@ -110,3 +113,25 @@ it('reports an error when this is used outside of a class', function () {
 
     execute('function(){var a = this;}');
 });
+
+it('can have a constructor', function (){
+    execute('
+    class Person {
+        function init(name, age, isAlive) {
+            this.name = name;
+            this.age = age;
+            this.isAlive = isAlive;
+        }
+    }
+    
+    var john = Person("John Doe", 42, true);
+    var name = john.name;
+    var age = john.age;
+    var isAlive = john.isAlive;
+    ');
+    expect($this->environment)
+        ->toHave('john')
+        ->toHave('name', new StringValue('John Doe'))
+        ->toHave('age', new NumberValue(42))
+        ->toHave('isAlive', new BooleanValue(true));
+})->only();
