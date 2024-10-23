@@ -50,7 +50,7 @@ class FunctionValue extends BaseValue implements CallableValue
         $environment = new Environment($this->closure);
 
         foreach ($this->declaration->parameters as $index => $parameter) {
-            $environment->define($parameter, $arguments[$index]);
+            $environment->defineOrFail($parameter, $arguments[$index]);
         }
 
         try {
@@ -59,5 +59,12 @@ class FunctionValue extends BaseValue implements CallableValue
             return $signal->value;
         }
         return dependency(NilValue::class);
+    }
+
+    public function bindInstance(InstanceValue $instance): FunctionValue
+    {
+        $environment = new Environment($this->closure);
+        $environment->defineOrReplace('this', $instance);
+        return new FunctionValue($this->declaration, $environment);
     }
 }

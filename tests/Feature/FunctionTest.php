@@ -32,9 +32,8 @@ class MockFunction extends BaseValue implements CallableValue
 }
 
 it('can call native functions', function () {
-    $mockVar  = new Token(TokenType::IDENTIFIER, 'myAwesomeFunction', null, 0);
     $mockFunc = new MockFunction();
-    $this->environment->define($mockVar, $mockFunc);
+    $this->environment->defineOrReplace('myAwesomeFunction', $mockFunc);
 
     execute('myAwesomeFunction()');
     expect($mockFunc->wasCalled)

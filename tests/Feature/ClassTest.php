@@ -1,6 +1,9 @@
 <?php
 
 use src\Interpreter\Runtime\Values\StringValue;
+use src\Scaner\Token;
+use src\Scaner\TokenType;
+use src\Services\ErrorReporter;
 
 it('can declare classes', function () {
     execute('
@@ -68,4 +71,42 @@ it('can access methods on instances', function () {
     ');
     expect($this->environment)
         ->toHave('result', new StringValue('Hello John'));
+});
+
+it('can access the current instance on methods', function () {
+    execute('
+        class Greeter {
+            function getGreeting() {
+                return "Hello " + this.name;
+            }
+        }
+        
+        var greeter = Greeter();
+        greeter.name = "John";
+        var result = greeter.getGreeting();
+    ');
+    expect($this->environment)
+        ->toHave('result', new StringValue('Hello John'));
+});
+
+it('reports an error when this is used outside of a class', function () {
+    $thisToken     = new Token(TokenType::THIS, 'this', null, 1);
+    $errorReporter = mock(ErrorReporter::class);
+    $errorReporter->shouldReceive('errorAt')->with(Mockery::any(), "Can't use 'this' outside of a class.")->once()->andSet('hadError', true);
+    resetLox([
+        ErrorReporter::class => $errorReporter
+    ]);
+
+    execute('var a = this;');
+
+    $thisToken     = new Token(TokenType::THIS, 'this', null, 1);
+    $errorReporter = mock(ErrorReporter::class);
+    $errorReporter->shouldReceive('errorAt')->with(Mockery::any(), "Can't use 'this' outside of a class.")->once()->andSet('hadError', true);
+
+
+    resetLox([
+        ErrorReporter::class => $errorReporter
+    ]);
+
+    execute('function(){var a = this;}');
 });

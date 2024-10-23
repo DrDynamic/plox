@@ -2,6 +2,7 @@
 
 namespace src\Resolver;
 
+use src\AST\Expressions;
 use src\AST\Expressions\Assign;
 use src\AST\Expressions\Binary;
 use src\AST\Expressions\Call;
@@ -36,6 +37,7 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 {
     private $scopes = [];
     private $currentFunction = LoxFunctionType::NONE;
+    private $currentClass = LoxClassType::NONE;
 
     public function __construct(
         private readonly ErrorReporter $errorReporter,
@@ -177,16 +179,37 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 
     public function visitClassExpression(ClassExpression $expression)
     {
+        $enclosingClass     = $this->currentClass;
+        $this->currentClass = LoxClassType::LOX_CLASS;
+
         if ($expression->name != null) {
             $this->declare($expression->name);
             $this->define($expression->name);
         }
 
+        $this->beginScope();
+        $scope          = Arr::pop($this->scopes);
+        $scope['this']  = true;
+        $this->scopes[] = $scope;
+
+
         foreach ($expression->body as $property) {
-            if($property instanceof FunctionExpression) {
+            if ($property instanceof FunctionExpression) {
                 $this->resolveFunction($property, LoxFunctionType::METHOD);
             }
         }
+
+        $this->endScope();
+
+        $this->currentClass = $enclosingClass;
+    }
+
+    public function visitThisExpression(Expressions\ThisExpression $expression)
+    {
+        if ($this->currentClass === LoxClassType::NONE) {
+            $this->errorReporter->errorAt($expression->keyword, "Can't use 'this' outside of a class.");
+        }
+        $this->resolveLocal($expression, $expression->keyword);
     }
 
     public function visitGetExpression(Get $expression)

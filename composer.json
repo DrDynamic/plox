@@ -22,7 +22,8 @@
     "laravel/tinker": "^2.10"
   },
   "require-dev": {
-    "pestphp/pest": "^2.30"
+    "pestphp/pest": "^2.30",
+    "mockery/mockery": "^1.6"
   },
   "config": {
     "allow-plugins": {

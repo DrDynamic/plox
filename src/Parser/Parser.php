@@ -14,6 +14,7 @@ use src\AST\Expressions\Literal;
 use src\AST\Expressions\Logical;
 use src\AST\Expressions\Set;
 use src\AST\Expressions\Ternary;
+use src\AST\Expressions\ThisExpression;
 use src\AST\Expressions\Unary;
 use src\AST\Expressions\Variable;
 use src\AST\Statements\BlockStatement;
@@ -337,7 +338,7 @@ class Parser
             if ($expression instanceof Variable) {
                 $name = $expression->name;
                 return new Assign($name, $value);
-            }else if($expression instanceof Get) {
+            } else if ($expression instanceof Get) {
                 return new Set($expression->object, $expression->name, $value);
             }
 
@@ -449,8 +450,8 @@ class Parser
         while (true) {
             if ($this->match(TokenType::LEFT_PAREN)) {
                 $expression = $this->finishCall($context, $expression);
-            }else if ($this->match(TokenType::DOT)){
-                $name = $this->consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
+            } else if ($this->match(TokenType::DOT)) {
+                $name       = $this->consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
                 $expression = new Get($expression, $name);
             } else {
                 break;
@@ -490,6 +491,8 @@ class Parser
                 return new Literal(new NumberValue($this->previous()->literal), $this->previous());
             case $this->match(TokenType::STRING):
                 return new Literal(new StringValue($this->previous()->literal), $this->previous());
+            case $this->match(TokenType::THIS):
+                return new ThisExpression($this->previous());
             case $this->match(TokenType::LEFT_PAREN):
                 $leftParen  = $this->previous();
                 $expression = $this->expression($context);

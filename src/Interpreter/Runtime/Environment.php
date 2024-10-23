@@ -44,7 +44,11 @@ class Environment
         return $env;
     }
 
-    public function define(Token $name, Value $value): void
+    public function defineOrReplace(string $name, Value $value)
+    {
+        $this->values[$name] = $value;
+    }
+    public function defineOrFail(Token $name, Value $value): void
     {
         if (!$this->has($name)) {
             $this->values[$name->lexeme] = $value;

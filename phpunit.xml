@@ -16,6 +16,7 @@
         <include>
             <directory suffix=".php">./app</directory>
             <directory suffix=".php">./lox</directory>
+            <directory suffix=".php">./src</directory>
         </include>
     </source>
     <php>
@@ -30,4 +31,6 @@
         <env name="TELESCOPE_ENABLED" value="false"/>
     </php>
 </phpunit>
-
+<!--
+Hotel / Silvester Schiffsfahrt
+-->

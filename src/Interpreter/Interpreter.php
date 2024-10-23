@@ -2,6 +2,7 @@
 
 namespace src\Interpreter;
 
+use src\AST\Expressions;
 use src\AST\Expressions\Assign;
 use src\AST\Expressions\Binary;
 use src\AST\Expressions\Call;
@@ -162,7 +163,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         } else {
             $value = dependency(NilValue::class);
         }
-        $this->environment->define($var->name, $value);
+        $this->environment->defineOrFail($var->name, $value);
     }
 
     #[\Override] public function visitBlockStmt(BlockStatement $block)
@@ -174,7 +175,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
     {
         $function = new FunctionValue($expression, $this->environment);
         if ($expression->name != null) {
-            $this->environment->define($expression->name, $function);
+            $this->environment->defineOrFail($expression->name, $function);
         }
         return $function;
     }
@@ -182,7 +183,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
     #[\Override] public function visitClassExpression(ClassExpression $expression)
     {
         if ($expression->name !== null) {
-            $this->environment->define($expression->name, new NilValue());
+            $this->environment->defineOrFail($expression->name, new NilValue());
         }
 
         $methods = [];
@@ -198,6 +199,11 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             $this->environment->assign($expression->name, $class);
         }
         return $class;
+    }
+
+    public function visitThisExpression(Expressions\ThisExpression $expression)
+    {
+        return $this->lookUpVariable($expression->keyword, $expression);
     }
 
     #[\Override] public function visitAssignExpr(Assign $expression)

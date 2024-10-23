@@ -4,6 +4,7 @@ namespace src\Interpreter\Runtime\Values;
 
 use src\AST\Expressions\Expression;
 use src\AST\Statements\Statement;
+use src\Interpreter\Runtime\Environment;
 use src\Interpreter\Runtime\Errors\RuntimeError;
 use src\Interpreter\Runtime\LoxType;
 use src\Scaner\Token;
@@ -43,7 +44,7 @@ class InstanceValue extends BaseValue implements GetAccess, SetAccess
 
         $method = $this->class->getMethod($name->lexeme);
         if ($method !== null) {
-            return $method;
+            return $method->bindInstance($this);
         }
 
         throw new RuntimeError($name, "Undefined propery '$name->lexeme'");

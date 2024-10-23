@@ -40,6 +40,8 @@ interface ExpressionVisitor
 
     public function visitClassExpression(ClassExpression $expression);
 
+    public function visitThisExpression(Expressions\ThisExpression $expression);
+
     public function visitGetExpression(Get $expression);
 
     public function visitSetExpression(Set $expression);
