@@ -177,7 +177,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
     #[\Override] public function visitClassExpression(ClassExpression $expression)
     {
         if ($expression->name !== null) {
-            $this->environment->define($expression->name, null);
+            $this->environment->define($expression->name, new NilValue());
         }
 
         $class = new ClassValue($expression);
