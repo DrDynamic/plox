@@ -41,6 +41,11 @@ class InstanceValue extends BaseValue implements GetAccess, SetAccess
             return $this->fields[$name->lexeme];
         }
 
+        $method = $this->class->getMethod($name->lexeme);
+        if ($method !== null) {
+            return $method;
+        }
+
         throw new RuntimeError($name, "Undefined propery '$name->lexeme'");
     }
 

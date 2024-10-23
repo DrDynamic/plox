@@ -10,8 +10,10 @@ use src\Interpreter\Runtime\LoxType;
 class ClassValue extends BaseValue implements CallableValue
 {
 
+
     public function __construct(
         private readonly ClassExpression $declaration,
+        private readonly array           $methods,
     )
     {
     }
@@ -19,6 +21,11 @@ class ClassValue extends BaseValue implements CallableValue
     public function getName(): ?string
     {
         return $this->declaration->name?->lexeme;
+    }
+
+    public function getMethod(string $methodName): ?FunctionValue
+    {
+        return $this->methods[$methodName] ?? null;
     }
 
     public function getType(): LoxType

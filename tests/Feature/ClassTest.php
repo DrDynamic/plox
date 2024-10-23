@@ -1,7 +1,5 @@
 <?php
 
-use src\Interpreter\Runtime\Values\ClassValue;
-use src\Interpreter\Runtime\Values\InstanceValue;
 use src\Interpreter\Runtime\Values\StringValue;
 
 it('can declare classes', function () {
@@ -55,5 +53,19 @@ it('can access fields on instances', function () {
 
     expect($this->environment)
         ->toHave('readValue', new StringValue('value'));
-})->only();
+});
 
+it('can access methods on instances', function () {
+    execute('
+        class Greeter {
+            function getGreeting(name) {
+                return "Hello "+name;
+            }
+        }
+        
+        var greeter = Greeter();
+        var result = greeter.getGreeting("John");
+    ');
+    expect($this->environment)
+        ->toHave('result', new StringValue('Hello John'));
+});

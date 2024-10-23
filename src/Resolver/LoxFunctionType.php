@@ -6,4 +6,5 @@ enum LoxFunctionType
 {
     case NONE;
     case FUNCTION;
+    case METHOD;
 }

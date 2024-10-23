@@ -181,6 +181,12 @@ class Resolver implements ExpressionVisitor, StatementVisitor
             $this->declare($expression->name);
             $this->define($expression->name);
         }
+
+        foreach ($expression->body as $property) {
+            if($property instanceof FunctionExpression) {
+                $this->resolveFunction($property, LoxFunctionType::METHOD);
+            }
+        }
     }
 
     public function visitGetExpression(Get $expression)

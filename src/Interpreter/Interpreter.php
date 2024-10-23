@@ -185,7 +185,14 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             $this->environment->define($expression->name, new NilValue());
         }
 
-        $class = new ClassValue($expression);
+        $methods = [];
+        foreach ($expression->body as $property) {
+            if($property instanceof FunctionExpression) {
+                $methods[$property->name->lexeme] = new FunctionValue($property, $this->environment);
+            }
+        }
+
+        $class = new ClassValue($expression, $methods);
 
         if ($expression->name !== null) {
             $this->environment->assign($expression->name, $class);
