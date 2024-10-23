@@ -8,9 +8,11 @@ use src\AST\Expressions\Call;
 use src\AST\Expressions\ClassExpression;
 use src\AST\Expressions\Expression;
 use src\AST\Expressions\FunctionExpression;
+use src\AST\Expressions\Get;
 use src\AST\Expressions\Grouping;
 use src\AST\Expressions\Literal;
 use src\AST\Expressions\Logical;
+use src\AST\Expressions\Set;
 use src\AST\Expressions\Ternary;
 use src\AST\Expressions\Unary;
 use src\AST\Expressions\Variable;
@@ -181,6 +183,16 @@ class Resolver implements ExpressionVisitor, StatementVisitor
         }
     }
 
+    public function visitGetExpression(Get $expression)
+    {
+        $this->resolve($expression->object);
+    }
+
+    public function visitSetExpression(Set $expression)
+    {
+        $this->resolve($expression->value);
+        $this->resolve($expression->object);
+    }
 
     private function beginScope()
     {
@@ -222,7 +234,7 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 
         $scope                = Arr::pop($this->scopes);
         $scope[$name->lexeme] = true;
-        $this->scopes[] = $scope;
+        $this->scopes[]       = $scope;
     }
 
     private function resolveFunction(FunctionExpression $expression, LoxFunctionType $type)

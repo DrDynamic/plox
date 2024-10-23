@@ -1,4 +1,8 @@
-                        <?php
+<?php
+
+use src\Interpreter\Runtime\Values\ClassValue;
+use src\Interpreter\Runtime\Values\InstanceValue;
+use src\Interpreter\Runtime\Values\StringValue;
 
 it('can declare classes', function () {
     execute('
@@ -40,4 +44,16 @@ it('can instantiate classes', function () {
     expect($this->environment)
         ->toHave('greeter');
 });
+
+it('can access fields on instances', function () {
+    execute('
+    var instance = class{}();
+    instance.key = "value";
+    
+    var readValue = instance.key;
+    ');
+
+    expect($this->environment)
+        ->toHave('readValue', new StringValue('value'));
+})->only();
 

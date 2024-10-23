@@ -4,10 +4,14 @@ namespace src\Interpreter\Runtime\Values;
 
 use src\AST\Expressions\Expression;
 use src\AST\Statements\Statement;
+use src\Interpreter\Runtime\Errors\RuntimeError;
 use src\Interpreter\Runtime\LoxType;
+use src\Scaner\Token;
 
-class InstanceValue extends BaseValue
+class InstanceValue extends BaseValue implements GetAccess, SetAccess
 {
+
+    private array $fields = [];
 
     public function __construct(
         private readonly ClassValue $class)
@@ -31,4 +35,17 @@ class InstanceValue extends BaseValue
     }
 
 
+    public function get(Token $name)
+    {
+        if (isset($this->fields[$name->lexeme])) {
+            return $this->fields[$name->lexeme];
+        }
+
+        throw new RuntimeError($name, "Undefined propery '$name->lexeme'");
+    }
+
+    public function set(Token $name, Value $value): Value
+    {
+        return $this->fields[$name->lexeme] = $value;
+    }
 }

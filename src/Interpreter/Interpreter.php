@@ -8,9 +8,11 @@ use src\AST\Expressions\Call;
 use src\AST\Expressions\ClassExpression;
 use src\AST\Expressions\Expression;
 use src\AST\Expressions\FunctionExpression;
+use src\AST\Expressions\Get;
 use src\AST\Expressions\Grouping;
 use src\AST\Expressions\Literal;
 use src\AST\Expressions\Logical;
+use src\AST\Expressions\Set;
 use src\AST\Expressions\Ternary;
 use src\AST\Expressions\Unary;
 use src\AST\Expressions\Variable;
@@ -26,13 +28,16 @@ use src\AST\Statements\WhileStatement;
 use src\AST\StatementVisitor;
 use src\Interpreter\Runtime\Environment;
 use src\Interpreter\Runtime\Errors\ArgumentCountError;
+use src\Interpreter\Runtime\Errors\InvalidAccessError;
 use src\Interpreter\Runtime\Errors\RuntimeError;
 use src\Interpreter\Runtime\LoxType;
 use src\Interpreter\Runtime\Values\CallableValue;
 use src\Interpreter\Runtime\Values\ClassValue;
 use src\Interpreter\Runtime\Values\FunctionValue;
+use src\Interpreter\Runtime\Values\GetAccess;
 use src\Interpreter\Runtime\Values\NilValue;
 use src\Interpreter\Runtime\Values\NumberValue;
+use src\Interpreter\Runtime\Values\SetAccess;
 use src\Interpreter\Runtime\Values\Value;
 use src\Scaner\Token;
 use src\Scaner\TokenType;
@@ -256,6 +261,29 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         }
 
         return $callable->call($arguments, $call);
+    }
+
+    public function visitGetExpression(Get $expression)
+    {
+        $object = $this->evaluate($expression->object);
+        if (is_subclass_of($object, GetAccess::class)) {
+            return $object->get($expression->name);
+        }
+
+        throw new RuntimeError($expression->name, "Illegal access via '.'");
+    }
+
+    public function visitSetExpression(Set $expression)
+    {
+        $object = $this->evaluate($expression->object);
+
+        if (!is_subclass_of($object, SetAccess::class)) {
+            throw new RuntimeError($expression->name, "Illegal access via '.'");
+        }
+
+        $value = $this->evaluate($expression->value);
+        $object->set($expression->name, $value);
+        return $value;
     }
 
     #[\Override] public function visitGroupingExpr(Grouping $expression)

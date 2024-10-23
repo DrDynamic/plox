@@ -8,9 +8,11 @@ use src\AST\Expressions\Call;
 use src\AST\Expressions\ClassExpression;
 use src\AST\Expressions\Expression;
 use src\AST\Expressions\FunctionExpression;
+use src\AST\Expressions\Get;
 use src\AST\Expressions\Grouping;
 use src\AST\Expressions\Literal;
 use src\AST\Expressions\Logical;
+use src\AST\Expressions\Set;
 use src\AST\Expressions\Ternary;
 use src\AST\Expressions\Unary;
 use src\AST\Expressions\Variable;
@@ -335,6 +337,8 @@ class Parser
             if ($expression instanceof Variable) {
                 $name = $expression->name;
                 return new Assign($name, $value);
+            }else if($expression instanceof Get) {
+                return new Set($expression->object, $expression->name, $value);
             }
 
             $this->error($equals, "Invalid assignment target.");
@@ -445,6 +449,9 @@ class Parser
         while (true) {
             if ($this->match(TokenType::LEFT_PAREN)) {
                 $expression = $this->finishCall($context, $expression);
+            }else if ($this->match(TokenType::DOT)){
+                $name = $this->consume(TokenType::IDENTIFIER, "Expect property name after '.'.");
+                $expression = new Get($expression, $name);
             } else {
                 break;
             }
