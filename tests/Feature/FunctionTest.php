@@ -1,6 +1,5 @@
 <?php
 
-use phpDocumentor\Reflection\PseudoTypes\IntegerValue;
 use src\Interpreter\Runtime\LoxType;
 use src\Interpreter\Runtime\Values\BaseValue;
 use src\Interpreter\Runtime\Values\CallableValue;
@@ -118,7 +117,7 @@ it('can have arguments', function () {
     ');
 
     expect($this->environment)
-        ->toHave('a', new IntegerValue(3));
+        ->toHave('result', new NumberValue(3));
 });
 
 // TODO: implement

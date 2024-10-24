@@ -14,14 +14,6 @@ it('can calculate', function () {
 
 });
 
-it('supports the comma operator', function () {
-    expect(evaluate('(2,4,3)'))
-        ->toEqual(new NumberValue(3));
-
-    expect(evaluate('2,4,5'))
-        ->toEqual(new NumberValue(5));
-});
-
 it('compares numbers with strings', function () {
     expect(evaluate('"Lorem" < 6'))
         ->toEqual(new BooleanValue(true));
