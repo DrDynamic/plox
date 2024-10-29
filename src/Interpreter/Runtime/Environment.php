@@ -48,6 +48,7 @@ class Environment
     {
         $this->values[$name] = $value;
     }
+
     public function defineOrFail(Token $name, Value $value): void
     {
         if (!$this->has($name)) {
@@ -98,9 +99,10 @@ class Environment
         throw new UndefinedVariableError($name, "Undefined variable '$name->lexeme'.");
     }
 
-    public function getAt(mixed $distance, Token $name)
+    public function getAt(mixed $distance, Token|string $name)
     {
-        return $this->ancestor($distance)->values[$name->lexeme];
+        $lexeme = is_string($name) ? $name : $name->lexeme;
+        return $this->ancestor($distance)->values[$lexeme];
     }
 
 

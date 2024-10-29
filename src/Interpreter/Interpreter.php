@@ -173,7 +173,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
     #[\Override] public function visitFunctionExpr(FunctionExpression $expression)
     {
-        $function = new FunctionValue($expression, $this->environment);
+        $function = new FunctionValue($expression, $this->environment, false);
         if ($expression->name != null) {
             $this->environment->defineOrFail($expression->name, $function);
         }
@@ -188,8 +188,8 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
         $methods = [];
         foreach ($expression->body as $property) {
-            if($property instanceof FunctionExpression) {
-                $methods[$property->name->lexeme] = new FunctionValue($property, $this->environment);
+            if ($property instanceof FunctionExpression) {
+                $methods[$property->name->lexeme] = new FunctionValue($property, $this->environment, $property->name->lexeme === 'init');
             }
         }
 

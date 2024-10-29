@@ -153,3 +153,51 @@ it('can have methods', function () {
     expect($this->environment)
         ->toHave('name', new StringValue('John Doe'));
 });
+
+it('can early return from a constructor', function () {
+
+    $errorReporter = mock(ErrorReporter::class);
+    $errorReporter->allows([
+        'runtimeError' => null
+    ]);
+    resetLox([
+        ErrorReporter::class => $errorReporter
+    ]);
+
+    execute('
+    class Person {
+        function init() {
+            this.name = "John Doe";
+            return;
+            this.age = 42;
+        }
+    }
+    var p = Person();
+    var name = p.name;
+    var age = p.age;
+    ');
+
+    expect($this->environment)
+        ->toHave('name', new StringValue('John Doe'))
+        ->toNotHave('age', new NumberValue(42));
+});
+
+it('can not return a value from a constructor', function () {
+
+    $errorReporter = mock(ErrorReporter::class);
+    $errorReporter->allows()->errorAt(Mockery::any(), "Can't return a value from a constructor.")->once();
+    resetLox([
+        ErrorReporter::class => $errorReporter
+    ]);
+
+    execute('
+    class Person {
+        function init() {
+            this.name = "John Doe";
+            return "Lorem";
+            this.age = 42;
+        }
+    }
+    var p = Person();
+    ');
+});

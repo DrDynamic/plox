@@ -15,7 +15,8 @@ class FunctionValue extends BaseValue implements CallableValue
 
     public function __construct(
         private readonly FunctionExpression $declaration,
-        private readonly Environment        $closure)
+        private readonly Environment        $closure,
+        private readonly bool               $isConstructor)
     {
     }
 
@@ -56,7 +57,13 @@ class FunctionValue extends BaseValue implements CallableValue
         try {
             $interpreter->executeBlock($this->declaration->body, $environment);
         } catch (ReturnSignal $signal) {
+            if ($this->isConstructor) {
+                return $this->closure->getAt(0, 'this');
+            }
             return $signal->value;
+        }
+        if ($this->isConstructor) {
+            return $this->closure->getAt(0, 'this');
         }
         return dependency(NilValue::class);
     }
@@ -65,6 +72,6 @@ class FunctionValue extends BaseValue implements CallableValue
     {
         $environment = new Environment($this->closure);
         $environment->defineOrReplace('this', $instance);
-        return new FunctionValue($this->declaration, $environment);
+        return new FunctionValue($this->declaration, $environment, $this->isConstructor);
     }
 }

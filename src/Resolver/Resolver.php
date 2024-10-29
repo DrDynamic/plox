@@ -27,6 +27,7 @@ use src\AST\Statements\VarStatement;
 use src\AST\Statements\WhileStatement;
 use src\AST\StatementVisitor;
 use src\Interpreter\Interpreter;
+use src\Interpreter\Runtime\Values\NilValue;
 use src\Scaner\Token;
 use src\Services\Arr;
 use src\Services\Dependency\Attributes\Instance;
@@ -105,9 +106,13 @@ class Resolver implements ExpressionVisitor, StatementVisitor
             $this->errorReporter->errorAt($statement->tokenStart, "Can't return from top-level code.");
         }
 
-        if ($statement->value != null) {
-            $this->resolve($statement->value);
+        if ($statement->value instanceof Literal && $statement->value->value instanceof NilValue) {
+            return;
         }
+        if ($this->currentFunction === LoxFunctionType::CONSTRUCTOR) {
+            $this->errorReporter->errorAt($statement->tokenStart, "Can't return a value from a constructor.");
+        }
+        $this->resolve($statement->value);
     }
 
     #[\Override] public function visitTernaryExpr(Ternary $expression)
@@ -195,7 +200,11 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 
         foreach ($expression->body as $property) {
             if ($property instanceof FunctionExpression) {
-                $this->resolveFunction($property, LoxFunctionType::METHOD);
+                $declaration = LoxFunctionType::METHOD;
+                if ($property->name->lexeme === 'init') {
+                    $declaration = LoxFunctionType::CONSTRUCTOR;
+                }
+                $this->resolveFunction($property, $declaration);
             }
         }
 
