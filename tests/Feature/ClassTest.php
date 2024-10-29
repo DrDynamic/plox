@@ -201,3 +201,6 @@ it('can not return a value from a constructor', function () {
     var p = Person();
     ');
 });
+
+// TODO: add private properties
+// TODO: add static properties
