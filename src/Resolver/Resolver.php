@@ -199,7 +199,9 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 
 
         foreach ($expression->body as $property) {
-            if ($property instanceof FunctionExpression) {
+            if ($property instanceof VarStatement) {
+                $this->visitVarStmt($property);
+            } else if ($property instanceof FunctionExpression) {
                 $declaration = LoxFunctionType::METHOD;
                 if ($property->name->lexeme === 'init') {
                     $declaration = LoxFunctionType::CONSTRUCTOR;

@@ -186,14 +186,22 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             $this->environment->defineOrFail($expression->name, new NilValue());
         }
 
+        $fields  = [];
         $methods = [];
         foreach ($expression->body as $property) {
-            if ($property instanceof FunctionExpression) {
+            if ($property instanceof VarStatement) {
+                if ($property->initializer != null) {
+                    $value = $this->evaluate($property->initializer);
+                } else {
+                    $value = dependency(NilValue::class);
+                }
+                $fields[$property->name->lexeme] = $value   ;
+            } else if ($property instanceof FunctionExpression) {
                 $methods[$property->name->lexeme] = new FunctionValue($property, $this->environment, $property->name->lexeme === 'init');
             }
         }
 
-        $class = new ClassValue($expression, $methods);
+        $class = new ClassValue($expression, $methods, $fields);
 
         if ($expression->name !== null) {
             $this->environment->assign($expression->name, $class);

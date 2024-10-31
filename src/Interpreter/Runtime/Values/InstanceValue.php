@@ -12,10 +12,9 @@ use src\Scaner\Token;
 class InstanceValue extends BaseValue implements GetAccess, SetAccess
 {
 
-    private array $fields = [];
-
     public function __construct(
-        private readonly ClassValue $class)
+        private readonly ClassValue $class,
+        private array $fields = [])
     {
     }
 

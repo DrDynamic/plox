@@ -13,6 +13,7 @@ class ClassValue extends BaseValue implements CallableValue
     public function __construct(
         private readonly ClassExpression $declaration,
         private readonly array           $methods,
+        private readonly array           $fields,
     )
     {
     }
@@ -53,11 +54,12 @@ class ClassValue extends BaseValue implements CallableValue
 
     public function call(array $arguments, Expression|Statement $cause): Value
     {
-        $instance    = new InstanceValue($this);
+        $instance    = new InstanceValue($this, $this->fields);
         $constructor = $this->getMethod('init');
         if ($constructor !== null) {
             $constructor->bindInstance($instance)->call($arguments, $cause);
         }
+
         return $instance;
     }
 

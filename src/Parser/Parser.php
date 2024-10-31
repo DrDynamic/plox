@@ -489,7 +489,9 @@ class Parser
 
         $body = [];
         while (!$this->check(TokenType::RIGHT_BRACE) && !$this->isAtEnd()) {
-            if ($this->match(TokenType::FUNCTION)) {
+            if($this->match(TokenType::VAR)) {
+                $body[] = $this->varDeclaration($context);
+            }else if ($this->match(TokenType::FUNCTION)) {
                 $body[] = $this->function("method", $context);
             }
         }

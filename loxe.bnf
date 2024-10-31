@@ -38,7 +38,7 @@ arguments           ::= expression ( "," expression )* ;
 primary             ::= NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER | funcDeclaration | classDeclaration   ;
 
 funcDeclaration     ::= "function" IDENTIFIER? function ;
-classDeclaration    ::= "class" IDENTIFIER? "{" ("function" IDENTIFIER function)* "}" ;
+classDeclaration    ::= "class" IDENTIFIER? "{" (varDeclaration | "function" IDENTIFIER function)* "}" ;
 
 // helpers
 function            ::= "(" parameters? ")" blockStatement ;

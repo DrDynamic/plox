@@ -202,5 +202,25 @@ it('can not return a value from a constructor', function () {
     ');
 });
 
+it('can have predefined fields in instance', function () {
+
+//    $errorReporter = mock(ErrorReporter::class);
+//    $errorReporter->allows()->errorAt(Mockery::any(), "Can't return a value from a constructor.")->once();
+//    resetLox([
+//        ErrorReporter::class => $errorReporter
+//    ]);
+
+    execute('
+    class Person {
+        var name = "John Doe";
+    }
+    var p = Person();
+    var name = p.name;
+    ');
+
+    expect($this->environment)
+        ->toHave('name', new StringValue('John Doe'));
+})->only();
+
 // TODO: add private properties
 // TODO: add static properties
