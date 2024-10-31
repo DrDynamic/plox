@@ -517,6 +517,7 @@ class Parser
             } else if ($this->match(TokenType::FUNCTION)) {
                 $body[] = $this->method($visibility, $context);
             }
+            $visibility = LoxClassPropertyVisibility::PUBLIC;
         }
         $this->consume(TokenType::RIGHT_BRACE, "Expect '}' after Class body.");
 

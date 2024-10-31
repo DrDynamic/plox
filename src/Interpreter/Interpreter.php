@@ -42,6 +42,7 @@ use src\Interpreter\Runtime\Values\NilValue;
 use src\Interpreter\Runtime\Values\NumberValue;
 use src\Interpreter\Runtime\Values\SetAccess;
 use src\Interpreter\Runtime\Values\Value;
+use src\Resolver\LoxClassPropertyVisibility;
 use src\Scaner\Token;
 use src\Scaner\TokenType;
 use src\Services\Dependency\Attributes\Singleton;
@@ -52,6 +53,8 @@ use WeakMap;
 class Interpreter implements ExpressionVisitor, StatementVisitor
 {
     public Environment $environment;
+
+    private $currentInstance = null;
 
     public function __construct(
         private readonly ErrorReporter $errorReporter,
@@ -153,9 +156,9 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         }
     }
 
-    #[\Override] public function visitCompletionStmt(CompletionStatement $completion)
+    #[\Override] public function visitCompletionStmt(CompletionStatement $statement)
     {
-        throw new CompletionSignal($completion);
+        throw new CompletionSignal($statement);
     }
 
     #[\Override] public function visitVarStmt(VarStatement $statement)
@@ -180,14 +183,12 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
     #[\Override] public function visitMethodStmt(MethodStatement $statement)
     {
-        $method = new MethodValue($statement, $this->environment, false);
-        $this->environment->defineOrFail($statement->name, $method);
-        return $method;
+        $this->errorReporter->errorAt($statement->tokenStart, "Can not declare a method outside of a class.");
     }
 
-    #[\Override] public function visitBlockStmt(BlockStatement $block)
+    #[\Override] public function visitBlockStmt(BlockStatement $statement)
     {
-        $this->executeBlock($block->statements, new Environment($this->environment));
+        $this->executeBlock($statement->statements, new Environment($this->environment));
     }
 
     #[\Override] public function visitFunctionExpr(FunctionExpression $expression)
@@ -205,8 +206,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             $this->environment->defineOrFail($expression->name, new NilValue());
         }
 
-        $fields  = [];
-        $methods = [];
+        $class = new ClassValue($expression, [], []);
         foreach ($expression->body as $property) {
             if ($property instanceof FieldStatement) {
                 if ($property->initializer != null) {
@@ -214,13 +214,12 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
                 } else {
                     $value = dependency(NilValue::class);
                 }
-                $fields[$property->name->lexeme] = $value;
+                $class->fields[$property->name->lexeme] = $value;
             } else if ($property instanceof MethodStatement) {
-                $methods[$property->name->lexeme] = new MethodValue($property, $this->environment, $property->name->lexeme === 'init');
+                $class->methods[$property->name->lexeme] = new MethodValue($class, $property, $this->environment, $property->name->lexeme === 'init');
             }
         }
 
-        $class = new ClassValue($expression, $methods, $fields);
 
         if ($expression->name !== null) {
             $this->environment->assign($expression->name, $class);
@@ -300,14 +299,32 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             throw new ArgumentCountError($call->rightParen, "Expect {$callable->arity()} arguments but got ".count($arguments).".");
         }
 
-        return $callable->call($arguments, $call);
+
+        if ($callable instanceof MethodValue) {
+            $enclosingInstance     = $this->currentInstance;
+            $this->currentInstance = $callee->getBoundInstance();
+
+            $result = $callable->call($arguments, $call);
+
+            $this->currentInstance = $enclosingInstance;
+            return $result;
+        } else {
+            return $callable->call($arguments, $call);
+        }
+
     }
 
     public function visitGetExpression(Get $expression)
     {
         $object = $this->evaluate($expression->object);
         if (is_subclass_of($object, GetAccess::class)) {
-            return $object->get($expression->name);
+            $property = $object->get($expression->name);
+            if ($property instanceof MethodValue
+                && $property->getVisibility() === LoxClassPropertyVisibility::PRIVATE) {
+                throw_if($property->getBoundInstance()->class !== $this->currentInstance->class,
+                    new RuntimeError($expression->tokenStart, "Can't access private method."));
+            }
+            return $property;
         }
 
         throw new RuntimeError($expression->name, "Illegal access via '.'");

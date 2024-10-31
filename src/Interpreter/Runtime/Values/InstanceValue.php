@@ -7,13 +7,14 @@ use src\AST\Statements\Statement;
 use src\Interpreter\Runtime\Environment;
 use src\Interpreter\Runtime\Errors\RuntimeError;
 use src\Interpreter\Runtime\LoxType;
+use src\Resolver\LoxClassPropertyVisibility;
 use src\Scaner\Token;
 
 class InstanceValue extends BaseValue implements GetAccess, SetAccess
 {
 
     public function __construct(
-        private readonly ClassValue $class,
+        public readonly ClassValue $class,
         private array $fields = [])
     {
     }

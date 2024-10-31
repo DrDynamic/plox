@@ -11,9 +11,9 @@ class ClassValue extends BaseValue implements CallableValue
 {
 
     public function __construct(
-        private readonly ClassExpression $declaration,
-        private readonly array           $methods,
-        private readonly array           $fields,
+        public readonly ClassExpression $declaration,
+        public array                    $methods,
+        public array                    $fields,
     )
     {
     }

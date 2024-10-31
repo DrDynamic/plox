@@ -8,7 +8,6 @@ use src\Services\Arr;
 
 class ClassExpression extends Expression
 {
-
     public function __construct(Token                         $tokenStart,
                                 public readonly Token|null    $name,
                                 public readonly Variable|null $superClass,

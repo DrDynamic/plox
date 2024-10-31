@@ -230,5 +230,83 @@ it('can have public predefined fields in instance', function () {
         ->toHave('name', new StringValue('John Doe'));
 });
 
+it('can\'t access private fields from outside of in instance', function () {
+    $errorReporter = mock(ErrorReporter::class);
+    $errorReporter->allows()->errorAt(Mockery::any(), "Can't access private field.")
+        ->andSet('hadError', true)
+        ->once();
+    resetLox([
+        ErrorReporter::class => $errorReporter
+    ]);
+    execute('
+    class Person {
+        private var name = "John Doe";
+    }
+    var p = Person();
+    var name = p.name;
+    ');
+});
+
+it('can\'t access private methods from outside of in instance', function () {
+
+    $errorReporter = mock(ErrorReporter::class);
+    $errorReporter->allows()->runtimeError(Mockery::any())
+        ->andSet('hadError', true)
+        ->once();
+    resetLox([
+        ErrorReporter::class => $errorReporter
+    ]);
+    execute('
+    class Person {
+        private function getName() {
+            return "John Doe";
+        }
+    }
+    var p = Person();
+    var name = p.getName();
+    ');
+});
+
+it('can access private fields on instance', function () {
+    execute('
+    class Person {
+        private var name = "John Doe";
+        
+        function getName() {
+            return this.name;
+        }
+    }
+    var p = Person();
+    var name = p.getName();
+    ');
+
+    expect($this->environment)
+        ->toHave('name', new StringValue('John Doe'));
+});
+
+it('can access private fields on other instance', function () {
+    execute('
+    class Person {
+        private var name;
+        
+        function init(name) {
+            this.name = name;
+        }
+        
+        function getName(instance) {
+            return instance.name;
+        }
+    }
+    var p1 = Person("John");
+    var p2 = Person("Peter");
+    var john = p1.getName(p1);
+    var peter = p1.getName(p2);
+    ');
+
+    expect($this->environment)
+        ->toHave('john', new StringValue('John'))
+        ->toHave('peter', new StringValue('Peter'));
+});
+
 // TODO: add private properties
 // TODO: add static properties

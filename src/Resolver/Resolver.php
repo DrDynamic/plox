@@ -39,8 +39,8 @@ use src\Services\ErrorReporter;
 class Resolver implements ExpressionVisitor, StatementVisitor
 {
     private $scopes = [];
-    private $currentFunction = LoxFunctionType::NONE;
-    private $currentClass = LoxClassType::NONE;
+    private $currentFunctionType = LoxFunctionType::NONE;
+    private $currentClassType = LoxClassType::NONE;
 
     public function __construct(
         private readonly ErrorReporter $errorReporter,
@@ -91,7 +91,7 @@ class Resolver implements ExpressionVisitor, StatementVisitor
             $this->define($statement->name);
         }
 
-        $this->resolveFunction($statement, LoxFunctionType::FUNCTION);
+        $this->resolveFunction($statement, LoxFunctionType::METHOD);
     }
 
     #[\Override] public function visitBlockStmt(BlockStatement $statement)
@@ -123,14 +123,14 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 
     #[\Override] public function visitReturnStmt(ReturnStatement $statement)
     {
-        if ($this->currentFunction == LoxFunctionType::NONE) {
+        if ($this->currentFunctionType == LoxFunctionType::NONE) {
             $this->errorReporter->errorAt($statement->tokenStart, "Can't return from top-level code.");
         }
 
         if ($statement->value instanceof Literal && $statement->value->value instanceof NilValue) {
             return;
         }
-        if ($this->currentFunction === LoxFunctionType::CONSTRUCTOR) {
+        if ($this->currentFunctionType === LoxFunctionType::CONSTRUCTOR) {
             $this->errorReporter->errorAt($statement->tokenStart, "Can't return a value from a constructor.");
         }
         $this->resolve($statement->value);
@@ -205,8 +205,8 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 
     public function visitClassExpression(ClassExpression $expression)
     {
-        $enclosingClass     = $this->currentClass;
-        $this->currentClass = LoxClassType::LOX_CLASS;
+        $enclosingClassType     = $this->currentClassType;
+        $this->currentClassType = LoxClassType::LOX_CLASS;
 
         if ($expression->name != null) {
             $this->declare($expression->name);
@@ -233,12 +233,12 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 
         $this->endScope();
 
-        $this->currentClass = $enclosingClass;
+        $this->currentClassType = $enclosingClassType;
     }
 
     public function visitThisExpression(Expressions\ThisExpression $expression)
     {
-        if ($this->currentClass === LoxClassType::NONE) {
+        if ($this->currentClassType === LoxClassType::NONE) {
             $this->errorReporter->errorAt($expression->keyword, "Can't use 'this' outside of a class.");
         }
         $this->resolveLocal($expression, $expression->keyword);
@@ -300,8 +300,8 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 
     private function resolveFunction(FunctionExpression|MethodStatement $expression, LoxFunctionType $type)
     {
-        $enclosingFunction     = $this->currentFunction;
-        $this->currentFunction = $type;
+        $enclosingFunction         = $this->currentFunctionType;
+        $this->currentFunctionType = $type;
 
         $this->beginScope();
         foreach ($expression->parameters as $parameter) {
@@ -311,7 +311,7 @@ class Resolver implements ExpressionVisitor, StatementVisitor
         $this->resolveAll($expression->body);
         $this->endScope();
 
-        $this->currentFunction = $enclosingFunction;
+        $this->currentFunctionType = $enclosingFunction;
     }
 
 }

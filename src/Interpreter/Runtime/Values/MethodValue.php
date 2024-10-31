@@ -3,7 +3,6 @@
 namespace src\Interpreter\Runtime\Values;
 
 use src\AST\Expressions\Expression;
-use src\AST\Expressions\FunctionExpression;
 use src\AST\Statements\MethodStatement;
 use src\AST\Statements\Statement;
 use src\Interpreter\Interpreter;
@@ -13,11 +12,23 @@ use src\Interpreter\Runtime\LoxType;
 
 class MethodValue extends BaseValue implements CallableValue
 {
+
     public function __construct(
+        private readonly ClassValue      $class,
         private readonly MethodStatement $declaration,
         private readonly Environment     $closure,
-        private readonly bool            $isConstructor)
+        private readonly bool            $isConstructor,
+        private readonly ?InstanceValue  $boundInstance = null)
     {
+    }
+
+    public function getVisibility() {
+        return $this->declaration->visibility;
+    }
+
+    public function getBoundInstance(): ?InstanceValue
+    {
+        return $this->boundInstance;
     }
 
     #[\Override] public function getType(): LoxType
@@ -72,6 +83,6 @@ class MethodValue extends BaseValue implements CallableValue
     {
         $environment = new Environment($this->closure);
         $environment->defineOrReplace('this', $instance);
-        return new MethodValue($this->declaration, $environment, $this->isConstructor);
+        return new MethodValue($this->class, $this->declaration, $environment, $this->isConstructor, $instance);
     }
 }
