@@ -214,7 +214,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
                 } else {
                     $value = dependency(NilValue::class);
                 }
-                $class->fields[$property->name->lexeme] = $value;
+                $class->addField($property->name->lexeme, $property->visibility, $value);
             } else if ($property instanceof MethodStatement) {
                 $class->methods[$property->name->lexeme] = new MethodValue($class, $property, $this->environment, $property->name->lexeme === 'init');
             }

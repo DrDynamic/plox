@@ -4,10 +4,8 @@ namespace src\Interpreter\Runtime\Values;
 
 use src\AST\Expressions\Expression;
 use src\AST\Statements\Statement;
-use src\Interpreter\Runtime\Environment;
 use src\Interpreter\Runtime\Errors\RuntimeError;
 use src\Interpreter\Runtime\LoxType;
-use src\Resolver\LoxClassPropertyVisibility;
 use src\Scaner\Token;
 
 class InstanceValue extends BaseValue implements GetAccess, SetAccess
@@ -15,7 +13,7 @@ class InstanceValue extends BaseValue implements GetAccess, SetAccess
 
     public function __construct(
         public readonly ClassValue $class,
-        private array $fields = [])
+        private array              $fields = [])
     {
     }
 
@@ -39,7 +37,7 @@ class InstanceValue extends BaseValue implements GetAccess, SetAccess
     public function get(Token $name)
     {
         if (isset($this->fields[$name->lexeme])) {
-            return $this->fields[$name->lexeme];
+            return $this->fields[$name->lexeme]->value;
         }
 
         $method = $this->class->getMethod($name->lexeme);
@@ -52,6 +50,6 @@ class InstanceValue extends BaseValue implements GetAccess, SetAccess
 
     public function set(Token $name, Value $value): Value
     {
-        return $this->fields[$name->lexeme] = $value;
+        return $this->fields[$name->lexeme]->value = $value;
     }
 }

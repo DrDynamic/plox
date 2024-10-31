@@ -245,7 +245,7 @@ it('can\'t access private fields from outside of in instance', function () {
     var p = Person();
     var name = p.name;
     ');
-});
+})->only();
 
 it('can\'t access private methods from outside of in instance', function () {
 

@@ -6,6 +6,8 @@ use src\AST\Expressions\ClassExpression;
 use src\AST\Expressions\Expression;
 use src\AST\Statements\Statement;
 use src\Interpreter\Runtime\LoxType;
+use src\Interpreter\Runtime\Util\FieldDefinition;
+use src\Resolver\LoxClassPropertyVisibility;
 
 class ClassValue extends BaseValue implements CallableValue
 {
@@ -21,6 +23,11 @@ class ClassValue extends BaseValue implements CallableValue
     public function getName(): ?string
     {
         return $this->declaration->name?->lexeme;
+    }
+
+    public function addField(string $name, LoxClassPropertyVisibility $visibility, Value $value)
+    {
+        $this->fields[$name] = new FieldDefinition($visibility, $value);
     }
 
     public function getMethod(string $methodName): ?MethodValue
