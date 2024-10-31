@@ -21,7 +21,9 @@ use src\AST\ExpressionVisitor;
 use src\AST\Statements\BlockStatement;
 use src\AST\Statements\CompletionStatement;
 use src\AST\Statements\ExpressionStatement;
+use src\AST\Statements\FieldStatement;
 use src\AST\Statements\IfStatement;
+use src\AST\Statements\MethodStatement;
 use src\AST\Statements\ReturnStatement;
 use src\AST\Statements\VarStatement;
 use src\AST\Statements\WhileStatement;
@@ -71,6 +73,25 @@ class Resolver implements ExpressionVisitor, StatementVisitor
             $this->resolve($statement->initializer);
         }
         $this->define($statement->name);
+    }
+
+    #[\Override] public function visitFieldStmt(FieldStatement $statement)
+    {
+        $this->declare($statement->name);
+        if ($statement->initializer != null) {
+            $this->resolve($statement->initializer);
+        }
+        $this->define($statement->name);
+    }
+
+    #[\Override] public function visitMethodStmt(MethodStatement $statement)
+    {
+        if ($statement->name != null) {
+            $this->declare($statement->name);
+            $this->define($statement->name);
+        }
+
+        $this->resolveFunction($statement, LoxFunctionType::FUNCTION);
     }
 
     #[\Override] public function visitBlockStmt(BlockStatement $statement)
@@ -199,9 +220,9 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 
 
         foreach ($expression->body as $property) {
-            if ($property instanceof VarStatement) {
-                $this->visitVarStmt($property);
-            } else if ($property instanceof FunctionExpression) {
+            if ($property instanceof FieldStatement) {
+                $this->visitFieldStmt($property);
+            } else if ($property instanceof MethodStatement) {
                 $declaration = LoxFunctionType::METHOD;
                 if ($property->name->lexeme === 'init') {
                     $declaration = LoxFunctionType::CONSTRUCTOR;
@@ -277,7 +298,7 @@ class Resolver implements ExpressionVisitor, StatementVisitor
         $this->scopes[]       = $scope;
     }
 
-    private function resolveFunction(FunctionExpression $expression, LoxFunctionType $type)
+    private function resolveFunction(FunctionExpression|MethodStatement $expression, LoxFunctionType $type)
     {
         $enclosingFunction     = $this->currentFunction;
         $this->currentFunction = $type;

@@ -34,6 +34,8 @@ class Scanner
         'while'    => TokenType::WHILE,
         'break'    => TokenType::BREAK,
         'continue' => TokenType::CONTINUE,
+        'public'   => TokenType::PUBLIC,
+        'private'  => TokenType::PRIVATE,
     ];
 
     public function __construct(

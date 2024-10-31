@@ -21,7 +21,9 @@ use src\AST\ExpressionVisitor;
 use src\AST\Statements\BlockStatement;
 use src\AST\Statements\CompletionStatement;
 use src\AST\Statements\ExpressionStatement;
+use src\AST\Statements\FieldStatement;
 use src\AST\Statements\IfStatement;
+use src\AST\Statements\MethodStatement;
 use src\AST\Statements\ReturnStatement;
 use src\AST\Statements\Statement;
 use src\AST\Statements\VarStatement;
@@ -29,13 +31,13 @@ use src\AST\Statements\WhileStatement;
 use src\AST\StatementVisitor;
 use src\Interpreter\Runtime\Environment;
 use src\Interpreter\Runtime\Errors\ArgumentCountError;
-use src\Interpreter\Runtime\Errors\InvalidAccessError;
 use src\Interpreter\Runtime\Errors\RuntimeError;
 use src\Interpreter\Runtime\LoxType;
 use src\Interpreter\Runtime\Values\CallableValue;
 use src\Interpreter\Runtime\Values\ClassValue;
 use src\Interpreter\Runtime\Values\FunctionValue;
 use src\Interpreter\Runtime\Values\GetAccess;
+use src\Interpreter\Runtime\Values\MethodValue;
 use src\Interpreter\Runtime\Values\NilValue;
 use src\Interpreter\Runtime\Values\NumberValue;
 use src\Interpreter\Runtime\Values\SetAccess;
@@ -156,14 +158,31 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         throw new CompletionSignal($completion);
     }
 
-    #[\Override] public function visitVarStmt(VarStatement $var)
+    #[\Override] public function visitVarStmt(VarStatement $statement)
     {
-        if ($var->initializer != null) {
-            $value = $this->evaluate($var->initializer);
+        if ($statement->initializer != null) {
+            $value = $this->evaluate($statement->initializer);
         } else {
             $value = dependency(NilValue::class);
         }
-        $this->environment->defineOrFail($var->name, $value);
+        $this->environment->defineOrFail($statement->name, $value);
+    }
+
+    #[\Override] public function visitFieldStmt(FieldStatement $statement)
+    {
+        if ($statement->initializer != null) {
+            $value = $this->evaluate($statement->initializer);
+        } else {
+            $value = dependency(NilValue::class);
+        }
+        $this->environment->defineOrFail($statement->name, $value);
+    }
+
+    #[\Override] public function visitMethodStmt(MethodStatement $statement)
+    {
+        $method = new MethodValue($statement, $this->environment, false);
+        $this->environment->defineOrFail($statement->name, $method);
+        return $method;
     }
 
     #[\Override] public function visitBlockStmt(BlockStatement $block)
@@ -173,7 +192,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
     #[\Override] public function visitFunctionExpr(FunctionExpression $expression)
     {
-        $function = new FunctionValue($expression, $this->environment, false);
+        $function = new FunctionValue($expression, $this->environment);
         if ($expression->name != null) {
             $this->environment->defineOrFail($expression->name, $function);
         }
@@ -189,15 +208,15 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         $fields  = [];
         $methods = [];
         foreach ($expression->body as $property) {
-            if ($property instanceof VarStatement) {
+            if ($property instanceof FieldStatement) {
                 if ($property->initializer != null) {
                     $value = $this->evaluate($property->initializer);
                 } else {
                     $value = dependency(NilValue::class);
                 }
-                $fields[$property->name->lexeme] = $value   ;
-            } else if ($property instanceof FunctionExpression) {
-                $methods[$property->name->lexeme] = new FunctionValue($property, $this->environment, $property->name->lexeme === 'init');
+                $fields[$property->name->lexeme] = $value;
+            } else if ($property instanceof MethodStatement) {
+                $methods[$property->name->lexeme] = new MethodValue($property, $this->environment, $property->name->lexeme === 'init');
             }
         }
 

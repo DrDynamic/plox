@@ -5,7 +5,9 @@ namespace src\AST;
 use src\AST\Statements\BlockStatement;
 use src\AST\Statements\CompletionStatement;
 use src\AST\Statements\ExpressionStatement;
+use src\AST\Statements\FieldStatement;
 use src\AST\Statements\IfStatement;
+use src\AST\Statements\MethodStatement;
 use src\AST\Statements\ReturnStatement;
 use src\AST\Statements\VarStatement;
 use src\AST\Statements\WhileStatement;
@@ -16,6 +18,10 @@ interface StatementVisitor
 
     public function visitVarStmt(VarStatement $statement);
 
+    public function visitFieldStmt(FieldStatement $statement);
+
+    public function visitMethodStmt(MethodStatement $statement);
+
     public function visitBlockStmt(BlockStatement $statement);
 
     public function visitIfStmt(IfStatement $statement);
@@ -25,4 +31,5 @@ interface StatementVisitor
     public function visitCompletionStmt(CompletionStatement $statement);
 
     public function visitReturnStmt(ReturnStatement $statement);
+
 }

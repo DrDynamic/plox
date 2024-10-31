@@ -52,6 +52,8 @@ enum TokenType: string
     case WHILE = "WHILE";
     case BREAK = "BREAK";
     case CONTINUE = "CONTINUE";
+    case PUBLIC = "PUBLIC";
+    case PRIVATE = "PRIVATE";
 
     case LINE_BREAK = "LINE_BREAK";
     case EOF = "EOF";

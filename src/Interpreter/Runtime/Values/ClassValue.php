@@ -23,7 +23,7 @@ class ClassValue extends BaseValue implements CallableValue
         return $this->declaration->name?->lexeme;
     }
 
-    public function getMethod(string $methodName): ?FunctionValue
+    public function getMethod(string $methodName): ?MethodValue
     {
         return $this->methods[$methodName] ?? null;
     }

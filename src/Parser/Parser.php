@@ -20,7 +20,9 @@ use src\AST\Expressions\Variable;
 use src\AST\Statements\BlockStatement;
 use src\AST\Statements\CompletionStatement;
 use src\AST\Statements\ExpressionStatement;
+use src\AST\Statements\FieldStatement;
 use src\AST\Statements\IfStatement;
+use src\AST\Statements\MethodStatement;
 use src\AST\Statements\ReturnStatement;
 use src\AST\Statements\Statement;
 use src\AST\Statements\VarStatement;
@@ -29,6 +31,7 @@ use src\Interpreter\Runtime\Values\BooleanValue;
 use src\Interpreter\Runtime\Values\NilValue;
 use src\Interpreter\Runtime\Values\NumberValue;
 use src\Interpreter\Runtime\Values\StringValue;
+use src\Resolver\LoxClassPropertyVisibility;
 use src\Scaner\Token;
 use src\Scaner\TokenType;
 use src\Services\Dependency\Attributes\Instance;
@@ -84,6 +87,20 @@ class Parser
         }
     }
 
+    private function fieldDeclaration(LoxClassPropertyVisibility $visibility, ParserContext $context): Statement
+    {
+        $startToken  = $this->previous();
+        $name        = $this->consume(TokenType::IDENTIFIER, "Expect field name.");
+        $initializer = null;
+        if ($this->match(TokenType::EQUAL)) {
+            $initializer = $this->expression($context);
+        }
+
+        $this->match(TokenType::SEMICOLON);
+
+        return new FieldStatement($startToken, $visibility, $name, $initializer);
+    }
+
     private function varDeclaration(ParserContext $context): Statement
     {
         $startToken  = $this->previous();
@@ -94,7 +111,6 @@ class Parser
         }
 
         $this->match(TokenType::SEMICOLON);
-//        $this->consume(TokenType::SEMICOLON, "Expected ; after value.");
 
         return new VarStatement($startToken, $name, $initializer);
     }
@@ -470,7 +486,7 @@ class Parser
             case $this->match(TokenType::CLS):
                 return $this->classDeclaration($context);
             case $this->match(TokenType::FUNCTION):
-                return $this->function('function', $context);
+                return $this->function($context);
             default:
                 throw $this->error($this->peek(), "Expect expression.");
         }
@@ -487,12 +503,19 @@ class Parser
 
         $this->consume(TokenType::LEFT_BRACE, "Expect '{' before Class body.");
 
-        $body = [];
+        $visibility = LoxClassPropertyVisibility::PUBLIC;
+        $body       = [];
         while (!$this->check(TokenType::RIGHT_BRACE) && !$this->isAtEnd()) {
-            if($this->match(TokenType::VAR)) {
-                $body[] = $this->varDeclaration($context);
-            }else if ($this->match(TokenType::FUNCTION)) {
-                $body[] = $this->function("method", $context);
+            if ($this->match(TokenType::PUBLIC)) {
+                $visibility = LoxClassPropertyVisibility::PUBLIC;
+            } else if ($this->match(TokenType::PRIVATE)) {
+                $visibility = LoxClassPropertyVisibility::PRIVATE;
+            }
+
+            if ($this->match(TokenType::VAR)) {
+                $body[] = $this->fieldDeclaration($visibility, $context);
+            } else if ($this->match(TokenType::FUNCTION)) {
+                $body[] = $this->method($visibility, $context);
             }
         }
         $this->consume(TokenType::RIGHT_BRACE, "Expect '}' after Class body.");
@@ -500,7 +523,18 @@ class Parser
         return new ClassExpression($tokenStart, $name, null, $body);
     }
 
-    private function function(string $kind, ParserContext $context)
+    private function method(LoxClassPropertyVisibility $visibility, ParserContext $context): MethodStatement
+    {
+        $tokenStart = $this->previous();
+        $name       = $this->consume(TokenType::IDENTIFIER, "Expect methods to have a name.");
+        $parameters = $this->functionParameters("method");
+        $this->consume(TokenType::LEFT_BRACE, "Expect '{' before method body.");
+        $body = $this->blockStmt($context);
+
+        return new MethodStatement($tokenStart, $visibility, $name, $parameters, $body);
+    }
+
+    private function function (ParserContext $context): FunctionExpression
     {
         $tokenStart = $this->previous();
 
@@ -509,7 +543,15 @@ class Parser
             $name = $this->previous();
         }
 
+        $parameters = $this->functionParameters('function');
+        $this->consume(TokenType::LEFT_BRACE, "Expect '{' before function body.");
+        $body = $this->blockStmt($context);
 
+        return new FunctionExpression($tokenStart, $name, $parameters, $body);
+    }
+
+    private function functionParameters(string $kind)
+    {
         $this->consume(TokenType::LEFT_PAREN, "Expect '(' after $kind name.");
         $parameters = [];
         if (!$this->check(TokenType::RIGHT_PAREN)) {
@@ -521,10 +563,7 @@ class Parser
             } while ($this->match(TokenType::COMMA));
         }
         $this->consume(TokenType::RIGHT_PAREN, "Expect ')' after parameters.");
-        $this->consume(TokenType::LEFT_BRACE, "Expect '{' before $kind body.");
-        $body = $this->blockStmt($context);
-
-        return new FunctionExpression($tokenStart, $name, $parameters, $body);
+        return $parameters;
     }
 
     private function isAtEnd(): bool

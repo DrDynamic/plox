@@ -46,15 +46,16 @@ uses(\Tests\TestCase::class)->beforeEach(function () {
 
 expect()->extend('toHave', function ($name, $value = null) {
     $variable = new Token(TokenType::IDENTIFIER, $name, null, 0);
-    assertTrue($this->value->has($variable));
+    assertTrue($this->value->has($variable), "Failed asserting that variable '$name' exists");
     if ($value !== null) {
-        assertEquals($this->value->get($variable), $value);
+
+        assertEquals($this->value->get($variable), $value, "Failed asserting that variable '$name' equals given value");
     }
 });
 
 expect()->extend('toNotHave', function ($name) {
     $variable = new Token(TokenType::IDENTIFIER, $name, null, 0);
-    assertFalse($this->value->has($variable));
+    assertFalse($this->value->has($variable), "Failed asserting that variable '$name' doesn't exist");
 });
 
 /*

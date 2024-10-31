@@ -4,24 +4,25 @@ namespace src\Interpreter\Runtime\Values;
 
 use src\AST\Expressions\Expression;
 use src\AST\Expressions\FunctionExpression;
+use src\AST\Statements\MethodStatement;
 use src\AST\Statements\Statement;
 use src\Interpreter\Interpreter;
 use src\Interpreter\ReturnSignal;
 use src\Interpreter\Runtime\Environment;
 use src\Interpreter\Runtime\LoxType;
 
-class FunctionValue extends BaseValue implements CallableValue
+class MethodValue extends BaseValue implements CallableValue
 {
-
     public function __construct(
-        private readonly FunctionExpression $declaration,
-        private readonly Environment        $closure)
+        private readonly MethodStatement $declaration,
+        private readonly Environment     $closure,
+        private readonly bool            $isConstructor)
     {
     }
 
     #[\Override] public function getType(): LoxType
     {
-        return LoxType::Function;
+        return LoxType::Method;
     }
 
     #[\Override] public function cast(LoxType $toType, Statement|Expression $cause): BaseValue
@@ -32,7 +33,7 @@ class FunctionValue extends BaseValue implements CallableValue
                 ? $this->declaration->name->lexeme
                 : "anonymous";
 
-            return new StringValue("<fn {$name}>");
+            return new StringValue("<method {$name}>");
         }
         return parent::cast($toType, $cause);
     }
@@ -56,9 +57,21 @@ class FunctionValue extends BaseValue implements CallableValue
         try {
             $interpreter->executeBlock($this->declaration->body, $environment);
         } catch (ReturnSignal $signal) {
+            if ($this->isConstructor) {
+                return $this->closure->getAt(0, 'this');
+            }
             return $signal->value;
         }
-        
+        if ($this->isConstructor) {
+            return $this->closure->getAt(0, 'this');
+        }
         return dependency(NilValue::class);
+    }
+
+    public function bindInstance(InstanceValue $instance): MethodValue
+    {
+        $environment = new Environment($this->closure);
+        $environment->defineOrReplace('this', $instance);
+        return new MethodValue($this->declaration, $environment, $this->isConstructor);
     }
 }
