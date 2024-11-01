@@ -38,12 +38,18 @@ arguments           ::= expression ( "," expression )* ;
 primary             ::= NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER | funcDeclaration | classDeclaration   ;
 
 funcDeclaration     ::= "function" IDENTIFIER? function ;
-classDeclaration    ::= "class" IDENTIFIER? "{" (classField | "function" IDENTIFIER function)* "}" ;
+classDeclaration    ::= "class" IDENTIFIER? "{" (staticClassField | classField | method)* "}" ;
 
 // helpers
 function            ::= "(" parameters? ")" blockStatement ;
 parameters          ::= IDENTIFIER ( "," IDENTIFIER )* ;
-classField          ::= ("private" | "public")? varDeclaration ;
+
+propertyVisibility  ::= "private" | "public" ;
+classField          ::= propertyVisibility? varDeclaration ;
+staticClassField    ::= propertyVisibility? "static" varDeclaration ;
+
+method              ::= propertyVisibility? "function" IDENTIFIER function ;
+
 
 // Lexical grammar
 NUMBER              ::= DIGIT+ ("." DIGIT+)?
