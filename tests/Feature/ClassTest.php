@@ -343,4 +343,44 @@ it('can access private fields on other instance', function () {
         ->toHave('peter', new StringValue('Peter'));
 });
 
+it('can have static fields', function () {
+    execute('
+        class Person {
+            static var name = "John Doe";
+        }
+        var name = Person.name;
+    ');
+
+    expect($this->environment)
+        ->toHave('name', new StringValue('John Doe'));
+});
+
+it('can have public static fields', function () {
+    execute('
+        class Person {
+            public static var name = "John Doe";
+        }
+        var name = Person.name;
+    ');
+
+    expect($this->environment)
+        ->toHave('name', new StringValue('John Doe'));
+});
+
+it('can have private static fields', function () {
+    $errorReporter = mock(ErrorReporter::class);
+    $errorReporter->allows()->runtimeError(Mockery::any())
+        ->andSet('hadError', true)
+        ->once();
+    resetLox([
+        ErrorReporter::class => $errorReporter
+    ]);
+    execute('
+        class Person {
+            private static var name = "John Doe";
+        }
+        var name = Person.name;
+    ');
+});
+
 // TODO: add static properties
