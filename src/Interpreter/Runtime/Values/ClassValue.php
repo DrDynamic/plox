@@ -8,6 +8,7 @@ use src\AST\Statements\Statement;
 use src\Interpreter\Runtime\LoxType;
 use src\Interpreter\Runtime\Util\FieldDefinition;
 use src\Resolver\LoxClassPropertyVisibility;
+use src\Services\Arr;
 
 class ClassValue extends BaseValue implements CallableValue
 {
@@ -61,13 +62,18 @@ class ClassValue extends BaseValue implements CallableValue
 
     public function call(array $arguments, Expression|Statement $cause): Value
     {
-        $instance    = new InstanceValue($this, $this->fields);
+        $instance    = new InstanceValue($this, $this->makeInstanceFields());
         $constructor = $this->getMethod('init');
         if ($constructor !== null) {
             $constructor->bindInstance($instance)->call($arguments, $cause);
         }
 
         return $instance;
+    }
+
+    private function makeInstanceFields()
+    {
+        return Arr::clone($this->fields);
     }
 
 

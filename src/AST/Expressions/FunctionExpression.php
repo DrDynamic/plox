@@ -13,7 +13,14 @@ class FunctionExpression extends Expression
                                 public readonly array      $parameters,
                                 public array               $body)
     {
-        parent::__construct($tokenStart, Arr::last($this->body)->tokenEnd);
+        $tokenEnd = $tokenStart;
+        if ($name != null) {
+            $tokenEnd = $name;
+        }
+        if (count($this->body) > 0) {
+            $tokenEnd = Arr::last($body)->tokenEnd;
+        }
+        parent::__construct($tokenStart, $tokenEnd);
     }
 
     #[\Override] function accept(ExpressionVisitor $visitor)

@@ -58,4 +58,16 @@ class Arr
     {
         return array_pop($array);
     }
+
+    public static function clone(array $array)
+    {
+        return array_map(function ($item) {
+            return ((is_array($item))
+                ? self::clone($item)
+                : ((is_object($item))
+                    ? clone $item
+                    : $item
+                ));
+        }, $array);
+    }
 }

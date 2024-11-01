@@ -9,9 +9,14 @@ class FieldDefinition
 {
     public function __construct(
         public LoxClassPropertyVisibility $visibility,
-        public Value $value,
+        public Value                      $value,
     )
     {
+    }
+
+    public function __clone(): void
+    {
+        $this->value = clone $this->value;
     }
 
 }

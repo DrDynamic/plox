@@ -232,8 +232,8 @@ it('can have public predefined fields in instance', function () {
 
 it('can\'t access private fields from outside of in instance', function () {
     $errorReporter = mock(ErrorReporter::class);
-    $errorReporter->allows()->errorAt(Mockery::any(), "Can't access private field.")
-        ->andSet('hadError', true)
+    $errorReporter->allows()->runtimeError(Mockery::any()) //, "Can't access private field.")
+    ->andSet('hadError', true)
         ->once();
     resetLox([
         ErrorReporter::class => $errorReporter
@@ -245,10 +245,9 @@ it('can\'t access private fields from outside of in instance', function () {
     var p = Person();
     var name = p.name;
     ');
-})->only();
+});
 
 it('can\'t access private methods from outside of in instance', function () {
-
     $errorReporter = mock(ErrorReporter::class);
     $errorReporter->allows()->runtimeError(Mockery::any())
         ->andSet('hadError', true)
@@ -264,6 +263,42 @@ it('can\'t access private methods from outside of in instance', function () {
     }
     var p = Person();
     var name = p.getName();
+    ');
+});
+
+it('can\'t set private fields on instance', function () {
+    $errorReporter = mock(ErrorReporter::class);
+    $errorReporter->allows()->runtimeError(Mockery::any())
+        ->andSet('hadError', true)
+        ->once();
+    resetLox([
+        ErrorReporter::class => $errorReporter
+    ]);
+    execute('
+    class Person {
+        private var name = "John";
+    }
+    var p = Person();
+    p.name = "Peter";
+    ');
+});
+
+it('can\'t overwrite methods on instance', function () {
+    $errorReporter = mock(ErrorReporter::class);
+    $errorReporter->allows()->runtimeError(Mockery::any())
+        ->andSet('hadError', true)
+        ->once();
+    resetLox([
+        ErrorReporter::class => $errorReporter
+    ]);
+    execute('
+    class Person {
+        function getName(){
+            return "Peter";
+        }
+    }
+    var p = Person();
+    p.getName = function(){};
     ');
 });
 
@@ -308,5 +343,4 @@ it('can access private fields on other instance', function () {
         ->toHave('peter', new StringValue('Peter'));
 });
 
-// TODO: add private properties
 // TODO: add static properties

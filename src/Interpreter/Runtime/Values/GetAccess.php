@@ -7,5 +7,6 @@ use src\Scaner\Token;
 
 interface GetAccess
 {
+    public function getOrFail(Token $name);
     public function get(Token $name);
 }
