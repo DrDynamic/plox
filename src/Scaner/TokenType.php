@@ -54,6 +54,7 @@ enum TokenType: string
     case CONTINUE = "CONTINUE";
     case PUBLIC = "PUBLIC";
     case PRIVATE = "PRIVATE";
+    case STATIC = "STATIC";
 
     case LINE_BREAK = "LINE_BREAK";
     case EOF = "EOF";
