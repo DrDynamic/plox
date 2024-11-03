@@ -501,6 +501,12 @@ class Parser
             $name = $this->previous();
         }
 
+        $superclass = null;
+        if($this->match(TokenType::EXTENDS)) {
+            $this->consume(TokenType::IDENTIFIER, "Expect superclass after 'extends'.");
+            $superclass = new Variable($this->previous());
+        }
+
         $this->consume(TokenType::LEFT_BRACE, "Expect '{' before Class body.");
 
         $body = [];
@@ -521,7 +527,7 @@ class Parser
         }
         $this->consume(TokenType::RIGHT_BRACE, "Expect '}' after Class body.");
 
-        return new ClassExpression($tokenStart, $name, null, $body);
+        return new ClassExpression($tokenStart, $name, $superclass, $body);
     }
 
     private function method(LoxClassPropertyVisibility $visibility, bool $isStatic, ParserContext $context): MethodStatement

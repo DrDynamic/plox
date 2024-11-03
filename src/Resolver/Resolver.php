@@ -213,6 +213,14 @@ class Resolver implements ExpressionVisitor, StatementVisitor
             $this->define($expression->name);
         }
 
+
+        if ($expression->superClass !== null) {
+            if($expression->name->lexeme === $expression->superClass->name->lexeme ) {
+                $this->errorReporter->errorAt($expression->superClass->name, "A class can't inherit from itself.");
+            }
+            $this->resolve($expression->superClass);
+        }
+
         $this->beginScope();
         $scope          = Arr::pop($this->scopes);
         $scope['this']  = true;

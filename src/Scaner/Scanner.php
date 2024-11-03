@@ -37,6 +37,7 @@ class Scanner
         'public'   => TokenType::PUBLIC,
         'private'  => TokenType::PRIVATE,
         'static'   => TokenType::STATIC,
+        'extends'  => TokenType::EXTENDS,
     ];
 
     public function __construct(
