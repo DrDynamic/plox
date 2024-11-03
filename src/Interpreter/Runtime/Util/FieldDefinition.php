@@ -14,6 +14,11 @@ class FieldDefinition
     {
     }
 
+    public function getVisibility(): LoxClassPropertyVisibility
+    {
+        return $this->visibility;
+    }
+
     public function __clone(): void
     {
         $this->value = clone $this->value;

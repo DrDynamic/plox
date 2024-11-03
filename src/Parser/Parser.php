@@ -87,7 +87,7 @@ class Parser
         }
     }
 
-    private function fieldDeclaration(LoxClassPropertyVisibility $visibility, ParserContext $context): Statement
+    private function fieldDeclaration(LoxClassPropertyVisibility $visibility, bool $isStatic, ParserContext $context): Statement
     {
         $startToken  = $this->previous();
         $name        = $this->consume(TokenType::IDENTIFIER, "Expect field name.");
@@ -98,7 +98,7 @@ class Parser
 
         $this->match(TokenType::SEMICOLON);
 
-        return new FieldStatement($startToken, $visibility, $name, $initializer);
+        return new FieldStatement($startToken, $visibility, $isStatic, $name, $initializer);
     }
 
     private function varDeclaration(ParserContext $context): Statement
@@ -503,28 +503,28 @@ class Parser
 
         $this->consume(TokenType::LEFT_BRACE, "Expect '{' before Class body.");
 
-        $visibility = LoxClassPropertyVisibility::PUBLIC;
-        $body       = [];
+        $body = [];
         while (!$this->check(TokenType::RIGHT_BRACE) && !$this->isAtEnd()) {
-            if ($this->match(TokenType::PUBLIC)) {
-                $visibility = LoxClassPropertyVisibility::PUBLIC;
-            } else if ($this->match(TokenType::PRIVATE)) {
-                $visibility = LoxClassPropertyVisibility::PRIVATE;
-            }
+            $visibility = match (true) {
+                $this->match(TokenType::PUBLIC) => LoxClassPropertyVisibility::PUBLIC,
+                $this->match(TokenType::PRIVATE) => LoxClassPropertyVisibility::PRIVATE,
+                default => LoxClassPropertyVisibility::PUBLIC,
+            };
+
+            $isStatic = $this->match(TokenType::STATIC);
 
             if ($this->match(TokenType::VAR)) {
-                $body[] = $this->fieldDeclaration($visibility, $context);
+                $body[] = $this->fieldDeclaration($visibility, $isStatic, $context);
             } else if ($this->match(TokenType::FUNCTION)) {
-                $body[] = $this->method($visibility, $context);
+                $body[] = $this->method($visibility, $isStatic, $context);
             }
-            $visibility = LoxClassPropertyVisibility::PUBLIC;
         }
         $this->consume(TokenType::RIGHT_BRACE, "Expect '}' after Class body.");
 
         return new ClassExpression($tokenStart, $name, null, $body);
     }
 
-    private function method(LoxClassPropertyVisibility $visibility, ParserContext $context): MethodStatement
+    private function method(LoxClassPropertyVisibility $visibility, bool $isStatic, ParserContext $context): MethodStatement
     {
         $tokenStart = $this->previous();
         $name       = $this->consume(TokenType::IDENTIFIER, "Expect methods to have a name.");
@@ -532,7 +532,7 @@ class Parser
         $this->consume(TokenType::LEFT_BRACE, "Expect '{' before method body.");
         $body = $this->blockStmt($context);
 
-        return new MethodStatement($tokenStart, $visibility, $name, $parameters, $body);
+        return new MethodStatement($tokenStart, $visibility,$isStatic, $name, $parameters, $body);
     }
 
     private function function (ParserContext $context): FunctionExpression

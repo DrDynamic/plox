@@ -32,8 +32,8 @@ use src\AST\StatementVisitor;
 use src\Interpreter\Runtime\Environment;
 use src\Interpreter\Runtime\Errors\ArgumentCountError;
 use src\Interpreter\Runtime\Errors\RuntimeError;
+use src\Interpreter\Runtime\ExecutionContext;
 use src\Interpreter\Runtime\LoxType;
-use src\Interpreter\Runtime\Util\FieldDefinition;
 use src\Interpreter\Runtime\Values\CallableValue;
 use src\Interpreter\Runtime\Values\ClassValue;
 use src\Interpreter\Runtime\Values\FunctionValue;
@@ -43,12 +43,10 @@ use src\Interpreter\Runtime\Values\NilValue;
 use src\Interpreter\Runtime\Values\NumberValue;
 use src\Interpreter\Runtime\Values\SetAccess;
 use src\Interpreter\Runtime\Values\Value;
-use src\Resolver\LoxClassPropertyVisibility;
 use src\Scaner\Token;
 use src\Scaner\TokenType;
 use src\Services\Dependency\Attributes\Singleton;
 use src\Services\ErrorReporter;
-use stdClass;
 use WeakMap;
 
 #[Singleton]
@@ -56,7 +54,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 {
     public Environment $environment;
 
-    private $currentInstance = null;
+    private $executionContext;
 
     public function __construct(
         private readonly ErrorReporter $errorReporter,
@@ -64,7 +62,8 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
         private WeakMap                $locals
     )
     {
-        $this->environment = $this->global;
+        $this->environment      = $this->global;
+        $this->executionContext = new ExecutionContext();
     }
 
     /**
@@ -301,49 +300,18 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             throw new ArgumentCountError($call->rightParen, "Expect {$callable->arity()} arguments but got ".count($arguments).".");
         }
 
+        $this->executionContext->pushContext($callable);
+        $instance = $callable->call($arguments, $call);
+        $this->executionContext->popContext();
 
-        if ($callable instanceof MethodValue) {
-            $enclosingInstance     = $this->currentInstance;
-            $this->currentInstance = $callee->getBoundInstance();
-
-            $result = $callable->call($arguments, $call);
-
-            $this->currentInstance = $enclosingInstance;
-            return $result;
-        } else if($callable instanceof ClassValue) {
-            $enclosingInstance     = $this->currentInstance;
-            $this->currentInstance = new StdClass();
-            $this->currentInstance->class = $callable;
-            $this->currentInstance->type = "Class Construction";
-
-            $instance =  $callable->call($arguments, $call);
-
-            $this->currentInstance = $enclosingInstance;
-            return $instance;
-        }else {
-            return $callable->call($arguments, $call);
-        }
-
+        return $instance;
     }
 
     public function visitGetExpression(Get $expression)
     {
         $object = $this->evaluate($expression->object);
-        // TODO: change to instanceof?
         if ($object instanceof GetAccess) {
-            $property = $object->getOrFail($expression->name);
-            if ($property instanceof MethodValue
-                && $property->getVisibility() === LoxClassPropertyVisibility::PRIVATE) {
-                throw_if($this->currentInstance === null || $object->class !== $this->currentInstance->class,
-                    new RuntimeError($expression->tokenStart, "Can't access private method."));
-            } else if ($property instanceof FieldDefinition) {
-                throw_if($property->visibility === LoxClassPropertyVisibility::PRIVATE
-                    && ($this->currentInstance === null
-                        || $object->class !== $this->currentInstance->class),
-                    new RuntimeError($expression->tokenStart, "Can't access private field."));
-                return $property->value;
-            }
-            return $property;
+            return $object->getOrFail($expression->name, $this->executionContext);
         }
 
         throw new RuntimeError($expression->name, "Illegal access via '.'");
@@ -353,25 +321,12 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
     {
         $object = $this->evaluate($expression->object);
 
-        if (!($object instanceof SetAccess)) {
-            throw new RuntimeError($expression->name, "Illegal access via '.'");
+        if ($object instanceof SetAccess) {
+            $value = $this->evaluate($expression->value);
+            $object->setOrFail($expression->name, $value, $this->executionContext);
+            return $value;
         }
-
-        if ($object instanceof GetAccess) {
-            $property = $object->get($expression->name);
-
-            throw_if($property instanceof MethodValue,
-            new RuntimeError($expression->tokenStart, "Can't overwrite methods."));
-
-            throw_if($property instanceof FieldDefinition
-                && $property->visibility === LoxClassPropertyVisibility::PRIVATE
-                && ($this->currentInstance === null || $object->class !== $this->currentInstance->class),
-            new RuntimeError($expression->tokenStart, "Can't access private Field."));
-        }
-
-        $value = $this->evaluate($expression->value);
-        $object->set($expression->name, $value);
-        return $value;
+        throw new RuntimeError($expression->name, "Illegal access via '.'");
     }
 
     #[\Override] public function visitGroupingExpr(Grouping $expression)

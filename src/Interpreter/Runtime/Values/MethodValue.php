@@ -14,11 +14,11 @@ class MethodValue extends BaseValue implements CallableValue
 {
 
     public function __construct(
-        private readonly ClassValue      $class,
-        private readonly MethodStatement $declaration,
-        private readonly Environment     $closure,
-        private readonly bool            $isConstructor,
-        private readonly ?InstanceValue  $boundInstance = null)
+        public readonly ClassValue      $class,
+        public readonly MethodStatement $declaration,
+        public readonly Environment     $closure,
+        public readonly bool            $isConstructor,
+        public readonly ?InstanceValue  $boundInstance = null)
     {
     }
 

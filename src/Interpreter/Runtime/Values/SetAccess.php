@@ -2,9 +2,10 @@
 
 namespace src\Interpreter\Runtime\Values;
 
+use src\Interpreter\Runtime\ExecutionContext;
 use src\Scaner\Token;
 
 interface SetAccess
 {
-    public function set(Token $name, Value $value);
+    public function setOrFail(Token $name, Value $value, ExecutionContext $executionContext);
 }

@@ -13,6 +13,7 @@ class FieldStatement extends Statement
     public function __construct(
         public readonly Token                      $startToken,
         public readonly LoxClassPropertyVisibility $visibility,
+        public readonly bool                       $isStatic,
         public readonly Token                      $name,
         public readonly ?Expression                $initializer)
     {

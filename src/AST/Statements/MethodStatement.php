@@ -12,6 +12,7 @@ class MethodStatement extends Statement
     public function __construct(
         Token                                      $tokenStart,
         public readonly LoxClassPropertyVisibility $visibility,
+        public readonly bool                       $isStatic,
         public readonly ?Token                     $name,
         public readonly array                      $parameters,
         public readonly array                      $body)
