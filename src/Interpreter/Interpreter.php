@@ -207,7 +207,7 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             $this->environment->defineOrFail($expression->name, new NilValue());
         }
 
-        $class = new ClassValue($expression, [], []);
+        $class = new ClassValue($expression);
         foreach ($expression->body as $property) {
             if ($property instanceof FieldStatement) {
                 if ($property->initializer != null) {
@@ -215,9 +215,9 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
                 } else {
                     $value = dependency(NilValue::class);
                 }
-                $class->addField($property->name->lexeme, $property->visibility, $value);
+                $class->addField($property, $value);
             } else if ($property instanceof MethodStatement) {
-                $class->methods[$property->name->lexeme] = new MethodValue($class, $property, $this->environment, $property->name->lexeme === 'init');
+                $class->addMethod($property, $this->environment);
             }
         }
 

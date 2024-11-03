@@ -383,4 +383,50 @@ it('can have private static fields', function () {
     ');
 });
 
+it('can have static methods', function () {
+    execute('
+        class Person {
+            static function getName() {
+                return "John Doe";
+            }
+        }
+        var name = Person.getName();
+    ');
+
+    expect($this->environment)
+        ->toHave('name', new StringValue('John Doe'));
+});
+
+it('can have public static methods', function () {
+    execute('
+        class Person {
+            public static function getName() {
+                return "John Doe";
+            }
+        }
+        var name = Person.getName();
+    ');
+
+    expect($this->environment)
+        ->toHave('name', new StringValue('John Doe'));
+});
+
+it('can have private static methods', function () {
+    $errorReporter = mock(ErrorReporter::class);
+    $errorReporter->allows()->runtimeError(Mockery::any())
+        ->andSet('hadError', true)
+        ->once();
+    resetLox([
+        ErrorReporter::class => $errorReporter
+    ]);
+    execute('
+        class Person {
+            private static function getName() {
+                return "John Doe";
+            }
+        }
+        var name = Person.getName();
+    ');
+});
+
 // TODO: add static properties

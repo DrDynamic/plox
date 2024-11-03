@@ -7,6 +7,7 @@ use src\AST\Statements\Statement;
 use src\Interpreter\Runtime\Errors\RuntimeError;
 use src\Interpreter\Runtime\ExecutionContext;
 use src\Interpreter\Runtime\LoxType;
+use src\Interpreter\Runtime\Traits\HasVisibilityAssertion;
 use src\Interpreter\Runtime\Util\FieldDefinition;
 use src\Resolver\LoxClassPropertyVisibility;
 use src\Scaner\Token;
@@ -14,6 +15,7 @@ use src\Services\IdService;
 
 class InstanceValue extends BaseValue implements GetAccess, SetAccess
 {
+    use HasVisibilityAssertion;
 
     public readonly int $id;
 
@@ -42,16 +44,15 @@ class InstanceValue extends BaseValue implements GetAccess, SetAccess
 
     public function getOrFail(Token $name, ExecutionContext $executionContext)
     {
-
         if (isset($this->fields[$name->lexeme])) {
             $property = $this->fields[$name->lexeme];
-            $this->assertVisibilityAccess($property, $executionContext, $name);
+            $this->assertVisibilityAccess($property, $executionContext, $name, $this->class);
             return $this->fields[$name->lexeme]->value;
         }
 
         $method = $this->class->getMethod($name->lexeme);
         if ($method !== null) {
-            $this->assertVisibilityAccess($method, $executionContext, $name);
+            $this->assertVisibilityAccess($method, $executionContext, $name, $this->class);
             return $method->bindInstance($this);
         }
 
@@ -68,19 +69,8 @@ class InstanceValue extends BaseValue implements GetAccess, SetAccess
             $this->fields[$name->lexeme] = new FieldDefinition(LoxClassPropertyVisibility::PUBLIC, $value);
             return $value;
         } else {
-            $this->assertVisibilityAccess($this->fields[$name->lexeme], $executionContext, $name);
+            $this->assertVisibilityAccess($this->fields[$name->lexeme], $executionContext, $name, $this->class);
             return $this->fields[$name->lexeme]->value = $value;
-        }
-    }
-
-    private function assertVisibilityAccess($property, ExecutionContext $executionContext, Token $name)
-    {
-        if ($property->getVisibility() !== LoxClassPropertyVisibility::PRIVATE) {
-            return;
-        }
-
-        if (!$executionContext->containsClassOrInstanceOf($this->class)) {
-            throw new RuntimeError($name, "Can't access private method.");
         }
     }
 

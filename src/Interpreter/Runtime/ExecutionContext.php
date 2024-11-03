@@ -8,7 +8,7 @@ use src\Interpreter\Runtime\Values\MethodValue;
 
 class ExecutionContext
 {
-    private array $stack;
+    private array $stack = [];
 
     public function pushContext($context)
     {
