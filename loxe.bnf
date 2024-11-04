@@ -35,7 +35,7 @@ factor              ::= unary ( ( "/" | "*" ) unary )* ;
 unary               ::= ( "!" | "-" ) unary | call ;
 call                ::= primary ( "(" arguments? ")" | "." IDENTIFIER )* ;
 arguments           ::= expression ( "," expression )* ;
-primary             ::= NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER | funcDeclaration | classDeclaration   ;
+primary             ::= NUMBER | STRING | "true" | "false" | "nil" | "(" expression ")" | IDENTIFIER | funcDeclaration | classDeclaration | "super" "." IDENTIFIER ;
 
 funcDeclaration     ::= "function" IDENTIFIER? function ;
 classDeclaration    ::= "class" IDENTIFIER? "{" (staticClassField | classField | method)* "}" ;

@@ -13,6 +13,7 @@ use src\AST\Expressions\Grouping;
 use src\AST\Expressions\Literal;
 use src\AST\Expressions\Logical;
 use src\AST\Expressions\Set;
+use src\AST\Expressions\Super;
 use src\AST\Expressions\Ternary;
 use src\AST\Expressions\ThisExpression;
 use src\AST\Expressions\Unary;
@@ -74,8 +75,6 @@ class Parser
     {
         try {
             switch (true) {
-//                case $this->match(TokenType::FUNCTION):
-//                    return $this->function("function", $context);
                 case $this->match(TokenType::VAR):
                     return $this->varDeclaration($context);
             }
@@ -474,6 +473,11 @@ class Parser
                 return new Literal(new NumberValue($this->previous()->literal), $this->previous());
             case $this->match(TokenType::STRING):
                 return new Literal(new StringValue($this->previous()->literal), $this->previous());
+            case $this->match(TokenType::SUPER):
+                $keyword = $this->previous();
+                $this->consume(TokenType::DOT, "Expect '.' after 'super'.");
+                $method = $this->consume(TokenType::IDENTIFIER, "Expect superclass method name.");
+                return new Super($keyword, $method);
             case $this->match(TokenType::THIS):
                 return new ThisExpression($this->previous());
             case $this->match(TokenType::LEFT_PAREN):
@@ -502,9 +506,9 @@ class Parser
         }
 
         $superclass = null;
-        if($this->match(TokenType::EXTENDS)) {
+        if ($this->match(TokenType::EXTENDS)) {
             $this->consume(TokenType::IDENTIFIER, "Expect superclass after 'extends'.");
-        $superclass = new Variable($this->previous());
+            $superclass = new Variable($this->previous());
         }
 
         $this->consume(TokenType::LEFT_BRACE, "Expect '{' before Class body.");
@@ -538,7 +542,7 @@ class Parser
         $this->consume(TokenType::LEFT_BRACE, "Expect '{' before method body.");
         $body = $this->blockStmt($context);
 
-        return new MethodStatement($tokenStart, $visibility,$isStatic, $name, $parameters, $body);
+        return new MethodStatement($tokenStart, $visibility, $isStatic, $name, $parameters, $body);
     }
 
     private function function (ParserContext $context): FunctionExpression

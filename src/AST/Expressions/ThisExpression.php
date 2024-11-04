@@ -18,9 +18,6 @@ class ThisExpression extends Expression
         return $visitor->visitThisExpression($this);
     }
 
-    /**
-     * @inheritDoc
-     */
     public function jsonSerialize(): mixed
     {
         return [

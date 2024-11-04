@@ -2,7 +2,6 @@
 
 namespace src\Resolver;
 
-use src\AST\Expressions;
 use src\AST\Expressions\Assign;
 use src\AST\Expressions\Binary;
 use src\AST\Expressions\Call;
@@ -14,7 +13,9 @@ use src\AST\Expressions\Grouping;
 use src\AST\Expressions\Literal;
 use src\AST\Expressions\Logical;
 use src\AST\Expressions\Set;
+use src\AST\Expressions\Super;
 use src\AST\Expressions\Ternary;
+use src\AST\Expressions\ThisExpression;
 use src\AST\Expressions\Unary;
 use src\AST\Expressions\Variable;
 use src\AST\ExpressionVisitor;
@@ -215,10 +216,19 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 
 
         if ($expression->superClass !== null) {
-            if($expression->name->lexeme === $expression->superClass->name->lexeme ) {
+            if ($expression->name->lexeme === $expression->superClass->name->lexeme) {
                 $this->errorReporter->errorAt($expression->superClass->name, "A class can't inherit from itself.");
             }
+            $this->currentClassType = LoxClassType::LOX_SUBCLASS;
             $this->resolve($expression->superClass);
+
+            // begin super scope
+            // TODO: refactor - create a scope class for easier access
+            $this->beginScope();
+            $scope          = Arr::pop($this->scopes);
+            $scope["super"] = true;
+            $this->scopes[] = $scope;
+
         }
 
         $this->beginScope();
@@ -241,10 +251,25 @@ class Resolver implements ExpressionVisitor, StatementVisitor
 
         $this->endScope();
 
+        if ($expression->superClass !== null) {
+            // end super scope
+            $this->endScope();
+        }
+
         $this->currentClassType = $enclosingClassType;
     }
 
-    public function visitThisExpression(Expressions\ThisExpression $expression)
+    public function visitSuperExpression(Super $expression)
+    {
+        if ($this->currentClassType === LoxClassType::NONE) {
+            $this->errorReporter->errorAt($expression->keyword, "Can't use 'super' outside of a class.");
+        } else if ($this->currentClassType !== LoxClassType::LOX_SUBCLASS) {
+            $this->errorReporter->errorAt($expression->keyword, "Can't use 'super' in a class with no superclass.");
+        }
+        $this->resolveLocal($expression, $expression->keyword);
+    }
+
+    public function visitThisExpression(ThisExpression $expression)
     {
         if ($this->currentClassType === LoxClassType::NONE) {
             $this->errorReporter->errorAt($expression->keyword, "Can't use 'this' outside of a class.");

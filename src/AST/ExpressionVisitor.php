@@ -12,7 +12,9 @@ use src\AST\Expressions\Grouping;
 use src\AST\Expressions\Literal;
 use src\AST\Expressions\Logical;
 use src\AST\Expressions\Set;
+use src\AST\Expressions\Super;
 use src\AST\Expressions\Ternary;
+use src\AST\Expressions\ThisExpression;
 use src\AST\Expressions\Unary;
 use src\AST\Expressions\Variable;
 
@@ -40,7 +42,9 @@ interface ExpressionVisitor
 
     public function visitClassExpression(ClassExpression $expression);
 
-    public function visitThisExpression(Expressions\ThisExpression $expression);
+    public function visitThisExpression(ThisExpression $expression);
+
+    public function visitSuperExpression(Super $expression);
 
     public function visitGetExpression(Get $expression);
 

@@ -14,6 +14,7 @@ use src\AST\Expressions\Grouping;
 use src\AST\Expressions\Literal;
 use src\AST\Expressions\Logical;
 use src\AST\Expressions\Set;
+use src\AST\Expressions\Super;
 use src\AST\Expressions\Ternary;
 use src\AST\Expressions\Unary;
 use src\AST\Expressions\Variable;
@@ -38,7 +39,6 @@ use src\Interpreter\Runtime\Values\CallableValue;
 use src\Interpreter\Runtime\Values\ClassValue;
 use src\Interpreter\Runtime\Values\FunctionValue;
 use src\Interpreter\Runtime\Values\GetAccess;
-use src\Interpreter\Runtime\Values\MethodValue;
 use src\Interpreter\Runtime\Values\NilValue;
 use src\Interpreter\Runtime\Values\NumberValue;
 use src\Interpreter\Runtime\Values\SetAccess;
@@ -203,13 +203,19 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
 
     #[\Override] public function visitClassExpression(ClassExpression $expression)
     {
+        $superclass = null;
+        if ($expression->superClass !== null) {
+            $superclass = $this->evaluate($expression->superClass);
+        }
+
         if ($expression->name !== null) {
             $this->environment->defineOrFail($expression->name, new NilValue());
         }
 
-        $superclass = null;
-        if($expression->superClass !== null) {
-            $superclass = $this->evaluate($expression->superClass);
+        if ($superclass !== null) {
+            // push super environment
+            $this->environment = new Environment($this->environment);
+            $this->environment->defineOrReplace("super", $superclass);
         }
 
         $class = new ClassValue($expression, $superclass);
@@ -226,11 +232,29 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             }
         }
 
+        if ($superclass !== null) {
+            // pop super environment
+            $this->environment = $this->environment->enclosing;
+        }
 
         if ($expression->name !== null) {
             $this->environment->assign($expression->name, $class);
         }
         return $class;
+    }
+
+    public function visitSuperExpression(Super $expression)
+    {
+        $distance   = $this->locals[$expression];
+        $superClass = $this->environment->getAt($distance, "super");
+        $object     = $this->environment->getAt($distance - 1, "this");
+        $method     = $superClass->getMethod($expression->method->lexeme);
+
+        if ($method === null) {
+            throw new RuntimeError($expression->method, "Undefined property '{$expression->method->lexeme}'.");
+        }
+
+        return $method->bindInstance($object);
     }
 
     public function visitThisExpression(Expressions\ThisExpression $expression)

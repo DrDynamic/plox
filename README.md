@@ -17,25 +17,33 @@
 - For Loop
 - Break and Continue keyword for loops
 - functions have access to parent scope
-
-## TBD
-
-- Logical operator XOR
-- import native modules
 - Classes
-- Array data structure with dynamic types
-- Foreach loops
 - Single Inheritance like Java
 - this keyword
 - Methods
 - Functions
-- Function Extension
 - Local functions
+- super, this keywords for oop
+- public / private class properties
+- static class properties
+
+## TBD (ideas)
+
+- Traits
+- instaceof mechanic (native method or binary operator?)
+- inheritance of fields
+- protected class properties
+- interfaces
+
+- Logical operator XOR
+- import native modules
+- Array data structure with dynamic types
+- Foreach loops
+- Function Extension
 - Elvis (X ?? Y) Operators
 - spread operator (ellipsis)
 - Do While Loop
 - Repeat block like Kotlin
-- super, this keywords for oop
 - Bitwise operators <<, >>, >>>
 - Function can take other Function as Parameter
 - Runtime error
@@ -48,5 +56,5 @@
 - ++ operator to increment a variable
 - +=, -=, *=, /= operators to run calculations on a variable
 - casting strings to callable
-- function declaration without block statement (instant return)
+- function declaration without block statement (instant return - like lambda)
 - Compiler instructions (inline / spread loop)
