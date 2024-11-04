@@ -23,6 +23,7 @@ class ClassValue extends BaseValue implements CallableValue, GetAccess, SetAcces
 
     public function __construct(
         public readonly ClassExpression $declaration,
+        public readonly ?ClassValue     $superClass = null,
         public array                    $staticMethods = [],
         public array                    $staticFields = [],
         public array                    $methods = [],
@@ -59,7 +60,24 @@ class ClassValue extends BaseValue implements CallableValue, GetAccess, SetAcces
 
     public function getMethod(string $methodName): ?MethodValue
     {
-        return $this->methods[$methodName] ?? null;
+        if (isset($this->methods[$methodName])) {
+            return $this->methods[$methodName];
+        }
+        if ($this->superClass !== null) {
+            return $this->superClass->getMethod($methodName);
+        }
+        return null;
+    }
+
+    public function getStaticMethod(string $methodName) {
+        if (isset($this->staticMethods[$methodName])) {
+            return $this->staticMethods[$methodName];
+        }
+
+        if ($this->superClass !== null) {
+            return $this->superClass->getStaticMethod($methodName);
+        }
+        return null;
     }
 
     public function getType(): LoxType
@@ -105,7 +123,7 @@ class ClassValue extends BaseValue implements CallableValue, GetAccess, SetAcces
             return $field->value;
         }
 
-        $method = $this->staticMethods[$name->lexeme] ?? null;
+        $method = $this->getStaticMethod($name->lexeme);
         if ($method !== null) {
             $this->assertVisibilityAccess($method, $executionContext, $name, $this);
 //            return $method->bindInstance($this);

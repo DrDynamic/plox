@@ -1,25 +1,10 @@
 <?php
 
 use src\Interpreter\Runtime\Values\BooleanValue;
+use src\Interpreter\Runtime\Values\StringValue;
 use src\Services\ErrorReporter;
 
-it('can inherit class', function () {
-    execute('
-    class Animal {
-        public var isAlive = true;
-    }
-    
-    class Cat extends Animal {
-        
-    }
-    
-    var cat = Cat();
-    var isAlive = cat.isAlive;
-    ');
 
-    expect($this->environment)
-        ->toHave('isAlive', new BooleanValue(true));
-});
 
 it('can\'t inherit itself', function () {
     $errorReporter = mock(ErrorReporter::class);

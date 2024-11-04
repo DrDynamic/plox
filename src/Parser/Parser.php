@@ -504,7 +504,7 @@ class Parser
         $superclass = null;
         if($this->match(TokenType::EXTENDS)) {
             $this->consume(TokenType::IDENTIFIER, "Expect superclass after 'extends'.");
-            $superclass = new Variable($this->previous());
+        $superclass = new Variable($this->previous());
         }
 
         $this->consume(TokenType::LEFT_BRACE, "Expect '{' before Class body.");

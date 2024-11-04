@@ -207,7 +207,12 @@ class Interpreter implements ExpressionVisitor, StatementVisitor
             $this->environment->defineOrFail($expression->name, new NilValue());
         }
 
-        $class = new ClassValue($expression);
+        $superclass = null;
+        if($expression->superClass !== null) {
+            $superclass = $this->evaluate($expression->superClass);
+        }
+
+        $class = new ClassValue($expression, $superclass);
         foreach ($expression->body as $property) {
             if ($property instanceof FieldStatement) {
                 if ($property->initializer != null) {
