@@ -19,7 +19,6 @@
 - functions have access to parent scope
 - Classes
 - Single Inheritance like Java
-- this keyword
 - Methods
 - Functions
 - Local functions
@@ -29,11 +28,12 @@
 
 ## TBD (ideas)
 
+- inheritance of fields
 - Traits
 - instaceof mechanic (native method or binary operator?)
-- inheritance of fields
 - protected class properties
 - interfaces
+- abstract classes
 
 - Logical operator XOR
 - import native modules

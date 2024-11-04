@@ -50,6 +50,7 @@ class InstanceValue extends BaseValue implements GetAccess, SetAccess
             return $this->fields[$name->lexeme]->value;
         }
 
+
         $method = $this->class->getMethod($name->lexeme);
         if ($method !== null) {
             $this->assertVisibilityAccess($method, $executionContext, $name, $this->class);

@@ -1,9 +1,7 @@
 <?php
 
 use src\Interpreter\Runtime\Values\BooleanValue;
-use src\Interpreter\Runtime\Values\StringValue;
 use src\Services\ErrorReporter;
-
 
 
 it('can\'t inherit itself', function () {
@@ -19,4 +17,21 @@ it('can\'t inherit itself', function () {
         public var isAlive = true;
     }
     ');
+});
+
+
+it('runs runs the constructor of a superclass if it has one', function () {
+    execute('
+    class Animal {
+        function init() {
+            this.isAlive = true;
+        }
+    }
+    
+    class Cat extends Animal {}
+    var cat = Cat();
+    var result = cat.isAlive;
+    ');
+    expect($this->environment)
+        ->toHave('result', new BooleanValue(true));
 });
