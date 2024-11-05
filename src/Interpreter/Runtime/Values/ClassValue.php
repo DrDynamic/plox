@@ -106,8 +106,12 @@ class ClassValue extends BaseValue implements CallableValue, GetAccess, SetAcces
 
     public function call(array $arguments, Expression|Statement $cause): Value
     {
+        $fields = [];
+        if($this->superClass !== null) {
+            $fields = $this->superClass->makeInstanceFields();
+        }
 
-        $instance    = new InstanceValue($this, $this->makeInstanceFields());
+        $instance    = new InstanceValue($this, array_merge($fields, $this->makeInstanceFields()));
         $constructor = $this->getMethod('init');
         if ($constructor !== null) {
             $constructor->bindInstance($instance)->call($arguments, $cause);
