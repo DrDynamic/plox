@@ -18,4 +18,4 @@ it('can inherit fields', function () {
 
     expect($this->environment)
         ->toHave('isAlive', new BooleanValue(true));
-})->only();
+});
